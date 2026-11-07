@@ -1,3 +1,12 @@
+Version 29 — 07/11 : ACCÈS PRIVÉ PAR CODE
+====================================================
+- Le code est demandé À CHAQUE ouverture du jeu (rien n'est mémorisé sur l'appareil).
+- Code de départ : celui donné par Claude dans la conversation.
+- Pour changer le code : dans le jeu, bouton « 🔑 Code d'accès » (en haut à droite),
+  avec votre CODE MAÎTRE (gardez-le pour vous, il n'est écrit dans aucun fichier).
+- Pour que le nouveau code reste après un redémarrage du serveur : ajoutez dans
+  Render > Environment la variable RENDER_API_KEY (votre clé API Render).
+
 Version 5 — 05/11
 ====================================================
 Version 2 (Lot 2) — 31/10

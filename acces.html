@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Accès privé · Simulateur de vol</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brun-fonce: #3e2a1e; --brun: #6b4a33; --brun-clair: #9a7457; --sable: #c9b29b;
+    --gris-nuit: #232326; --gris: #4a4a4f; --gris-clair: #8d8d93; --brume: #e9e6e2; --blanc: #fbfaf8;
+    --rouge: #a23b2c;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif; color: var(--gris-nuit); background: var(--gris-nuit);
+    display: flex; align-items: center; justify-content: center; overflow: hidden; min-height: 100vh; padding: 16px;
+  }
+  /* ---------- ciel du fond : dégradé gris -> brun, horizon, piste ---------- */
+  .ciel { position: fixed; inset: 0; z-index: 0;
+    background: radial-gradient(ellipse 120% 70% at 50% 110%, #7a5a42 0%, #4b3527 32%, #2e2a28 62%, #1d1d20 100%); }
+  .ciel::before { content: ''; position: absolute; inset: 0;
+    background-image: radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,.55), transparent 60%), radial-gradient(1px 1px at 72% 12%, rgba(255,255,255,.45), transparent 60%),
+      radial-gradient(1.5px 1.5px at 38% 8%, rgba(255,255,255,.5), transparent 60%), radial-gradient(1px 1px at 88% 30%, rgba(255,255,255,.35), transparent 60%),
+      radial-gradient(1px 1px at 22% 36%, rgba(255,255,255,.3), transparent 60%), radial-gradient(1px 1px at 58% 26%, rgba(255,255,255,.35), transparent 60%); }
+  .horizon { position: fixed; left: 0; right: 0; bottom: 0; height: 34vh; z-index: 0;
+    background: linear-gradient(to top, rgba(201,178,155,.20), transparent); }
+  .piste { position: fixed; left: 50%; bottom: -2vh; width: 160vw; height: 40vh; transform: translateX(-50%) perspective(420px) rotateX(62deg); transform-origin: bottom; z-index: 0;
+    background: linear-gradient(to right, transparent 46%, rgba(251,250,248,.07) 46%, rgba(251,250,248,.07) 54%, transparent 54%),
+      repeating-linear-gradient(to top, rgba(251,250,248,.5) 0 34px, transparent 34px 80px) center / 6px 100% no-repeat; opacity: .55; }
+  .trainee { position: fixed; z-index: 0; height: 2px; width: 46vw; top: 21vh; left: -50vw; border-radius: 2px;
+    background: linear-gradient(to right, transparent, rgba(251,250,248,.5)); animation: vol 14s linear infinite; }
+  .trainee svg { position: absolute; right: -16px; top: -9px; width: 22px; height: 20px; fill: var(--blanc); opacity: .85; }
+  @keyframes vol { 0% { transform: translateX(0) translateY(0); opacity: 0; } 8% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateX(165vw) translateY(-6vh); opacity: 0; } }
+
+  /* ---------- carte ---------- */
+  .carte { position: relative; z-index: 1; width: 100%; max-width: 420px; border-radius: 22px; overflow: hidden;
+    background: linear-gradient(180deg, var(--blanc), #f2efeb); box-shadow: 0 30px 80px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.08); animation: monte .7s cubic-bezier(.2,.8,.2,1) both; }
+  @keyframes monte { from { opacity: 0; transform: translateY(24px) scale(.98); } to { opacity: 1; transform: none; } }
+  .bandeau { background: linear-gradient(135deg, var(--brun-fonce), var(--brun) 60%, var(--brun-clair)); color: var(--blanc); padding: 30px 30px 26px; position: relative; }
+  .bandeau::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: linear-gradient(to right, var(--sable), transparent 70%); }
+  .insigne { width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; margin-bottom: 16px;
+    background: rgba(251,250,248,.12); border: 1px solid rgba(251,250,248,.35); }
+  .insigne svg { width: 30px; height: 30px; fill: var(--blanc); transform: rotate(-35deg); }
+  h1 { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; font-size: 34px; line-height: 1.05; letter-spacing: .3px; }
+  .sous { margin-top: 8px; font-size: 13px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--sable); font-weight: 500; }
+
+  form { padding: 28px 30px 26px; }
+  label { display: block; font-size: 13px; font-weight: 600; color: var(--gris); margin-bottom: 10px; letter-spacing: .2px; }
+  .champ { position: relative; }
+  .champ input { width: 100%; height: 56px; border-radius: 14px; border: 1.5px solid #d8d2cb; background: var(--blanc); padding: 0 52px 0 50px;
+    font: 600 20px 'Inter', sans-serif; letter-spacing: 5px; color: var(--gris-nuit); outline: none; transition: border-color .2s, box-shadow .2s; }
+  .champ input::placeholder { letter-spacing: 1px; font-weight: 400; font-size: 15px; color: var(--gris-clair); }
+  .champ input:focus { border-color: var(--brun-clair); box-shadow: 0 0 0 4px rgba(154,116,87,.18); }
+  .cadenas { position: absolute; left: 17px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; fill: none; stroke: var(--brun); stroke-width: 2; }
+  .oeil { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border: 0; background: transparent; border-radius: 10px; cursor: pointer; display: grid; place-items: center; color: var(--gris-clair); }
+  .oeil:hover { background: var(--brume); color: var(--brun); }
+  .oeil svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 2; }
+  .erreur { margin-top: 12px; min-height: 20px; font-size: 13.5px; color: var(--rouge); font-weight: 500; }
+  .secoue { animation: secoue .45s; }
+  @keyframes secoue { 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
+  button.entrer { margin-top: 10px; width: 100%; height: 54px; border: 0; border-radius: 14px; cursor: pointer; font: 600 16px 'Inter', sans-serif; letter-spacing: .5px; color: var(--blanc);
+    background: linear-gradient(135deg, var(--brun), var(--brun-fonce)); box-shadow: 0 10px 24px rgba(62,42,30,.35); transition: transform .15s, box-shadow .2s, filter .2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+  button.entrer:hover { filter: brightness(1.08); box-shadow: 0 14px 30px rgba(62,42,30,.42); }
+  button.entrer:active { transform: translateY(1px) scale(.995); }
+  button.entrer svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; }
+  button.entrer:disabled { filter: grayscale(.6) brightness(.9); cursor: wait; }
+  .pied { border-top: 1px solid #e3ddd6; padding: 16px 30px 20px; font-size: 12.5px; color: var(--gris-clair); line-height: 1.55; display: flex; gap: 10px; align-items: flex-start; }
+  .pied svg { flex: 0 0 auto; width: 16px; height: 16px; margin-top: 2px; fill: none; stroke: var(--brun-clair); stroke-width: 2; }
+  .reglage { background: #f6efe7; border: 1px solid #e5d6c6; color: var(--brun-fonce); border-radius: 12px; padding: 12px 14px; font-size: 13px; line-height: 1.5; margin-bottom: 16px; }
+  @media (max-width: 420px) { .bandeau, form { padding-left: 22px; padding-right: 22px; } .pied { padding-left: 22px; padding-right: 22px; } h1 { font-size: 30px; } }
+  @media (prefers-reduced-motion: reduce) { .trainee, .carte { animation: none; } }
+</style>
+</head>
+<body>
+  <div class="ciel"></div><div class="horizon"></div><div class="piste"></div>
+  <div class="trainee"><svg viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z" transform="rotate(90 12 12)"/></svg></div>
+
+  <main class="carte" role="main">
+    <div class="bandeau">
+      <div class="insigne"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg></div>
+      <h1>Simulateur de vol</h1>
+      <div class="sous">Accès privé · pilotes autorisés</div>
+    </div>
+
+    <form id="f" method="post" action="/acces" autocomplete="off">
+      <div class="reglage" id="reglage" hidden>Le code d'accès n'est pas encore réglé sur le serveur. Le propriétaire doit ajouter <b>ACCESS_CODE</b> dans Render (Environment).</div>
+      <label for="code">Entrez votre code d'accès</label>
+      <div class="champ" id="champ">
+        <svg class="cadenas" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10.5" width="16" height="10.5" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>
+        <input id="code" name="code" type="password" inputmode="text" placeholder="Code secret" autofocus required maxlength="64" spellcheck="false" autocapitalize="off">
+        <button class="oeil" type="button" id="oeil" aria-label="Afficher le code"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      </div>
+      <div class="erreur" id="err" role="alert"></div>
+      <button class="entrer" id="go" type="submit">Entrer dans le cockpit
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    </form>
+
+    <div class="pied">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/></svg>
+      <span>Ce simulateur est privé. Seules les personnes à qui le propriétaire a donné le code peuvent entrer. Le code est demandé à chaque ouverture du jeu.</span>
+    </div>
+  </main>
+
+<script>
+  const INFO = __INFO__;
+  const err = document.getElementById('err'), champ = document.getElementById('champ'), code = document.getElementById('code');
+    if (INFO.err) {
+    err.textContent = INFO.err + (INFO.left !== undefined && INFO.left > 0 ? ' Il reste ' + INFO.left + ' essai' + (INFO.left > 1 ? 's' : '') + '.' : '');
+    champ.classList.add('secoue'); setTimeout(() => champ.classList.remove('secoue'), 500);
+  }
+  document.getElementById('oeil').onclick = () => { const v = code.type === 'password'; code.type = v ? 'text' : 'password'; code.focus(); };
+  document.getElementById('f').onsubmit = () => { document.getElementById('go').disabled = true; };
+</script>
+</body>
+</html>

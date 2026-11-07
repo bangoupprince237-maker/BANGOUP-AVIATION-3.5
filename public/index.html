@@ -64,11 +64,15 @@ label{display:block;color:var(--dim);font-size:12px;margin:10px 0 4px;letter-spa
 input[type=range]{padding:0;accent-color:var(--amber)}
 .closeX{position:absolute;right:12px;top:10px;padding:4px 10px}
 /* aide */
-#help .card{width:min(860px,94vw);max-height:88vh;overflow:auto}
-.keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:6px 22px}
-.keys h4{grid-column:1/-1;margin:14px 0 2px;color:var(--amber);font-size:12px;letter-spacing:.12em;text-transform:uppercase}
-.k{display:flex;gap:10px;align-items:center;font-size:14px;padding:3px 0}
-.k kbd{min-width:62px;white-space:nowrap;text-align:center;font-family:Consolas,monospace;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);border-bottom-width:3px;border-radius:6px;padding:2px 6px}
+#help .card{width:min(980px,95vw);max-height:90vh;overflow:auto;background:rgba(14,18,24,.97);border:1px solid rgba(255,255,255,.14);padding:26px 30px}
+#help h2{margin:0 0 6px;font-size:26px;color:#fff}
+#help .kintro{margin:0 0 6px;color:#d6dde6;font-size:15px;line-height:1.5}
+.keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:2px 28px}
+.keys h4{grid-column:1/-1;margin:20px 0 6px;padding:8px 12px;border-radius:8px;background:rgba(255,176,0,.12);border-left:4px solid var(--amber);color:#ffc94d;font-size:15px;letter-spacing:.06em;text-transform:uppercase}
+.k{display:flex;gap:14px;align-items:flex-start;font-size:15.5px;line-height:1.45;padding:6px 4px;color:#f4f7fb;border-bottom:1px solid rgba(255,255,255,.07)}
+.k span{flex:1}
+.k kbd{flex:0 0 150px;white-space:normal;text-align:center;font-family:Consolas,"Segoe UI",monospace;font-size:14.5px;font-weight:700;color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);border-bottom-width:3px;border-radius:7px;padding:4px 6px}
+@media (max-width:700px){.keys{grid-template-columns:1fr}.k kbd{flex-basis:110px}}
 #crash .card{text-align:center;border-color:rgba(255,80,80,.4)}
 #crash h2{color:#ff6b6b}
 body.clean #gameui{display:none}
@@ -148,74 +152,131 @@ body.incockpit.autoclean #pfd,body.incockpit.autoclean #status,body.incockpit.au
 
 <div id="help" class="overlay hidden"><div class="card">
   <h2>Aide des touches</h2>
+  <p class="kintro">Toutes les touches du simulateur, classées par usage. <b>Maj</b> = la touche Majuscule (⇧). Les lettres suivent ce qui est imprimé sur votre clavier (AZERTY ou QWERTY).</p>
   <div class="keys">
-    <h4>Piloter l'avion</h4>
-    <div class="k"><kbd>↑</kbd> Piquer (descendre le nez)</div>
-    <div class="k"><kbd>↓</kbd> Cabrer (monter le nez), rotation au décollage</div>
-    <div class="k"><kbd>← →</kbd> Guider : virer en vol · roue avant au sol (jusqu'à 72°, efficace aussi en roulant vite)</div>
-    <div class="k"><kbd>Q / D</kbd> Guider plus fort (plus sensible) : au sol roue avant + palonnier, en vol lacet + virage. Clavier AZERTY ou QWERTY : c'est la lettre imprimée qui compte</div>
-    <div class="k"><kbd>Hélico</kbd> W/Z maintenu monter · S descendre · relâché = stationnaire · ↑ avancer · ↓ freiner/reculer · ← → tourner · Q/D pivoter</div>
-    <div class="k"><kbd>W ou Z / S</kbd> Levier MONTÉE / DESCENTE rapides (au sol : décollage auto)</div>
-    <div class="k"><kbd>Page ↑ / Page ↓</kbd> GAZ : augmenter / diminuer la poussée (maintenir = en continu). Ce sont les 2 touches à côté des flèches</div>
-    <div class="k"><kbd>T</kbd> Pleine poussée (TOGA)</div>
-    <div class="k"><kbd>R</kbd> Inverseurs de poussée (au sol)</div>
-    <div class="k"><kbd>B (maintenir)</kbd> Freins</div>
-    <div class="k"><kbd>Maj+B</kbd> FREIN D'URGENCE</div>
-    <div class="k"><kbd>P</kbd> Frein de parc</div>
-    <div class="k"><kbd>J</kbd> Frein constant</div>
-    <div class="k"><kbd>Maj seule (maintenir)</kbd> FREIN AÉRIEN PUISSANT en vol : ralentit très fort jusqu'à environ 140 km/h · au sol : freins puissants</div>
-    <div class="k"><kbd>Origine (maintenir) ou E</kbd> MARCHE ARRIÈRE au sol</div>
-    <div class="k"><kbd>B (maintenir)</kbd> Freins des roues au sol</div>
-    <div class="k"><kbd>4 / 6 (rangée du haut)</kbd> Guidage TRÈS sensible : au sol, roue avant braquée au maximum (virages serrés, passer d'une piste à l'autre) · en vol, un peu plus fort que les flèches</div>
-    <div class="k"><kbd>I / K (en vol)</kbd> PALIER de l'avion : I = le nez monte (l'avion monte), K = le nez descend (l'avion descend) ; maintenir = en continu. L'avion garde ensuite cette pente tout seul</div>
-    <div class="k"><kbd>Tab</kbd> PANNE AU HASARD (moteur, feu, carburant, train, volets, hydraulique) — réparation : Maj+Suppr au sol, ou le mécanicien (0 puis I)</div>
-    <div class="k"><kbd>Inser</kbd> PALIER réglable : l'avion se stabilise. Réglage avec le pavé numérique : <b>+</b> monter / <b>−</b> descendre l'altitude tenue · <b>*</b> cap à droite / <b>/</b> cap à gauche (maintenir = en continu). Les flèches pilotent toujours : quand vous les lâchez, le palier garde la nouvelle altitude et le nouveau cap. Inser = arrêter</div>
-    <div class="k"><kbd>F / Maj+F</kbd> Volets : sortir / rentrer</div>
-    <div class="k"><kbd>G</kbd> Train d'atterrissage</div>
-    <div class="k"><kbd>Espace</kbd> Aérofreins sortis / rentrés</div>
-    <div class="k"><kbd>Maj+Espace</kbd> Aérofreins +25 %</div>
-    <div class="k"><kbd>Maj+G</kbd> Armer les aérofreins</div>
-    <div class="k"><kbd>O</kbd> Hypervitesse (turbo)</div>
-    <div class="k"><kbd>Maj+D</kbd> Direction très sensible</div>
-    <div class="k"><kbd>4 / 6 (haut)</kbd> Levier de secours gauche / droite</div>
-    <div class="k"><kbd>Pavé 8 / 2</kbd> Levier de secours monter / descendre</div>
-    <div class="k"><kbd>I · K · X · A · Maj+A</kbd> Roulage auto (repoussage compris), configuration atterrissage, atterrissage automatique, pilote automatique, vol automatique complet (Maj+A)</div>
-    <h4>Moteurs, trim, vol</h4>
-    <div class="k"><kbd>Maj+I</kbd> Ralenti (IDLE)</div>
-    <div class="k"><kbd>Maj+C</kbd> Poussée de montée (CL)</div>
-    <div class="k"><kbd>Maj+X</kbd> Poussée réduite (FLX)</div>
-    <div class="k"><kbd>Maj+1 / Maj+2</kbd> Moteur 1 / moteur 2</div>
-    <div class="k"><kbd>Maj+Y</kbd> Libérer le levier MONTÉE</div>
-    <div class="k"><kbd>Maj+5 / 6 / 7</kbd> Trim : piquer / neutre / cabrer</div>
-    <div class="k"><kbd>Maj+0</kbd> Aligner en bout de piste</div>
-    <div class="k"><kbd>Maj+O</kbd> Garer au poste</div>
-    <div class="k"><kbd>< / ></kbd> Accélération du temps</div>
-    <div class="k"><kbd>Maj+E</kbd> Faire le plein (au sol)</div>
-    <div class="k"><kbd>Suppr</kbd> Simuler une panne moteur</div>
-    <div class="k"><kbd>Maj+Suppr</kbd> Réparer (au sol)</div>
-    <div class="k"><kbd>Maj+S</kbd> Son des moteurs</div>
-    <div class="k"><kbd>Maj+R</kbd> Voix</div>
-    <h4>Affichage et caméras</h4>
-    <div class="k"><kbd>H</kbd> Panneau de commandes</div>
-    <div class="k"><kbd>C</kbd> Vue dégagée</div>
-    <div class="k"><kbd>U</kbd> Radar</div>
-    <div class="k"><kbd>Maj+U</kbd> Radar PLAN / ROSE</div>
-    <div class="k"><kbd>, / ;</kbd> Échelle du radar</div>
-    <div class="k"><kbd>:</kbd> Noms des sommets et monuments</div>
-    <div class="k"><kbd>V</kbd> Vue suivante</div>
-    <div class="k"><kbd>L</kbd> Phares</div>
-    <div class="k"><kbd>N</kbd> Jour / nuit</div>
-    <div class="k"><kbd>M</kbd> Météo</div>
-    <div class="k"><kbd>Souris</kbd> Tourner (cliquer-glisser)</div>
-    <div class="k"><kbd>Molette</kbd> Zoom</div>
-    <div class="k"><kbd>Double-clic</kbd> Recentrer</div>
-    <h4>Bientôt</h4>
-    <div class="k"><kbd>1 2 3 5 · Y · F6</kbd> Balles (maintenir), missile, bombe, bombe atomique (3 par vol) · Y cible suivante · F6 lâcher la cible · Retour ← leurres · Entrée missile</div>
-    <div class="k"><kbd>À pied</kbd> Espace tirer · 1–7 armes (revolver, magnum, carabine, sniper, pistolet, lance-roquettes, pistolet lourd) · R recharger · C accroupi · P à plat ventre · Tab cible · U lâcher · M coup de poing · F ordres à l'escouade · T prendre un autre soldat · G revenir au chef · O vue 360° · K vue de face</div>
-    <div class="k"><kbd>Véhicules</kbd> Z/S ou ↑ ↓ avancer/reculer · Q/D ou ← → tourner (les motos se penchent) · A tir automatique · Entrée missile · Y cible · 0 descendre (0 à côté = remonter)</div>
-    <div class="k"><kbd>0 / F9</kbd> Sortir de l'avion / remonter (à pied : Z Q S D ou flèches, Maj courir, J sauter, I mécanicien répare l'avion)</div>
-    <div class="k"><kbd>8 / 9</kbd> Écrire (8) / parler au micro en maintenant 9 (multijoueur)</div>
-    <div class="k"><kbd>Pavé 4 6 5 7</kbd> Pilote auto : cap −/+ 10° (4/6), altitude −/+ 1000 ft (5/7). Maj+T A/THR · Maj+N NAV · Maj+P APPR · Maj+H cap · Maj+Z V/S · Maj+L altitude · Maj+3/4 V/S −/+ · Maj+J/M briefings · Maj+8/9 embarquer/fermer portes</div>
+    <h4>1 · Au sol : rouler et décoller</h4>
+    <div class="k"><kbd>← →</kbd><span>Tourner la roue avant (rouler, virer sur le taxiway)</span></div>
+    <div class="k"><kbd>Q / D</kbd><span>Gouvernail + roue avant : tourner plus fort au sol</span></div>
+    <div class="k"><kbd>4 / 6</kbd><span>Roue avant braquée au MAXIMUM : virages très serrés (rangée du haut)</span></div>
+    <div class="k"><kbd>E ou Origine</kbd><span>MARCHE ARRIÈRE rapide (maintenir)</span></div>
+    <div class="k"><kbd>Page ↑ / Page ↓</kbd><span>Gaz : augmenter / diminuer (maintenir = en continu)</span></div>
+    <div class="k"><kbd>T</kbd><span>Pleine poussée (TOGA) pour décoller</span></div>
+    <div class="k"><kbd>W ou Z</kbd><span>Levier MONTÉE : décollage automatique (Maj+Y pour le libérer)</span></div>
+    <div class="k"><kbd>↓</kbd><span>Cabrer : lever le nez au moment du décollage</span></div>
+    <div class="k"><kbd>I (au sol)</kbd><span>Roulage automatique jusqu'à la piste (I encore = arrêter)</span></div>
+    <h4>2 · Piloter en vol</h4>
+    <div class="k"><kbd>↑</kbd><span>Piquer : le nez descend</span></div>
+    <div class="k"><kbd>↓</kbd><span>Cabrer : le nez monte</span></div>
+    <div class="k"><kbd>← →</kbd><span>Incliner l'avion pour virer</span></div>
+    <div class="k"><kbd>4 / 6</kbd><span>Virage serré (rangée du haut)</span></div>
+    <div class="k"><kbd>Q / D</kbd><span>GOUVERNAIL de direction : le nez tourne, l'avion reste à plat et à son niveau</span></div>
+    <div class="k"><kbd>S</kbd><span>Levier DESCENTE rapide (en vol)</span></div>
+    <div class="k"><kbd>O</kbd><span>Hypervitesse (turbo) marche / arrêt</span></div>
+    <div class="k"><kbd>Maj+D</kbd><span>Direction très sensible marche / arrêt</span></div>
+    <h4>3 · Palier (garder l'avion stable)</h4>
+    <div class="k"><kbd>I / K (en vol)</kbd><span>PALIER du nez : I = le nez monte, K = le nez descend (maintenir). L'avion garde ensuite cette pente tout seul</span></div>
+    <div class="k"><kbd>Inser</kbd><span>PALIER automatique : l'avion tient son altitude et son cap (Inser encore = arrêter)</span></div>
+    <div class="k"><kbd>Pavé + / −</kbd><span>Avec le palier : altitude tenue plus haute / plus basse</span></div>
+    <div class="k"><kbd>Pavé * / /</kbd><span>Avec le palier : cap à droite / à gauche</span></div>
+    <h4>4 · Moteurs et poussée</h4>
+    <div class="k"><kbd>Page ↑ / Page ↓</kbd><span>Gaz plus / moins</span></div>
+    <div class="k"><kbd>T</kbd><span>Pleine poussée (TOGA)</span></div>
+    <div class="k"><kbd>Maj+I</kbd><span>Ralenti (IDLE)</span></div>
+    <div class="k"><kbd>Maj+C</kbd><span>Poussée de montée (CL)</span></div>
+    <div class="k"><kbd>Maj+X</kbd><span>Poussée de décollage réduite (FLX)</span></div>
+    <div class="k"><kbd>Maj+1 / Maj+2</kbd><span>Couper / rallumer le moteur 1 / le moteur 2</span></div>
+    <div class="k"><kbd>R (au sol)</kbd><span>Inverseurs de poussée sortis / rentrés</span></div>
+    <div class="k"><kbd>Maj+5 / 6 / 7</kbd><span>Trim : piquer / neutre / cabrer</span></div>
+    <h4>5 · Freiner et ralentir</h4>
+    <div class="k"><kbd>B</kbd><span>Freins des roues au sol (maintenir)</span></div>
+    <div class="k"><kbd>Maj+B</kbd><span>Frein d'urgence</span></div>
+    <div class="k"><kbd>P</kbd><span>Frein de parc serré / relâché</span></div>
+    <div class="k"><kbd>J</kbd><span>Frein constant marche / arrêt</span></div>
+    <div class="k"><kbd>Maj seule</kbd><span>FREIN AÉRIEN puissant en vol : d'environ 500 à 100 km/h en 5 s (maintenir)</span></div>
+    <div class="k"><kbd>Espace</kbd><span>Aérofreins sortis / rentrés</span></div>
+    <div class="k"><kbd>Maj+Espace</kbd><span>Aérofreins par crans de 25 %</span></div>
+    <div class="k"><kbd>Maj+G</kbd><span>Armer les aérofreins (sortie automatique au toucher)</span></div>
+    <h4>6 · Volets et train</h4>
+    <div class="k"><kbd>F</kbd><span>Volets : sortir d'un cran</span></div>
+    <div class="k"><kbd>Maj+F</kbd><span>Volets : rentrer d'un cran</span></div>
+    <div class="k"><kbd>G</kbd><span>Train d'atterrissage sorti / rentré</span></div>
+    <div class="k"><kbd>K (au sol)</kbd><span>Configuration atterrissage</span></div>
+    <h4>7 · Pilote automatique et atterrissage</h4>
+    <div class="k"><kbd>A</kbd><span>Pilote automatique marche / arrêt</span></div>
+    <div class="k"><kbd>Maj+A</kbd><span>VOL AUTOMATIQUE complet jusqu'à la destination</span></div>
+    <div class="k"><kbd>X</kbd><span>Atterrissage automatique</span></div>
+    <div class="k"><kbd>Pavé 4 / 6</kbd><span>Pilote auto : cap −10° / +10°</span></div>
+    <div class="k"><kbd>Pavé 5 / 7</kbd><span>Pilote auto : altitude −1000 / +1000 ft</span></div>
+    <div class="k"><kbd>Maj+T</kbd><span>Gestion automatique de la poussée (A/THR)</span></div>
+    <div class="k"><kbd>Maj+N</kbd><span>Navigation vers la destination (NAV)</span></div>
+    <div class="k"><kbd>Maj+P</kbd><span>Approche (APPR)</span></div>
+    <div class="k"><kbd>Maj+H</kbd><span>Cap sélectionné</span></div>
+    <div class="k"><kbd>Maj+L</kbd><span>Maintien d'altitude</span></div>
+    <div class="k"><kbd>Maj+Z / Maj+W</kbd><span>Vitesse verticale (V/S)</span></div>
+    <div class="k"><kbd>Maj+3 / Maj+4</kbd><span>Vitesse verticale − / +</span></div>
+    <div class="k"><kbd>Maj+K</kbd><span>Aide à l'arrondi et à l'axe de piste</span></div>
+    <div class="k"><kbd>Maj+J / Maj+M</kbd><span>Briefing de départ / d'atterrissage</span></div>
+    <h4>8 · Aéroport : poste, passagers, plein</h4>
+    <div class="k"><kbd>Maj+8</kbd><span>Embarquer les passagers (au poste)</span></div>
+    <div class="k"><kbd>Maj+9</kbd><span>Fermer les portes + SORTIE AUTOMATIQUE du poste jusqu'à la piste (Maj+9 ou B = arrêter)</span></div>
+    <div class="k"><kbd>Maj+O</kbd><span>Aller garer l'avion au poste</span></div>
+    <div class="k"><kbd>Maj+0</kbd><span>S'aligner en bout de piste</span></div>
+    <div class="k"><kbd>Maj+E</kbd><span>Faire le plein (à l'arrêt sur un aéroport) et réarmer</span></div>
+    <div class="k"><kbd>Maj+Suppr</kbd><span>Réparer l'avion (à l'arrêt au sol)</span></div>
+    <h4>9 · Pannes et urgences</h4>
+    <div class="k"><kbd>Tab</kbd><span>PANNE AU HASARD (moteur, feu, carburant, train, volets…)</span></div>
+    <div class="k"><kbd>Suppr</kbd><span>Panne du moteur 1</span></div>
+    <div class="k"><kbd>0 puis I</kbd><span>Sortir de l'avion et appeler le MÉCANICIEN qui répare</span></div>
+    <h4>10 · Radar, écran et caméras</h4>
+    <div class="k"><kbd>H</kbd><span>Panneau de commandes (réglages, aéroports, météo…)</span></div>
+    <div class="k"><kbd>U</kbd><span>Radar affiché / masqué</span></div>
+    <div class="k"><kbd>Maj+U</kbd><span>Radar PLAN / ROSE</span></div>
+    <div class="k"><kbd>, / ;</kbd><span>Radar : zoomer / dézoomer</span></div>
+    <div class="k"><kbd>:</kbd><span>Noms des montagnes et monuments</span></div>
+    <div class="k"><kbd>V</kbd><span>Caméra suivante</span></div>
+    <div class="k"><kbd>C</kbd><span>Écran dégagé (cacher les indicateurs)</span></div>
+    <div class="k"><kbd>Souris</kbd><span>Cliquer-glisser = tourner la vue · molette = zoom · double-clic = recentrer</span></div>
+    <h4>11 · Lumières, temps, météo, son</h4>
+    <div class="k"><kbd>L</kbd><span>Phares allumés / éteints</span></div>
+    <div class="k"><kbd>N</kbd><span>Jour / nuit</span></div>
+    <div class="k"><kbd>M</kbd><span>Météo suivante</span></div>
+    <div class="k"><kbd>< / ></kbd><span>Ralentir / accélérer le temps</span></div>
+    <div class="k"><kbd>Maj+S</kbd><span>Son des moteurs marche / arrêt</span></div>
+    <div class="k"><kbd>Maj+R</kbd><span>Voix radio marche / arrêt</span></div>
+    <h4>12 · Combat (avion armé)</h4>
+    <div class="k"><kbd>1 ou F2</kbd><span>Canon : tirer en rafale (maintenir)</span></div>
+    <div class="k"><kbd>2, F3 ou Entrée</kbd><span>Tirer un missile</span></div>
+    <div class="k"><kbd>3 ou F4</kbd><span>Lâcher une bombe</span></div>
+    <div class="k"><kbd>5</kbd><span>Bombe atomique (3 par vol)</span></div>
+    <div class="k"><kbd>Y</kbd><span>Cible suivante</span></div>
+    <div class="k"><kbd>F6</kbd><span>Lâcher la cible</span></div>
+    <div class="k"><kbd>Retour ←</kbd><span>Leurres (contre les missiles)</span></div>
+    <div class="k"><kbd>Maj+V</kbd><span>Aller sur le porte-avions</span></div>
+    <div class="k"><kbd>T (sur le pont)</kbd><span>Catapulte du porte-avions</span></div>
+    <div class="k"><kbd>Maj+Q</kbd><span>Appeler l'escadrille</span></div>
+    <h4>13 · À pied et véhicules</h4>
+    <div class="k"><kbd>0 ou F9</kbd><span>Sortir de l'avion / remonter</span></div>
+    <div class="k"><kbd>Z Q S D ou flèches</kbd><span>Marcher (Maj = courir, J = sauter)</span></div>
+    <div class="k"><kbd>I (à pied)</kbd><span>Le mécanicien répare l'avion</span></div>
+    <div class="k"><kbd>1 à 7</kbd><span>Armes : revolver, magnum, carabine, sniper, pistolet, lance-roquettes, pistolet lourd</span></div>
+    <div class="k"><kbd>Espace</kbd><span>Tirer</span></div>
+    <div class="k"><kbd>R / C / P</kbd><span>Recharger / s'accroupir / à plat ventre</span></div>
+    <div class="k"><kbd>Tab / U</kbd><span>Viser une cible / la lâcher</span></div>
+    <div class="k"><kbd>M</kbd><span>Coup de poing</span></div>
+    <div class="k"><kbd>F / T / G</kbd><span>Ordres à l'escouade / prendre un autre soldat / revenir au chef</span></div>
+    <div class="k"><kbd>O / K</kbd><span>Vue 360° / vue de face</span></div>
+    <div class="k"><kbd>Véhicules</kbd><span>Z/S ou ↑ ↓ avancer / reculer · Q/D ou ← → tourner · A tir automatique · Entrée missile · Y cible · 0 descendre</span></div>
+    <h4>14 · Multijoueur</h4>
+    <div class="k"><kbd>8 ou F7</kbd><span>Écrire un message</span></div>
+    <div class="k"><kbd>9 ou F8</kbd><span>Parler au micro (maintenir)</span></div>
+    <h4>15 · Hélicoptère</h4>
+    <div class="k"><kbd>W ou Z</kbd><span>Monter (maintenir) · relâché = vol stationnaire</span></div>
+    <div class="k"><kbd>S</kbd><span>Descendre</span></div>
+    <div class="k"><kbd>↑ / ↓</kbd><span>Avancer / freiner, reculer</span></div>
+    <div class="k"><kbd>← → / Q D</kbd><span>Tourner / pivoter sur place</span></div>
+    <h4>16 · Autres</h4>
+    <div class="k"><kbd>Échap</kbd><span>Arrêter le replay</span></div>
+    <div class="k"><kbd>🔑 en haut à droite</kbd><span>Changer le code d'accès du site (propriétaire, avec le code maître)</span></div>
   </div>
   <div style="margin-top:18px;text-align:right"><button class="primary" id="btnHelpClose">Fermer</button></div>
 </div></div>
@@ -236,6 +297,7 @@ body.incockpit.autoclean #pfd,body.incockpit.autoclean #status,body.incockpit.au
     <div class="chip"><span id="camname"></span> · <span id="clock"></span> · <span id="fps"></span></div>
     <div class="chip" id="where"></div>
     <button class="chip" id="btnFiche" style="cursor:pointer">📋 Fiche de vol (altitude, vitesses)</button>
+    <button class="chip" id="btnCode" style="cursor:pointer">🔑 Code d'accès</button>
   </div>
   <div id="fiche" class="card hidden"><button class="closeX" id="btnFicheClose">✕</button><h3>Fiche de vol</h3><div id="ficheBody"></div>
     <div class="grid2" style="margin-top:8px"><button data-k="KeyF">🪶 Volets + [F]</button><button data-k="KeyF" data-s="1">🪶 Volets − [Maj+F]</button><button data-k="KeyG">🛞 Train [G]</button><button data-k="Insert">➖ Palier [Inser]</button><button data-k="NumpadAdd" data-h="1">⬆ Palier + [pavé +]</button><button data-k="NumpadSubtract" data-h="1">⬇ Palier − [pavé −]</button><button data-k="NumpadDivide" data-h="1">↺ Cap − [pavé /]</button><button data-k="NumpadMultiply" data-h="1">↻ Cap + [pavé *]</button><button data-k="KeyA">🤖 Pilote auto [A]</button><button data-k="KeyK">🛬 Config. atterrissage [K]</button></div></div>
@@ -311,7 +373,7 @@ body.incockpit.autoclean #pfd,body.incockpit.autoclean #status,body.incockpit.au
 <script>
 // ---- 00_util.js ----
 // ===== Outils communs =====
-const VERSION = 'Version 27 · 06/11';
+const VERSION = 'Version 30 · 07/11';
 const DEG = Math.PI / 180, RAD = 180 / Math.PI;
 const KT = 0.514444, FT = 0.3048;
 const clamp = (x, a, b) => x < a ? a : (x > b ? b : x);
@@ -5029,7 +5091,7 @@ const Net = (function () {
   function connect(sc) {
     scene = sc; wanted = true;
     if (location.protocol === 'file:') { status(false, 'Hors ligne · mode solo (ouvrez le site depuis le serveur pour jouer à plusieurs)'); return; }
-    const url = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host;
+    const url = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + (window.__SIM_TICKET ? '/?ticket=' + encodeURIComponent(window.__SIM_TICKET) : '');
     try { ws = new WebSocket(url); } catch (e) { status(false, 'Hors ligne · mode solo'); return later(); }
     status(false, 'Connexion au serveur…');
     ws.onopen = () => { retry = 0; ws.send(JSON.stringify({ t: 'join', name: Settings.data.name, room: Settings.data.room, plane: (Settings.data.type || 'A320') + '|' + (Settings.data.livery || '') })); };
@@ -5473,7 +5535,7 @@ const Game = (function () {
     let p; const big = fm.spec.D && fm.spec.D.L > 60 && !fm.spec.heli;
     if (fm.spec.heli) { const h = a.L.heli; const [x, z] = Airports.toWorld(a, h.x, h.z); p = { x, z, hdg: a.hdg }; }
     else if (mode === 'poste') p = Airports.gateStart(a, fm.spec.D ? fm.spec.D.L : 37); else p = Airports.runwayStart(a, 0);
-    if (mode === 'poste' && !fm.spec.heli && !quiet) UI.toast('Au poste : 8 = embarquer · Maj+9 = fermer les portes et SORTIE AUTOMATIQUE jusqu\'à la piste (Maj+9 ou B pour l\'arrêter). Ou sortez vous-même : marche arrière E / Origine.', 9000);
+    if (mode === 'poste' && !fm.spec.heli && !quiet) UI.toast('Au poste : Maj+8 = embarquer · Maj+9 = fermer les portes et SORTIE AUTOMATIQUE jusqu\'à la piste (Maj+9 ou B pour l\'arrêter). Ou sortez vous-même : marche arrière E / Origine.', 9000);
     fm.reset(p.x, a.elev + 0.2 * (mode === 'poste' ? 1 : 1.6), p.z, p.hdg); fm.engOn = new Array(fm.spec.nEng || 2).fill(true); fm.reverse = false; fm.hyper = false; fm.taxiReverse = false; fm.missiles = fm.spec.heli ? 0 : 99; try { Ops.repair(); } catch (e) { }
     if (fm.spec.heli) { fm.n1 = 0; fm.parking = false; }
     S.lever = 0; S.spoilerSet = 0; S.constBrake = false; S.trim = 0;
@@ -7087,6 +7149,58 @@ const Extra = (function () {
   return { takeVehicle, spawnSquad, init, key, keyUp, update, camTarget, afterRender, chatShow, voicePlay, pad, foot, replay, replayStep };
 })();
 
+// ---- 15c_code.js ----
+// ===== 🔑 Changer le code d'accès du site (propriétaire seulement, avec le code maître) =====
+(function () {
+  const $ = id => document.getElementById(id);
+  function open() { const m = $('codeModal'); if (!m) return; m.classList.remove('hidden'); m.style.display = 'flex'; $('codeMsg').textContent = ''; ['codeMaitre', 'codeNew', 'codeNew2'].forEach(i => $(i).value = ''); setTimeout(() => $('codeMaitre').focus(), 50); }
+  function close() { const m = $('codeModal'); m.classList.add('hidden'); m.style.display = 'none'; }
+  function msg(t, ok) { const e = $('codeMsg'); e.textContent = t; e.style.color = ok ? '#3d6b3a' : '#a23b2c'; }
+  async function save() {
+    const maitre = $('codeMaitre').value.trim(), nv = $('codeNew').value.trim(), nv2 = $('codeNew2').value.trim();
+    if (!maitre) return msg('Entrez votre code maître.');
+    if (nv.length < 4) return msg('Le nouveau code doit avoir au moins 4 caractères.');
+    if (nv !== nv2) return msg('Les deux nouveaux codes ne sont pas identiques.');
+    if (!window.__SIM_TICKET) return msg('Le changement de code se fait sur le site en ligne (pas en ouvrant le fichier sur le PC).');
+    $('codeSave').disabled = true; msg('Enregistrement…', true);
+    try {
+      const r = await fetch('/changer-code', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ticket: window.__SIM_TICKET, maitre, nouveau: nv }) });
+      const d = await r.json(); msg((d.ok ? '✔ ' : '') + d.msg + (d.ok ? ' Nouveau code : « ' + nv + ' »' : ''), d.ok);
+      if (d.ok) { $('codeMaitre').value = ''; }
+    } catch (e) { msg('Impossible de joindre le serveur. Réessayez.'); }
+    $('codeSave').disabled = false;
+  }
+  function init() {
+    if (!$('btnCode')) return; $('btnCode').onclick = e => { e.target.blur(); open(); };
+    $('codeClose').onclick = close; $('codeModal').addEventListener('mousedown', e => { if (e.target.id === 'codeModal') close(); });
+    $('codeSave').onclick = save;
+    // les touches tapées dans la fenêtre ne pilotent pas l'avion
+    $('codeModal').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') save(); if (e.key === 'Escape') close(); });
+    $('codeModal').addEventListener('keyup', e => e.stopPropagation());
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+
 </script>
+<div id="codeModal" class="hidden" style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(20,18,17,.62);backdrop-filter:blur(3px);padding:16px">
+  <div style="width:100%;max-width:400px;border-radius:20px;overflow:hidden;background:linear-gradient(180deg,#fbfaf8,#f2efeb);box-shadow:0 30px 80px rgba(0,0,0,.55);font-family:Inter,system-ui,sans-serif;color:#232326">
+    <div style="background:linear-gradient(135deg,#3e2a1e,#6b4a33 60%,#9a7457);color:#fbfaf8;padding:22px 24px 18px;position:relative">
+      <button id="codeClose" style="position:absolute;right:12px;top:10px;background:transparent;border:0;color:#fbfaf8;font-size:20px;cursor:pointer" aria-label="Fermer">✕</button>
+      <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:27px;font-weight:600">Changer le code d'accès</div>
+      <div style="margin-top:6px;font-size:11.5px;letter-spacing:2.2px;text-transform:uppercase;color:#c9b29b">Réservé au propriétaire</div>
+    </div>
+    <div style="padding:20px 24px 22px">
+      <label style="display:block;font-size:12.5px;font-weight:600;color:#4a4a4f;margin:0 0 7px">Votre code maître</label>
+      <input id="codeMaitre" type="password" autocomplete="off" spellcheck="false" style="box-sizing:border-box;width:100%;height:48px;border-radius:12px;border:1.5px solid #d8d2cb;background:#fbfaf8;padding:0 14px;font:600 16px Inter,sans-serif;letter-spacing:2px;outline:none">
+      <label style="display:block;font-size:12.5px;font-weight:600;color:#4a4a4f;margin:14px 0 7px">Nouveau code d'accès (celui que vous donnez aux joueurs)</label>
+      <input id="codeNew" type="text" autocomplete="off" spellcheck="false" maxlength="40" style="box-sizing:border-box;width:100%;height:48px;border-radius:12px;border:1.5px solid #d8d2cb;background:#fbfaf8;padding:0 14px;font:600 16px Inter,sans-serif;letter-spacing:2px;outline:none">
+      <label style="display:block;font-size:12.5px;font-weight:600;color:#4a4a4f;margin:14px 0 7px">Retapez le nouveau code</label>
+      <input id="codeNew2" type="text" autocomplete="off" spellcheck="false" maxlength="40" style="box-sizing:border-box;width:100%;height:48px;border-radius:12px;border:1.5px solid #d8d2cb;background:#fbfaf8;padding:0 14px;font:600 16px Inter,sans-serif;letter-spacing:2px;outline:none">
+      <div id="codeMsg" style="min-height:20px;margin-top:12px;font-size:13px;line-height:1.45"></div>
+      <button id="codeSave" style="box-sizing:border-box;margin-top:8px;width:100%;height:50px;border:0;border-radius:12px;cursor:pointer;font:600 15px Inter,sans-serif;color:#fbfaf8;background:linear-gradient(135deg,#6b4a33,#3e2a1e);box-shadow:0 10px 24px rgba(62,42,30,.35)">Enregistrer le nouveau code</button>
+      <div style="margin-top:12px;font-size:12px;color:#8d8d93;line-height:1.5">Dès l'enregistrement, l'ancien code ne fonctionne plus pour entrer. Les joueurs déjà en vol ne sont pas coupés.</div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
