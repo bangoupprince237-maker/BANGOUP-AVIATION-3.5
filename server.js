@@ -115,9 +115,10 @@ function broadcast(room, msg, except) {
 
 wss.on('connection', ws => {
   ws.id = nextId++; ws.room = null; ws.alive = true; ws.chatTimes = [];
-  ws.on('pong', () => ws.alive = true);
+  ws.on('pong', () => { ws.alive = true; ws.miss = 0; });
   ws.on('message', raw => {
-    if (raw.length > 16000) return;
+    ws.alive = true; ws.miss = 0; // tout message reçu prouve que le joueur est toujours là
+    if (raw.length > 60000) return;
     let m; try { m = JSON.parse(raw); } catch (e) { return; }
     if (m.t === 'join' && !ws.room) {
       const room = clean(m.room, 24) || 'public'; ws.name = clean(m.name, 20) || 'Pilote'; ws.plane = clean(m.plane, 30);
@@ -148,6 +149,6 @@ wss.on('connection', ws => {
   });
 });
 // déconnexions silencieuses
-setInterval(() => { wss.clients.forEach(ws => { if (!ws.alive) return ws.terminate(); ws.alive = false; try { ws.ping(); } catch (e) { } }); }, 15000);
+setInterval(() => { wss.clients.forEach(ws => { if (!ws.alive) { ws.miss = (ws.miss || 0) + 1; if (ws.miss >= 4) return ws.terminate(); } ws.alive = false; try { ws.ping(); } catch (e) { } }); }, 15000); // coupé seulement après 1 minute sans aucun signe de vie
 
 server.listen(PORT, () => console.log('Simulateur prêt : http://localhost:' + PORT + ' (accès protégé par code)'));

@@ -267,8 +267,13 @@ body.incockpit.autoclean #pfd,body.incockpit.autoclean #status,body.incockpit.au
     <div class="k"><kbd>O / K</kbd><span>Vue 360° / vue de face</span></div>
     <div class="k"><kbd>Véhicules</kbd><span>Z/S ou ↑ ↓ avancer / reculer · Q/D ou ← → tourner · A tir automatique · Entrée missile · Y cible · 0 descendre</span></div>
     <h4>14 · Multijoueur</h4>
+    <div class="k"><kbd>Menu</kbd><span>Bouton « Multijoueur » : même nom de salon = même ciel. Chacun part de l'aéroport qu'il choisit</span></div>
+    <div class="k"><kbd>Repérage</kbd><span>Chaque joueur a SA couleur : grande bande au-dessus de lui (nom, distance, altitude), flèche au bord de l'écran s'il est loin, point de couleur sur le radar</span></div>
+    <div class="k"><kbd>Y</kbd><span>Viser : les JOUEURS passent en premier, puis leurs Rafale, puis les autres cibles. La caméra de la cible zoome sur lui</span></div>
+    <div class="k"><kbd>1 · 2 · 3 · 5</kbd><span>Canon, missile, bombe, bombe atomique : touchent aussi les autres joueurs</span></div>
+    <div class="k"><kbd>Maj+Q</kbd><span>Lancer / rappeler MES escadrilles de Rafale (1 à 4 escadrilles, panneau H) : elles attaquent ma cible, même un joueur</span></div>
     <div class="k"><kbd>8 ou F7</kbd><span>Écrire un message</span></div>
-    <div class="k"><kbd>9 ou F8</kbd><span>Parler au micro (maintenir)</span></div>
+    <div class="k"><kbd>9 ou F8</kbd><span>Parler au micro : MAINTENIR pendant qu'on parle (la 1ʳᵉ fois, autoriser le micro). Seul dans le salon = on s'entend soi-même (test)</span></div>
     <h4>15 · Hélicoptère</h4>
     <div class="k"><kbd>W ou Z</kbd><span>Monter (maintenir) · relâché = vol stationnaire</span></div>
     <div class="k"><kbd>S</kbd><span>Descendre</span></div>
@@ -352,6 +357,9 @@ body.incockpit.autoclean #pfd,body.incockpit.autoclean #status,body.incockpit.au
     <label>Vitesse du temps</label>
     <select id="selTime"><option value="1">Temps réel</option><option value="60">× 60 (1 h par minute)</option><option value="600">× 600</option><option value="0">Arrêté</option></select>
     <label>Météo</label><select id="selWeather"></select>
+    <label>Escadrilles de Rafale (Maj+Q ou bouton)</label><select id="selSquad"><option value="1">1 escadrille (4 Rafale)</option><option value="2">2 escadrilles (8 Rafale)</option><option value="3">3 escadrilles (12 Rafale)</option><option value="4">4 escadrilles (16 Rafale)</option></select>
+    <select id="selSquadLiv"><option value="">Couleurs de mon pays</option><option value="gris">Rafale gris</option><option value="desert">Rafale désert</option></select>
+    <button id="btnSquad" style="width:100%;margin-top:6px">✈ Lancer / rappeler mes escadrilles</button>
     <label>Cumulus (nuages)</label><select id="selClouds"><option value="auto">Automatique (selon la météo)</option><option value="aucun">Aucun cumulus</option><option value="tres_petits">Très petits</option><option value="petits">Petits</option><option value="moyens">Moyens</option><option value="plusieurs">Plusieurs cumulus (beaucoup)</option><option value="geants">Gigantesques, loin sur ma route</option></select>
     <h3>Relief</h3>
     <label>Intensité du relief (montagnes) : <span id="valRelief">145 %</span></label><input type="range" id="rngRelief" min="0.3" max="2.5" step="0.1" value="1.45">
@@ -373,7 +381,7 @@ body.incockpit.autoclean #pfd,body.incockpit.autoclean #status,body.incockpit.au
 <script>
 // ---- 00_util.js ----
 // ===== Outils communs =====
-const VERSION = 'Version 30 · 07/11';
+const VERSION = 'Version 31 · 07/11';
 const DEG = Math.PI / 180, RAD = 180 / Math.PI;
 const KT = 0.514444, FT = 0.3048;
 const clamp = (x, a, b) => x < a ? a : (x > b ? b : x);
@@ -5085,7 +5093,7 @@ const Sound = (function () {
 // ---- 11_network.js ----
 // ===== Multijoueur (base) : salons, positions lissées, reconnexion =====
 const Net = (function () {
-  let ws = null, id = null, online = false, retry = 0, lastSend = 0, scene, baseModel = null, wanted = false;
+  let lastWing = 0, sentWing = false; let ws = null, id = null, online = false, retry = 0, lastSend = 0, scene, baseModel = null, wanted = false;
   const players = new Map();
   function status(on, text) { online = on; UI.setNet(on, text); }
   function connect(sc) {
@@ -5101,35 +5109,50 @@ const Net = (function () {
   }
   function later() { if (!wanted) return; retry++; setTimeout(() => connect(scene), Math.min(30000, 1000 * Math.pow(1.8, retry))); }
   function clearPlayers() { for (const [k, p] of players) removeP(k); }
-  function removeP(k) { const p = players.get(k); if (!p) return; World.remove(p.obj); players.delete(k); }
+  function removeP(k) { const p = players.get(k); if (!p) return; World.remove(p.obj); p.wingObjs.forEach(w => World.remove(w.obj)); players.delete(k); }
   function label(name) {
     const c = makeCanvas(256, 64), g = c.getContext('2d'); g.font = '600 30px Segoe UI, Arial'; g.textAlign = 'center';
     g.fillStyle = 'rgba(8,16,28,0.6)'; const w = g.measureText(name).width + 30; g.fillRect(128 - w / 2, 8, w, 46); g.fillStyle = '#7fe3ff'; g.fillText(name, 128, 42);
     const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: canvasTex(c), depthTest: false, transparent: true, sizeAttenuation: false })); s.scale.set(0.12, 0.03, 1); s.position.y = 12; s.renderOrder = 11; return s;
   }
   const bases = {};
+  // chaque joueur a SA couleur (la même partout : étiquette, bande au-dessus de lui, radar)
+  const COLS = ['#ff5a5a', '#4fd1ff', '#ffd24f', '#7dff6a', '#ff7ae6', '#ff9a3c', '#b58cff', '#3cffd2', '#ffffff', '#ff4fa3', '#9dff3c', '#5a8cff'];
+  const colorOf = pid => COLS[Math.abs(pid * 7919) % COLS.length];
   function addP(pid, name, plane) {
     if (players.has(pid)) return; const [ty, lv] = String(plane || 'A320|').split('|'); const key = (AC_TYPES[ty] ? ty : 'A320') + '|' + (lv || '');
     if (!bases[key]) bases[key] = AircraftModel.buildType(AC_TYPES[ty] ? ty : 'A320', lv || '', true);
-    const base = bases[key]; const obj = base.clone(); obj.userData.parts = base.userData.parts; obj.add(label(name)); World.add(obj);
-    players.set(pid, { obj, name, snaps: [] });
+    const base = bases[key]; const obj = base.clone(); obj.userData.parts = base.userData.parts; World.add(obj);
+    players.set(pid, { obj, name, snaps: [], pid, remote: true, kind: 'remote', pos: new THREE.Vector3(), hp: 100, dead: false, color: colorOf(pid), wing: [], wingObjs: [], hdg: 0, onGround: false });
     UI.toast(name + ' a rejoint le salon');
   }
   function handle(m) {
     if (m.t === 'welcome') { id = m.id; m.players.forEach(p => addP(p.id, p.name, p.plane)); status(true, 'En ligne · salon « ' + Settings.data.room + ' » · ' + (players.size + 1) + ' joueur(s)'); }
     else if (m.t === 'join') { addP(m.id, m.name, m.plane); status(true, 'En ligne · salon « ' + Settings.data.room + ' » · ' + (players.size + 1) + ' joueur(s)'); }
     else if (m.t === 'leave') { const p = players.get(m.id); if (p) UI.toast(p.name + ' est parti'); removeP(m.id); status(true, 'En ligne · salon « ' + Settings.data.room + ' » · ' + (players.size + 1) + ' joueur(s)'); }
-    else if (m.t === 's') { const p = players.get(m.id); if (!p) return; p.snaps.push({ t: performance.now(), p: m.p, q: m.q, v: m.v, g: m.g }); if (p.snaps.length > 30) p.snaps.shift(); }
+    else if (m.t === 's') { const p = players.get(m.id); if (!p) return; p.snaps.push({ t: performance.now(), p: m.p, q: m.q, v: m.v, g: m.g }); if (p.snaps.length > 30) p.snaps.shift(); if (m.hp !== undefined) p.hp = m.hp; p.dead = !!m.x; p.onGround = !!m.g; if (m.w) setWing(p, m.w); }
+    // COMBAT entre joueurs : c'est la victime qui applique les dégâts chez elle
+    else if (m.t === 'hit') { if (m.to !== id) return; const from = players.get(m.id); Ops.netHit(m.dmg, from ? from.name : 'un joueur', m.wk, m.w); }
+    else if (m.t === 'down') { const v = players.get(m.id); UI.toast('💥 ' + (v ? v.name : 'Un joueur') + ' a été abattu' + (m.by ? ' par ' + m.by : '') + ' !', 4000); }
     else if (m.t === 'chat') { Extra.chatShow(m.name, m.text); }
     else if (m.t === 'v') { Extra.voicePlay(m); }
     else if (m.t === 'full') { UI.toast('Salon complet — essayez un autre nom de salon'); }
+  }
+  // escadrille de Rafale d'un autre joueur (positions reçues ~3 fois par seconde)
+  let wingBase = null;
+  function setWing(p, W) {
+    if (!wingBase) wingBase = AircraftModel.buildType('chasseur', 'gris', true);
+    while (p.wingObjs.length < W.length) { const o = wingBase.clone(); World.add(o); p.wingObjs.push({ obj: o, pos: new THREE.Vector3(), tgt: new THREE.Vector3(), hdg: 0, remote: true, kind: 'remoteWing', pid: p.pid, name: 'Rafale de ' + p.name, dead: false, hp: 150, color: p.color, k: 0 }); }
+    while (p.wingObjs.length > W.length) World.remove(p.wingObjs.pop().obj);
+    W.forEach((w, i) => { const o = p.wingObjs[i]; o.k = w[4]; if (o.pos.lengthSq() === 0) o.pos.set(w[0], w[1], w[2]); o.tgt.set(w[0], w[1], w[2]); o.hdg = w[3]; });
   }
   const qa = new THREE.Quaternion(), qb = new THREE.Quaternion();
   function update(dt, fm) {
     const now = performance.now();
     if (ws && ws.readyState === 1 && id && now - lastSend > 100) {
       lastSend = now;
-      ws.send(JSON.stringify({ t: 's', p: [+fm.pos.x.toFixed(2), +fm.pos.y.toFixed(2), +fm.pos.z.toFixed(2)], q: [+fm.q.x.toFixed(4), +fm.q.y.toFixed(4), +fm.q.z.toFixed(4), +fm.q.w.toFixed(4)], v: [+fm.vel.x.toFixed(2), +fm.vel.y.toFixed(2), +fm.vel.z.toFixed(2)], g: +fm.gearPos.toFixed(2) }));
+      const extra = { hp: Math.round(Ops.hp), x: fm.crashed ? 1 : 0 }; if (now - (lastWing || 0) > 300) { lastWing = now; const W = Ops.myWing(); if (W.length || sentWing) { extra.w = W; sentWing = W.length > 0; } }
+      ws.send(JSON.stringify({ ...extra, t: 's', p: [+fm.pos.x.toFixed(2), +fm.pos.y.toFixed(2), +fm.pos.z.toFixed(2)], q: [+fm.q.x.toFixed(4), +fm.q.y.toFixed(4), +fm.q.z.toFixed(4), +fm.q.w.toFixed(4)], v: [+fm.vel.x.toFixed(2), +fm.vel.y.toFixed(2), +fm.vel.z.toFixed(2)], g: +fm.gearPos.toFixed(2) }));
     }
     // interpolation (rendu 150 ms en retard) + prédiction si le réseau tarde
     const rt = now - 150;
@@ -5146,11 +5169,51 @@ const Net = (function () {
         p.obj.position.set(last.p[0] + last.v[0] * ex, last.p[1] + last.v[1] * ex, last.p[2] + last.v[2] * ex);
         p.obj.quaternion.set(last.q[0], last.q[1], last.q[2], last.q[3]);
       }
+      p.pos.copy(p.obj.position); p.obj.visible = true; { const e = new THREE.Euler().setFromQuaternion(p.obj.quaternion, 'YXZ'); p.hdg = ((-e.y * RAD) % 360 + 360) % 360; }
+      for (const w of p.wingObjs) { w.pos.lerp(w.tgt, Math.min(1, dt * 3)); w.obj.position.copy(w.pos); w.obj.rotation.set(0, -w.hdg * DEG, 0, 'YXZ'); }
     }
   }
   function send(o) { if (ws && ws.readyState === 1) ws.send(JSON.stringify(o)); }
   function rejoin() { if (ws && ws.readyState === 1) { try { ws.close(); } catch (e) { } } }
-  return { connect, update, rejoin, send, get online() { return online; }, players };
+  // ---------- REPÉRER les autres joueurs de très loin : grande bande de couleur au-dessus de chacun ----------
+  let cv = null, cg = null; const _v = new THREE.Vector3();
+  function draw(camera) {
+    if (!cv) { cv = document.createElement('canvas'); cv.id = 'netMarks'; cv.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:6'; document.body.appendChild(cv); cg = cv.getContext('2d'); }
+    const W = innerWidth, H = innerHeight; if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+    cg.clearRect(0, 0, W, H); if (!online || !players.size || document.body.classList.contains('clean')) return;
+    const me = camera.position; const tgt = Ops.target;
+    const L = []; for (const [, p] of players) { if (!p.snaps.length) continue; _v.set(p.pos.x - World.ox, p.pos.y, p.pos.z - World.oz); L.push({ p, d: _v.distanceTo(me), w: _v.clone() }); }
+    L.sort((a, b) => a.d - b.d);
+    let n = 0;
+    for (const { p, d, w } of L) {
+      const full = n++ < 60; const c = p.dead ? '#8a8a8a' : p.color;
+      const sp = w.clone().add(new THREE.Vector3(0, 6, 0)).project(camera); const behind = sp.z > 1;
+      let x = (sp.x * 0.5 + 0.5) * W, y = (-sp.y * 0.5 + 0.5) * H; if (behind) { x = W - x; y = H - y; }
+      const off = behind || x < 30 || x > W - 30 || y < 70 || y > H - 30;
+      const km = d / 1000, txt = p.name + (p.dead ? ' ✖' : ''), info = (km < 10 ? km.toFixed(1) : Math.round(km)) + ' km · ' + Math.round(p.pos.y) + ' m';
+      cg.font = 'bold 15px Segoe UI, Arial';
+      if (off) { // sur le bord de l'écran : flèche qui montre la direction du joueur
+        const cx = W / 2, cy = H / 2; let dx = x - cx, dy = y - cy; if (behind && Math.abs(dx) < 1 && Math.abs(dy) < 1) dy = 1; const k = Math.min((W / 2 - 40) / Math.abs(dx || 1e-6), (H / 2 - 50) / Math.abs(dy || 1e-6)); const ex = cx + dx * k, ey = cy + dy * k; const a = Math.atan2(dy, dx);
+        cg.fillStyle = c; cg.strokeStyle = 'rgba(0,0,0,.7)'; cg.lineWidth = 2; cg.beginPath(); cg.moveTo(ex + Math.cos(a) * 16, ey + Math.sin(a) * 16); cg.lineTo(ex + Math.cos(a + 2.5) * 13, ey + Math.sin(a + 2.5) * 13); cg.lineTo(ex + Math.cos(a - 2.5) * 13, ey + Math.sin(a - 2.5) * 13); cg.closePath(); cg.fill(); cg.stroke();
+        if (full) { const t = txt + ' · ' + (km < 10 ? km.toFixed(1) : Math.round(km)) + ' km'; const tw = cg.measureText(t).width; const tx = clamp(ex - tw / 2 - Math.cos(a) * 30, 6, W - tw - 12), ty = clamp(ey - Math.sin(a) * 30, 20, H - 10); cg.fillStyle = 'rgba(10,12,16,.75)'; cg.fillRect(tx - 5, ty - 15, tw + 10, 21); cg.fillStyle = c; cg.fillText(t, tx, ty); }
+        continue;
+      }
+      // grande bande de couleur au-dessus du joueur + trait jusqu'à lui
+      cg.strokeStyle = c; cg.lineWidth = 2; cg.beginPath(); cg.moveTo(x, y - 8); cg.lineTo(x, y + 14); cg.stroke();
+      cg.fillStyle = c; cg.beginPath(); cg.moveTo(x, y + 20); cg.lineTo(x - 7, y + 12); cg.lineTo(x + 7, y + 12); cg.closePath(); cg.fill();
+      if (!full) continue;
+      const tw = Math.max(cg.measureText(txt).width, (cg.font = '13px Segoe UI, Arial', cg.measureText(info).width)); cg.font = 'bold 15px Segoe UI, Arial';
+      const bw = tw + 22, bh = 42, bx = x - bw / 2, by = y - 8 - bh;
+      cg.fillStyle = 'rgba(10,12,16,.78)'; cg.fillRect(bx, by, bw, bh); cg.fillStyle = c; cg.fillRect(bx, by, bw, 5); cg.fillRect(bx, by, 5, bh);
+      cg.fillStyle = '#fff'; cg.textAlign = 'center'; cg.fillText(txt, x + 2, by + 22); cg.font = '13px Segoe UI, Arial'; cg.fillStyle = c; cg.fillText(info, x + 2, by + 37); cg.textAlign = 'left';
+      if (tgt === p) { cg.strokeStyle = '#ff2a2a'; cg.lineWidth = 3; cg.strokeRect(bx - 4, by - 4, bw + 8, bh + 8); cg.fillStyle = '#ff2a2a'; cg.font = 'bold 12px Segoe UI'; cg.fillText('🎯 CIBLE', bx, by - 8); }
+      // ses Rafale : petits losanges de sa couleur
+      for (const wo of p.wingObjs) { if (wo.dead) continue; const q = new THREE.Vector3(wo.pos.x - World.ox, wo.pos.y, wo.pos.z - World.oz).project(camera); if (q.z > 1) continue; const wx = (q.x * 0.5 + 0.5) * W, wy = (-q.y * 0.5 + 0.5) * H; cg.fillStyle = c; cg.beginPath(); cg.moveTo(wx, wy - 5); cg.lineTo(wx + 5, wy); cg.lineTo(wx, wy + 5); cg.lineTo(wx - 5, wy); cg.closePath(); cg.fill(); }
+    }
+  }
+  // tous les joueurs (et leurs Rafale) qu'on peut viser
+  function remotes() { const L = []; for (const [, p] of players) { if (!p.snaps.length) continue; if (!p.dead) L.push(p); for (const w of p.wingObjs) if (!w.dead) L.push(w); } return L; }
+  return { draw, connect, update, rejoin, send, get online() { return online; }, get myId() { return id; }, players, remotes, colorOf };
 })();
 
 // ---- 12_ui.js ----
@@ -5409,6 +5472,9 @@ const UI = (function () {
     $('btnFiche').onclick = () => { $('fiche').classList.toggle('hidden'); ficheT = 0; }; $('btnFicheClose').onclick = () => $('fiche').classList.add('hidden');
     document.querySelectorAll('#fiche [data-h]').forEach(b => { const code = b.dataset.k; b.onpointerdown = e => { e.preventDefault(); window.__sim.codes[code] = true; }; const up = () => window.__sim.codes[code] = false; b.onpointerup = up; b.onpointerleave = up; });
     document.querySelectorAll('#fiche [data-k]:not([data-h])').forEach(b => b.onclick = () => { const code = b.dataset.k, sh = !!b.dataset.s; const key = code.startsWith('Key') ? (sh ? code.slice(3) : code.slice(3).toLowerCase()) : code; window.dispatchEvent(new KeyboardEvent('keydown', { key, code, shiftKey: sh })); setTimeout(() => window.dispatchEvent(new KeyboardEvent('keyup', { key, code, shiftKey: sh })), 60); b.blur(); });
+    $('selSquad').value = String(Settings.data.squad || 2); $('selSquad').onchange = e => { Settings.data.squad = +e.target.value; Settings.save(); e.target.blur(); UI.toast('Escadrilles : ' + e.target.selectedOptions[0].text + ' — Maj+Q pour les lancer', 3000); };
+    $('selSquadLiv').value = Settings.data.squadLiv || ''; $('selSquadLiv').onchange = e => { Settings.data.squadLiv = e.target.value; Settings.save(); e.target.blur(); };
+    $('btnSquad').onclick = e => { e.target.blur(); window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Q', code: 'KeyQ', shiftKey: true })); setTimeout(() => window.dispatchEvent(new KeyboardEvent('keyup', { key: 'Q', code: 'KeyQ', shiftKey: true })), 60); };
     $('selClouds').value = Settings.data.clouds || 'auto'; $('selClouds').onchange = e => { Settings.data.clouds = e.target.value; Settings.save(); Ops.cloudsChanged(); UI.toast('Cumulus : ' + e.target.selectedOptions[0].text, 3000); e.target.blur(); };
     $('selRadio').value = Settings.data.radioLang || 'both'; $('selRadio').onchange = e => { Settings.data.radioLang = e.target.value; Settings.save(); };
     $('btnTake').onclick = () => { Settings.data.type = selType.value; Settings.data.livery = selLiv.value; Settings.save(); handlers.take(selType.value, selLiv.value); };
@@ -5814,7 +5880,7 @@ const Game = (function () {
       autoQuality(dt); safe('fiche', () => UI.fiche(fm, dt)); safe('voyage', () => UI.tripBar(fm, dt));
       document.getElementById('fps').textContent = Math.round(fps) + ' img/s' + (S.timeMul > 1 ? ' · ×' + S.timeMul : '');
     }
-    renderer.render(scene, camera); safe('photo', () => Extra.afterRender(renderer.domElement)); if (started) safe('caméra cible', () => Ops.pip(renderer, scene));
+    renderer.render(scene, camera); safe('photo', () => Extra.afterRender(renderer.domElement)); if (started) safe('caméra cible', () => Ops.pip(renderer, scene)); if (started) safe('joueurs', () => Net.draw(camera));
   }
   return { init, get fm() { return fm; }, get S() { return S; } };
 })();
@@ -6222,9 +6288,9 @@ const Ops = (function () {
 
   // ---------- Armes ----------
   const shots = []; let target = null, lastGun = 0, nukes = 3, bombs = 12, flares = 30, flareT = 0; const enemyMissiles = [];
-  function targets() { return [...AI.filter(o => !o.dead), ...ground.filter(o => !o.dead)]; }
+  function targets() { const R = (typeof Net !== 'undefined' && Net.online) ? Net.remotes() : []; return [...AI.filter(o => !o.dead), ...ground.filter(o => !o.dead), ...R]; }
   function nextTarget(fm) {
-    const L = targets().filter(o => o.pos.distanceTo(fm.pos) < 250000).sort((a, b) => a.pos.distanceTo(fm.pos) - b.pos.distanceTo(fm.pos)); if (!L.length) return T('Aucune cible en vue.');
+    const L = targets().filter(o => o.pos.distanceTo(fm.pos) < (o.remote ? 3e6 : 250000)).sort((a, b) => (a.remote ? 0 : 1e9) + a.pos.distanceTo(fm.pos) - (b.remote ? 0 : 1e9) - b.pos.distanceTo(fm.pos)); if (!L.length) return T('Aucune cible en vue.');
     const i = target ? (L.indexOf(target) + 1) % L.length : 0; target = L[i]; T('🎯 Cible : ' + (target.name || 'avion') + ' — ' + (target.pos.distanceTo(fm.pos) / 1000).toFixed(1) + ' km (F6 pour lâcher)');
   }
   const mslGeo = new THREE.CylinderGeometry(0.2, 0.2, 3.2, 8); mslGeo.rotateX(Math.PI / 2); let mslMat;
@@ -6255,7 +6321,10 @@ const Ops = (function () {
   }
   const shock = [];
   function hit(o, dmg) {
-    if (o.dead) return; o.hp -= dmg; if (o.hp > 0) return; o.dead = true; Ops.kills = (Ops.kills || 0) + 1; T('💥 ' + (o.name || 'Cible') + ' DÉTRUIT !', 2500);
+    if (o.dead) return;
+    if (o.remote) { // un autre JOUEUR (ou un Rafale de son escadrille) : on lui envoie les dégâts, c'est lui qui les applique
+      Net.send({ t: 'hit', to: o.pid, dmg, wk: o.kind === 'remoteWing' ? o.k : -1, w: dmg >= 900 ? 'nuke' : dmg >= 150 ? 'msl' : 'gun' });
+      if (dmg >= 100) T('🎯 Touché : ' + o.name + ' !', 1500); return; } o.hp -= dmg; if (o.hp > 0) return; o.dead = true; Ops.kills = (Ops.kills || 0) + 1; T('💥 ' + (o.name || 'Cible') + ' DÉTRUIT !', 2500);
     if (o.ground) { boom(o.pos, 1.2); o.obj.traverse(m => { if (m.isMesh) { m.material = m.material.clone(); m.material.color.setHex(0x1a1a1a); } }); o.obj.rotation.z = 0.3; }
     if (target === o) target = null;
   }
@@ -6289,7 +6358,18 @@ const Ops = (function () {
     }
   }
   let hp = 100;
-  function playerDamage(fm, d) { hp -= d; T('Touché ! Structure ' + Math.max(0, Math.round(hp)) + ' %', 2500); ctx.S.engFire[0] = true; if (fm.engOn) fm.engOn[0] = false; if (hp <= 0) fm.crash('Abattu par un missile ennemi'); }
+  function playerDamage(fm, d, by) { if (fm.crashed) return; hp -= d; T('Touché' + (by ? ' par ' + by : '') + ' ! Structure ' + Math.max(0, Math.round(hp)) + ' %', 2500); ctx.S.engFire[0] = true; if (fm.engOn) fm.engOn[0] = false; if (hp <= 0) { fm.crash('Abattu par ' + (by || 'un missile ennemi')); if (typeof Net !== 'undefined') Net.send({ t: 'down', by: by || '' }); } }
+  // dégâts reçus d'un autre joueur (multijoueur)
+  function netHit(dmg, by, wk, w) {
+    const fm = ctx.fm();
+    if (wk >= 0) { const o = AI.find(x => x.kind === 'escort' && x.k === wk); if (o && !o.dead) { o.hp -= dmg; if (o.hp <= 0) { o.dead = true; o.vy = 0; boom(o.pos.clone(), 1.3); T('💥 Votre Rafale n°' + (wk + 1) + ' a été abattu par ' + by + ' !', 3500); } } return; }
+    if (w === 'gun') { hp -= dmg / (fm.spec.armor || 1); if (Math.random() < 0.15) T('🔫 ' + by + ' vous tire dessus ! Structure ' + Math.max(0, Math.round(hp)) + ' %', 1500); if (hp <= 0 && !fm.crashed) { fm.crash('Abattu par ' + by); Net.send({ t: 'down', by }); } return; }
+    if (w === 'nuke') { boom(fm.pos.clone(), 1, false); fm.crash('Bombe atomique de ' + by); Net.send({ t: 'down', by }); return; }
+    if (w === 'bump') { hp -= dmg; T('⚠ ' + by + ' vous a percuté ! Structure ' + Math.max(0, Math.round(hp)) + ' %', 2500); if (hp <= 0 && !fm.crashed) { fm.crash('Collision avec ' + by); Net.send({ t: 'down', by }); } return; }
+    boom(fm.pos.clone(), 1.2); playerDamage(fm, (w === 'msl' ? 55 : dmg * 0.3) / (fm.spec.armor || 1), by);
+  }
+  // mon escadrille, envoyée aux autres joueurs : [x, y, z, cap, n°]
+  function myWing() { return AI.filter(o => o.kind === 'escort' && !o.dead).slice(0, 16).map(o => [Math.round(o.pos.x), Math.round(o.pos.y), Math.round(o.pos.z), Math.round(o.hdg), o.k]); }
   function segDist(a, b, p) { const ab = b.clone().sub(a); const t = clamp(p.clone().sub(a).dot(ab) / Math.max(1e-6, ab.lengthSq()), 0, 1); return a.clone().addScaledVector(ab, t).distanceTo(p); }
   function rearm(fm) { fm.missiles = Math.max(6, (ctx.model().userData.parts.missiles || []).length * 3); bombs = 12; nukes = 3; flares = 30; hp = 100; T('Réarmé : ' + fm.missiles + ' missiles, 12 bombes, 3 bombes atomiques, 30 leurres.'); }
   // réticule rouge sur la cible
@@ -6306,6 +6386,14 @@ const Ops = (function () {
     // trafic et cibles
     for (const o of AI) { if (o.dead) continue; const [x, y] = P(o.pos.x, o.pos.z); if (Math.hypot(x - cx, y - cy) > R) continue; g.fillStyle = '#ffffff'; g.beginPath(); g.moveTo(x, y - 4); g.lineTo(x + 3, y + 3); g.lineTo(x - 3, y + 3); g.fill(); g.font = '8px Consolas'; g.fillText(Math.round(o.pos.y / FT / 100) + '', x + 4, y); }
     for (const o of ground) { if (o.dead) continue; const [x, y] = P(o.pos.x, o.pos.z); if (Math.hypot(x - cx, y - cy) > R) continue; g.fillStyle = '#ff5050'; g.fillRect(x - 2, y - 2, 4, 4); }
+    // AUTRES JOUEURS : chacun sa couleur + son nom ; ceux qui sont hors de l'écran du radar sont montrés sur le bord avec leur distance
+    if (typeof Net !== 'undefined' && Net.online) { const L = [...Net.players.values()].filter(p => p.snaps.length).map(p => ({ p, d: Math.hypot(p.pos.x - fm.pos.x, p.pos.z - fm.pos.z) })).sort((a, b) => a.d - b.d); let n = 0;
+      for (const { p, d } of L) { let [x, y] = P(p.pos.x, p.pos.z); const r = Math.hypot(x - cx, y - cy); const out = r > R - 6; if (out) { x = cx + (x - cx) / r * (R - 6); y = cy + (y - cy) / r * (R - 6); }
+        g.fillStyle = p.dead ? '#777' : p.color; g.strokeStyle = '#000'; g.lineWidth = 1.5;
+        if (out) { const a = Math.atan2(y - cy, x - cx); g.beginPath(); g.moveTo(x + Math.cos(a) * 6, y + Math.sin(a) * 6); g.lineTo(x + Math.cos(a + 2.4) * 6, y + Math.sin(a + 2.4) * 6); g.lineTo(x + Math.cos(a - 2.4) * 6, y + Math.sin(a - 2.4) * 6); g.closePath(); g.fill(); g.stroke(); }
+        else { g.beginPath(); g.arc(x, y, 5, 0, 7); g.fill(); g.stroke(); for (const w of p.wingObjs) { if (w.dead) continue; const [wx, wy] = P(w.pos.x, w.pos.z); if (Math.hypot(wx - cx, wy - cy) < R) { g.fillRect(wx - 1.5, wy - 1.5, 3, 3); } } }
+        if (n++ < 25) { g.font = 'bold 9px Consolas'; g.fillStyle = p.color; g.textAlign = out ? (x < cx ? 'left' : 'right') : 'left'; g.fillText(p.name + (out ? ' ' + Math.round(d / 1000) + 'km' : ''), out ? x + (x < cx ? 8 : -8) : x + 7, y + 3); g.textAlign = 'left'; }
+      } g.lineWidth = 1; }
     for (const c of CARRIERS) { const [x, y] = P(c.x, c.z); if (Math.hypot(x - cx, y - cy) > R) continue; g.fillStyle = '#9ad0ff'; g.fillRect(x - 5, y - 2, 10, 4); g.font = '8px Consolas'; g.fillText('PA', x + 6, y + 3); }
     if (target && !target.dead) { const [x, y] = P(target.pos.x, target.pos.z); g.strokeStyle = '#ff2020'; g.lineWidth = 2; g.strokeRect(x - 6, y - 6, 12, 12); g.lineWidth = 1; }
     // route vers la destination
@@ -6502,8 +6590,9 @@ const Ops = (function () {
   function squadron(fm) {
     const mine = AI.filter(o => o.kind === 'escort'); if (mine.length) { mine.forEach(o => remove(AI.indexOf(o))); return T('Escadrille rappelée.'); }
     const cc = (ctx.airport() || AIRPORTS[0]).cc;
-    for (let k = 0; k < 8; k++) { const o = { ty: 'chasseur', obj: aiModel('chasseur', 'nat:' + cc), kind: 'escort', hp: 150, gearH: 2, name: 'Escorte ' + (k + 1), t: 0, k, pos: fm.pos.clone(), hdg: hdgOf(fm), spd: 150, cd: 3 + k, liv: 'nat:' + cc }; World.add(o.obj); AI.push(o); }
-    T('✈ Escadrille de 8 chasseurs aux couleurs nationales : elle vous escorte et attaque votre cible (Y).', 5000); radio('escadrille en l\'air, en formation sur vous.', 'squadron airborne, joining on you.', 'Escadrille');
+    const N = Math.max(4, Math.min(16, (+Settings.data.squad || 2) * 4)); const livS = Settings.data.squadLiv || ('nat:' + cc);
+    for (let k = 0; k < N; k++) { const o = { ty: 'chasseur', obj: aiModel('chasseur', livS), kind: 'escort', hp: 150, gearH: 2, name: 'Escorte ' + (k + 1), t: 0, k, pos: fm.pos.clone(), hdg: hdgOf(fm), spd: 150, cd: 3 + k, liv: 'nat:' + cc }; World.add(o.obj); AI.push(o); }
+    T('✈ ' + N / 4 + ' escadrille(s) de Rafale (' + N + ' avions) : elles vous escortent et attaquent votre cible (Y), même un autre joueur.', 5000); radio('escadrille en l\'air, en formation sur vous.', 'squadron airborne, joining on you.', 'Escadrille');
   }
   function escortUpdate(o, dt, fm) {
     const side = o.k % 2 ? 1 : -1, row = Math.floor(o.k / 2) + 1; const h = hdgOf(fm); const back = dirOf(h).multiplyScalar(-60 * row), lat = new THREE.Vector3(Math.cos(h * DEG), 0, Math.sin(h * DEG)).multiplyScalar(side * 45 * row);
@@ -6593,6 +6682,7 @@ const Ops = (function () {
       return true;
     };
     const a = Airports.nearest(fm.pos.x, fm.pos.z); if (a && a.parked && fm.pos.y - a.elev < 120) for (const p of a.parked) if (hitObj(p.x, p.y, p.z, p.r, p.h, 0, 0, 'un avion garé')) break;
+    if (typeof Net !== 'undefined' && Net.online) for (const p of Net.remotes()) { if (p.kind !== 'remote') continue; const dd = Math.hypot(p.pos.x - fm.pos.x, p.pos.z - fm.pos.z); if (dd > 150) continue; const R2 = 22; if (dd < (rp + R2) * 0.62 && Math.abs(p.pos.y - fm.pos.y) < 10 && bumpT < 0) { const rel = Math.max(3, fm.vel.length()); Net.send({ t: 'hit', to: p.pid, dmg: Math.min(100, rel * (fm.onGround ? 1.5 : 4)), wk: -1, w: 'bump' }); hitObj(p.pos.x, p.pos.y, p.pos.z, R2, 10, 0, 0, p.name, null); } }
     for (const o of AI) { if (o.dead || !o.pos) continue; const L = acLayout(o.ty); const vx = o.kind === 'cross' ? 0 : Math.sin(o.hdg * DEG) * (o.spd || 0), vz = o.kind === 'cross' ? 0 : -Math.cos(o.hdg * DEG) * (o.spd || 0); if (hitObj(o.pos.x, o.pos.y, o.pos.z, Math.max(L.L, L.span) * 0.42, L.H, vx, vz, o.name || 'un avion', o)) break; }
   }
   // tir depuis n'importe quelle position (soldats, véhicules) vers une cible
@@ -6600,7 +6690,7 @@ const Ops = (function () {
     else { const v = tg.pos.clone().add(new THREE.Vector3((Math.random() - 0.5) * 3, Math.random() * 2, (Math.random() - 0.5) * 3)).sub(from).normalize().multiplyScalar(700); shots.push({ kind: 'gun', pos: from.clone(), vel: v, life: 2 }); } }
   function nearestEnemy(pos, range) { let b = null, bd = range; for (const o of ground) { if (o.dead) continue; const d = o.pos.distanceTo(pos); if (d < bd) { bd = d; b = o; } } return b; }
   function fireDir(from, dir, kind) { shots.push({ kind: 'gun', pos: from.clone(), vel: dir.clone().normalize().multiplyScalar(kind === 'sniper' ? 1100 : 750), life: 2 }); }
-  return { cloudsChanged, strike: () => lightning(ctx.fm()), hitAI: (f) => { const o = AI.find(o => o.kind === 'tfc' && o.role === 'dep'); if (o) { aiFull(o); Damage.hit(o.obj, new THREE.Vector3(f * 15, 0, 0), 30, { motion: { vel: new THREE.Vector3(), pos: o.pos.clone() } }); o.stuck = true; return o.pos; } }, get traffic() { return AI.filter(o => o.kind === 'tfc').map(o => o.G.R.name + o.role[0] + ':' + o.phase + ':' + Math.round(o.along ?? o.al)).join(' '); }, repair: () => repair(ctx.fm()), randomFailure, addGround(o) { ground.push(o); }, shootAt, nearestEnemy, fireDir, setTarget(o) { target = o; }, pip, deckAt, declareWar, gotoBattle, peace, init, key, control, update, radar, AP, radio, syncDest, takeNearestAI, resetFlight() { gh.h = null; gh.user = false; repair(ctx.fm()); nukes = 3; hp = 100; AP.on = false; AP.full = false; AP.taxi = null; AP.land = false; AP.appr = false; atc.phase = ''; }, get target() { return target; } };
+  return { get target() { return target; }, netHit, myWing, get hp() { return hp; }, cloudsChanged, strike: () => lightning(ctx.fm()), hitAI: (f) => { const o = AI.find(o => o.kind === 'tfc' && o.role === 'dep'); if (o) { aiFull(o); Damage.hit(o.obj, new THREE.Vector3(f * 15, 0, 0), 30, { motion: { vel: new THREE.Vector3(), pos: o.pos.clone() } }); o.stuck = true; return o.pos; } }, get traffic() { return AI.filter(o => o.kind === 'tfc').map(o => o.G.R.name + o.role[0] + ':' + o.phase + ':' + Math.round(o.along ?? o.al)).join(' '); }, repair: () => repair(ctx.fm()), randomFailure, addGround(o) { ground.push(o); }, shootAt, nearestEnemy, fireDir, setTarget(o) { target = o; }, pip, deckAt, declareWar, gotoBattle, peace, init, key, control, update, radar, AP, radio, syncDest, takeNearestAI, resetFlight() { gh.h = null; gh.user = false; repair(ctx.fm()); nukes = 3; hp = 100; AP.on = false; AP.full = false; AP.taxi = null; AP.land = false; AP.appr = false; atc.phase = ''; }, get target() { return target; } };
 })();
 
 // ---- 14b_wreck.js ----
@@ -7020,17 +7110,22 @@ const Extra = (function () {
   async function talk(on) {
     if (on === talking) return; talking = on; const ind = document.getElementById('micInd');
     if (!on) { if (rec && rec.state !== 'inactive') rec.stop(); if (ind) ind.classList.add('hidden'); return; }
-    if (!Net.online) { T('Le micro sert à parler aux autres joueurs : jouez en multijoueur.'); talking = false; return; }
+    if (!Net.online) { T('Le micro sert à parler aux autres joueurs : jouez en multijoueur (en ligne).'); talking = false; return; }
+    if (!navigator.mediaDevices || !window.MediaRecorder) { talking = false; return T('Ce navigateur ne permet pas le micro. Utilisez Chrome ou Edge, sur le site en https.', 5000); }
     try {
-      if (!micStream) micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      if (!micStream) { const first = true; micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } }); if (!talking) { T('🎙 Micro autorisé ! Maintenant MAINTENEZ la touche 9 pendant que vous parlez.', 5000); return; } }
       if (!talking) return; if (ind) ind.classList.remove('hidden');
+      if (!Net.players.size) T('🎙 Vous êtes seul dans le salon : vous allez entendre votre propre voix (test du micro).', 3500);
       const loop = () => { if (!talking) return; rec = new MediaRecorder(micStream, { mimeType: MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : '', audioBitsPerSecond: 12000 }); const parts = [];
-        rec.ondataavailable = e => parts.push(e.data); rec.onstop = async () => { const b = new Blob(parts, { type: rec.mimeType }); if (b.size > 0 && b.size < 11500) { const r = new FileReader(); r.onload = () => Net.send({ t: 'v', d: r.result }); r.readAsDataURL(b); } loop(); };
-        rec.start(); setTimeout(() => rec.state !== 'inactive' && rec.stop(), 900); };
+        rec.ondataavailable = e => parts.push(e.data); rec.onstop = async () => { const b = new Blob(parts, { type: rec.mimeType || 'audio/webm' }); if (b.size > 200 && b.size < 40000) { const r = new FileReader(); r.onload = () => { Net.send({ t: 'v', d: r.result, name: Settings.data.name }); if (!Net.players.size) voicePlay({ d: r.result }); }; r.readAsDataURL(b); } loop(); };
+        rec.start(); setTimeout(() => rec.state !== 'inactive' && rec.stop(), 1500); };
       loop();
     } catch (e) { talking = false; T('Micro refusé ou indisponible. Autorisez le micro dans le navigateur (icône 🔒 à gauche de l\'adresse).', 5000); }
   }
-  function voicePlay(m) { if (typeof m.d !== 'string' || !m.d.startsWith('data:audio')) return; try { const a = new Audio(m.d); a.volume = Settings.data.volume; a.play(); } catch (e) { } }
+  // voix reçue : les morceaux sont joués les uns après les autres (pas en même temps), volume toujours audible
+  const vq = []; let vPlaying = false;
+  function voicePlay(m) { if (typeof m.d !== 'string' || !m.d.startsWith('data:audio')) return; vq.push(m); if (!vPlaying) vNext(); }
+  function vNext() { const m = vq.shift(); if (!m) { vPlaying = false; return; } vPlaying = true; try { const a = new Audio(m.d); a.volume = clamp(Math.max(0.6, +Settings.data.volume || 0.7), 0, 1); a.onended = a.onerror = () => vNext(); const pr = a.play(); if (pr && pr.catch) pr.catch(() => { vPlaying = false; T('🔈 Cliquez une fois dans le jeu pour entendre la voix des autres joueurs.', 3000); }); } catch (e) { vNext(); } }
 
   // ---------- MANETTE ----------
   let padPrev = [], padBlocked = false;
