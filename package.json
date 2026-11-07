@@ -1,0 +1,9 @@
+{
+  "name": "simulateur-vol",
+  "version": "1.0.0",
+  "description": "Simulateur de vol et de combat 3D multijoueur",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" },
+  "dependencies": { "ws": "^8.18.0" }
+}

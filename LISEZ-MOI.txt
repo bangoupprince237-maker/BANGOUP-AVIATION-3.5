@@ -1,0 +1,35 @@
+Version 5 — 05/11
+====================================================
+Version 2 (Lot 2) — 31/10
+
+CONTENU DU DOSSIER
+  public/index.html      -> TOUT le jeu (un seul fichier)
+  server.js              -> le serveur (site + multijoueur)
+  package.json           -> la liste des outils pour Render
+  demarrer-windows.bat   -> pour tester sur votre PC
+  LISEZ-MOI.txt          -> ce fichier
+
+METTRE EN LIGNE (GitHub + Render)
+  1. GitHub : envoyez TOUT le contenu de ce dossier dans votre dépôt
+     (Add file -> Upload files -> glissez les fichiers et le dossier public -> Commit changes).
+  2. Render : New + -> Web Service -> choisissez votre dépôt GitHub.
+       Build Command : npm install
+       Start Command : node server.js
+     Cliquez Create Web Service. Attendez 2-3 minutes.
+  3. Ouvrez l'adresse donnée par Render (https://....onrender.com).
+
+METTRE À JOUR (les fois suivantes)
+  Remplacez seulement public/index.html sur GitHub. Render redémarre tout seul.
+
+TESTER SUR VOTRE PC (facultatif)
+  Installez Node.js (nodejs.org, version LTS), puis double-cliquez demarrer-windows.bat.
+  Le jeu s'ouvre sur http://localhost:3000
+
+JOUER À PLUSIEURS
+  Ouvrez l'adresse du site sur 2 onglets ou 2 ordinateurs, mettez le MÊME nom de salon,
+  puis cliquez « Multijoueur ». Le nombre de joueurs s'affiche en haut à droite.
+
+TOUCHES PRINCIPALES
+  Z / S : gaz +/-        Flèches : piloter (↓ = cabrer)     Q / D : direction
+  F / V : volets +/-     G : train      B : freins      P : frein de parc
+  W : aérofreins         Tab : caméra   C : vue dégagée   H : panneau   R : recommencer
