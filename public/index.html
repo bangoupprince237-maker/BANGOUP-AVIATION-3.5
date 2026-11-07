@@ -381,7 +381,7 @@ body.incockpit.autoclean #pfd,body.incockpit.autoclean #status,body.incockpit.au
 <script>
 // ---- 00_util.js ----
 // ===== Outils communs =====
-const VERSION = 'Version 31 · 07/11';
+const VERSION = 'Version 33 · 08/11';
 const DEG = Math.PI / 180, RAD = 180 / Math.PI;
 const KT = 0.514444, FT = 0.3048;
 const clamp = (x, a, b) => x < a ? a : (x > b ? b : x);
@@ -2345,6 +2345,55 @@ const Humans = (function () {
     g.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
     return g;
   }
+  // ---------- PILOTES MILITAIRES : chasseur (casque, visière, masque à oxygène, combinaison anti-G) et transport militaire ----------
+  // homme noir, carrure solide, barbe courte : un vrai pilote de guerre charismatique
+  function warPilot(kind, seed, cc) {
+    const g = new THREE.Group(); const mat = (c, r) => new THREE.MeshStandardMaterial({ color: lin(c), roughness: r ?? 0.8 }); const sk = ['#3b2318', '#2f1b11', '#4a2c1c'][seed % 3]; const skin = mat(sk, 0.55);
+    const suitCol = kind === 'chasse' ? 0x4a5240 : 0x5e6a4c; const suit = mat(suitCol, 0.85), dark = mat(0x1d1f1c, 0.7), strap = mat(0x2b2a24, 0.6), metal = new THREE.MeshStandardMaterial({ color: 0x9aa0a6, metalness: 0.8, roughness: 0.3 });
+    // buste large (carrure), harnais, gilet de survie
+    const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.235, 0.19, 0.58, 16), suit); torso.scale.z = 0.66; torso.position.set(0, 0.39, 0.1); g.add(torso);
+    const sh = new THREE.Mesh(new THREE.SphereGeometry(0.24, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2), suit); sh.scale.set(1, 0.42, 0.66); sh.position.set(0, 0.67, 0.1); g.add(sh);
+    for (const sx of [-1, 1]) { const st = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.56, 0.012), strap); st.position.set(sx * 0.1, 0.42, -0.06); st.rotation.z = sx * 0.12; g.add(st); }
+    const buckle = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.02, 14), metal); buckle.rotation.x = Math.PI / 2; buckle.position.set(0, 0.36, -0.07); g.add(buckle);
+    if (kind === 'chasse') { const vest = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.2, 0.06), mat(0x3a3f33, 0.8)); vest.position.set(0, 0.25, -0.05); g.add(vest); }
+    // écusson du pays sur l'épaule + insigne de grade
+    const flagCv = makeCanvas(48, 32); try { drawFlag2D(flagCv.getContext('2d'), (typeof COUNTRIES !== 'undefined' && COUNTRIES[cc]) ? COUNTRIES[cc].f : 'cm', 0, 0, 48, 32); } catch (e) { }
+    const patch = new THREE.Mesh(new THREE.PlaneGeometry(0.075, 0.05), new THREE.MeshBasicMaterial({ map: canvasTex(flagCv) })); patch.position.set(-0.235, 0.56, 0.08); patch.rotation.y = -Math.PI / 2; g.add(patch);
+    const tag = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.03, 0.01), mat(0x222222, 0.5)); tag.position.set(0.1, 0.55, -0.045); g.add(tag);
+    for (const sx of [-0.17, 0.17]) { const rk = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.015, 0.14), mat(0x2f3328)); rk.position.set(sx, 0.7, 0.1); g.add(rk); const star = new THREE.Mesh(new THREE.OctahedronGeometry(0.012), new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.8, roughness: 0.3 })); star.position.set(sx, 0.712, 0.07); g.add(star); }
+    for (const sx of [-0.15, 0.15]) {
+      const up = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.052, 0.3, 10), suit); up.position.set(sx * 1.55, 0.52, 0.06); up.rotation.x = 0.5; g.add(up);
+      const fo = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.042, 0.28, 10), suit); fo.position.set(sx * 1.55, 0.38, -0.13); fo.rotation.x = 1.35; g.add(fo);
+      const glove = new THREE.Mesh(new THREE.SphereGeometry(0.05, 10, 8), mat(kind === 'chasse' ? 0x6b5a45 : 0x2a2a28, 0.7)); glove.scale.set(0.85, 0.65, 1.25); glove.position.set(sx * 1.55, 0.36, -0.29); g.add(glove);
+      const th = new THREE.Mesh(new THREE.CylinderGeometry(0.085, 0.072, 0.42, 10), kind === 'chasse' ? mat(0x3d4334, 0.9) : suit); th.rotation.x = Math.PI / 2; th.position.set(sx * 0.62, 0.1, -0.12); g.add(th); // pantalon anti-G
+      const pk = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.1, 0.12), dark); pk.position.set(sx * 0.62 + sx * 0.07, 0.12, -0.14); g.add(pk);
+      const sn = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.055, 0.4, 10), suit); sn.position.set(sx * 0.62, -0.12, -0.33); g.add(sn);
+      const boot = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.12, 0.26), mat(0x141414, 0.5)); boot.position.set(sx * 0.62, -0.32, -0.38); g.add(boot);
+    }
+    const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.058, 0.064, 0.1, 10), skin); neck.position.set(0, 0.75, 0.1); g.add(neck);
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.108, 32, 20), new THREE.MeshStandardMaterial({ map: faceTex(sk, '#0b0806'), roughness: 0.55 })); head.scale.set(0.95, 1.12, 1); head.position.set(0, 0.89, 0.1); g.add(head);
+    // barbe courte et moustache
+    const beard = new THREE.Mesh(new THREE.SphereGeometry(0.1, 20, 12, Math.PI * 0.15, Math.PI * 0.7, Math.PI * 0.55, Math.PI * 0.3), mat(0x0d0907, 0.95)); beard.rotation.y = Math.PI; beard.scale.set(0.97, 1.15, 1.04); beard.position.set(0, 0.885, 0.1); g.add(beard);
+    const mus = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.008, 0.01), mat(0x0d0907, 0.95)); mus.position.set(0, 0.852, 0.0); g.add(mus);
+    if (kind === 'chasse') {
+      // casque de pilote de chasse + visière teintée relevée + masque à oxygène décroché sur le côté
+      const helm = new THREE.Mesh(new THREE.SphereGeometry(0.135, 26, 16, 0, Math.PI * 2, 0, Math.PI * 0.62), mat(0x5b6150, 0.45)); helm.position.set(0, 0.9, 0.11); g.add(helm);
+      const visor = new THREE.Mesh(new THREE.SphereGeometry(0.139, 24, 10, Math.PI * 0.62, Math.PI * 0.76, Math.PI * 0.12, Math.PI * 0.2), new THREE.MeshStandardMaterial({ color: 0x1a1508, metalness: 0.9, roughness: 0.08 })); visor.position.set(0, 0.9, 0.11); g.add(visor);
+      const rail = new THREE.Mesh(new THREE.TorusGeometry(0.137, 0.006, 6, 24, Math.PI), metal); rail.rotation.x = -0.3; rail.position.set(0, 0.92, 0.11); g.add(rail);
+      for (const sx of [-1, 1]) { const ec = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.03, 14), mat(0x4e5445, 0.5)); ec.rotation.z = Math.PI / 2; ec.position.set(sx * 0.125, 0.86, 0.11); g.add(ec); }
+      const mask = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.08, 12), mat(0x6e7266, 0.5)); mask.rotation.set(0, 0, Math.PI / 2.2); mask.position.set(0.12, 0.82, 0.04); g.add(mask);
+      const hose = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.012, 6, 16, Math.PI * 0.8), mat(0x222222, 0.6)); hose.rotation.set(0, Math.PI / 2, 0.3); hose.position.set(0.13, 0.7, 0.0); g.add(hose);
+    } else {
+      // transport militaire : béret / calot + casque radio
+      const cap = new THREE.Mesh(new THREE.SphereGeometry(0.112, 20, 10, 0, Math.PI * 2, 0, Math.PI * 0.4), mat(0x3d4a2e, 0.85)); cap.scale.set(1.05, 0.7, 1.1); cap.rotation.z = -0.15; cap.position.set(0.01, 0.95, 0.1); g.add(cap);
+      const badge = new THREE.Mesh(new THREE.CircleGeometry(0.014, 12), new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.8 })); badge.position.set(-0.05, 0.965, 0.005); g.add(badge);
+      const hs = new THREE.Mesh(new THREE.TorusGeometry(0.115, 0.01, 6, 20, Math.PI), mat(0x222222, 0.4)); hs.position.set(0, 0.91, 0.1); g.add(hs);
+      for (const sx of [-1, 1]) { const cup = new THREE.Mesh(new THREE.CylinderGeometry(0.042, 0.042, 0.035, 12), mat(0x1a1a1a, 0.4)); cup.rotation.z = Math.PI / 2; cup.position.set(sx * 0.115, 0.88, 0.1); g.add(cup); }
+      const mic = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, 0.12, 6), mat(0x222222)); mic.rotation.set(0, 0.6, Math.PI / 2.4); mic.position.set(-0.07, 0.83, 0.03); g.add(mic);
+    }
+    g.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+    return g;
+  }
   // passagers en cabine (instanciés) : corps assis + tête au visage peint
   function cabinPeople(n, seed) {
     const body = new THREE.InstancedMesh(new THREE.BoxGeometry(0.42, 0.55, 0.26), new THREE.MeshStandardMaterial({ roughness: 0.85 }), n);
@@ -2356,7 +2405,7 @@ const Humans = (function () {
       const h = heads[Math.floor(r * 97) % heads.length]; const hm = new THREE.Matrix4().compose(new THREE.Vector3(x, y + 0.72, z - 0.02), new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), (r - 0.5) * 0.5), new THREE.Vector3(0.92, 1.15, 1)); h.setMatrixAt(h.count++, hm);
     } };
   }
-  return { faceTex, pilot, cabinPeople };
+  return { faceTex, pilot, warPilot, cabinPeople };
 })();
 
 // ---- 06_airports.js ----
@@ -3522,7 +3571,14 @@ const AircraftModel = (function () {
     { name: 'MÉDITERRANÉE', top: '#ffffff', belly: '#0077b6', stripes: ['#0077b6', '#90e0ef'], text: '#0077b6', tail: ['#0077b6', '#90e0ef'], logo: 'M', flag: ['#0077b6', '#fff', '#90e0ef'] }
   ];
   function nationalLivery(cc, small) { const C = COUNTRIES[cc]; const c = C.c.filter(x => x !== '#ffffff'); const full = C.c.length >= 3 ? C.c.slice(0, 3) : [C.c[0], C.c[1], C.c[0]]; return { name: C.nat.toUpperCase(), reg: regOf(cc, 99), top: full[0], full, belly: '#2a2d33', stripes: ['#ffffff'], text: '#ffffff', textStroke: '#111', big: true, cc, small: !!small }; }
-  function cityLivery(a, small) { const C = COUNTRIES[a.cc]; const inv = C.c.slice().reverse(); const nm = (a.city ? a.city.n : a.name).toUpperCase(); return { name: nm, reg: regOf(a.cc, a.id.charCodeAt(0)), top: '#15181d', belly: '#0c0e12', stripes: inv, text: inv[0] === '#ffffff' ? '#ffffff' : inv[0], tail: inv, logo: a.id, logoCol: '#fff', big: true, flag: inv, small: !!small }; }
+  function cityLivery(a, small) {
+    // chaque ville a SES couleurs (palette propre + couleurs du pays), plus jamais tout noir
+    const C = COUNTRIES[a.cc]; const nm = (a.city ? a.city.n : a.name).toUpperCase();
+    const PAL = [['#f7f5ef', '#0f3b6f', '#d4af37'], ['#ffffff', '#b3122e', '#1d1d1d'], ['#f2efe6', '#0b6e4f', '#e0b23a'], ['#eef3f8', '#5a2d82', '#c9a227'], ['#fbfaf6', '#c4541a', '#123c69'], ['#f5f7fa', '#006d77', '#e29578'], ['#fffdf7', '#7a1f2b', '#c8a96b'], ['#f4f6f8', '#1b998b', '#2d3047'], ['#ffffff', '#e4572e', '#29335c']];
+    let h = 0; for (const ch of a.id) h = (h * 31 + ch.charCodeAt(0)) >>> 0; const P = PAL[h % PAL.length]; const nat = C.c.filter(x => x.toLowerCase() !== '#ffffff');
+    const stripes = [P[1], nat[0] || P[2], P[2]];
+    return { name: nm, reg: regOf(a.cc, a.id.charCodeAt(0)), top: P[0], belly: P[1], stripes, text: P[1], tail: [P[1], nat[0] || P[2], nat[1] || P[2]], logo: a.id, logoCol: P[2], big: true, flag: C.c, wing: '#c9ced4', engine: P[1], full: [P[0], P[0], P[1]], small: !!small };
+  }
   function livery(key) {
     if (LIVERIES[key]) return LIVERIES[key];
     let L; const [t, a, b] = key.split(':');
@@ -3819,7 +3875,7 @@ const AircraftModel = (function () {
       if (D.tail === 'conv' || D.tail === 'fin' || D.tail === 'triple') { fin(fx, finY0, finH, frc, ftc); if (D.tail !== 'fin') stab(R * 0.45, stabZ, stabSpan, src, stc); }
       if (D.tail === 'triple') for (const sd of sides) fin(fx + sd * stabSpan, R * 0.45 - finH * 0.25, finH * 0.65, src * 0.8, src * 0.4, stabZ - finRootZ);
       if (D.tail === 'T') { const b = fin(fx, finY0, finH, frc, frc * 0.6); stab(b.tip[1] - 0.2, b.tip[2] + frc * 0.05, stabSpan * 0.85, frc * 0.55, frc * 0.25, -2 * DEG); }
-      if (D.tail === 'twin') { stab(R * 0.5, stabZ, stabSpan, src, stc, typeId === 'geant' ? 9 * DEG : 4 * DEG); const ty = R * 0.5 + stabSpan * Math.tan((typeId === 'geant' ? 9 : 4) * DEG); for (const sd of sides) fin(fx + sd * stabSpan, ty - finH * 0.3, finH * 0.85, src * 1.25, src * 0.8, stabZ - finRootZ + stabSpan * Math.tan(32 * DEG) - src * 0.3); }
+      if (D.tail === 'twin') { stab(R * 0.5, stabZ, stabSpan, src, stc, (typeId === 'geant' || (AC_TYPES[typeId] || {}).shapeOf === 'geant') ? 9 * DEG : 4 * DEG); const ty = R * 0.5 + stabSpan * Math.tan(((typeId === 'geant' || (AC_TYPES[typeId] || {}).shapeOf === 'geant') ? 9 : 4) * DEG); for (const sd of sides) fin(fx + sd * stabSpan, ty - finH * 0.3, finH * 0.85, src * 1.25, src * 0.8, stabZ - finRootZ + stabSpan * Math.tan(32 * DEG) - src * 0.3); }
       if (D.tail === 'V') { for (const sd of sides) fin(fx + sd * R * 0.3, R * 0.5, finH * 1.05, frc * 0.9, ftc, 0, -sd * 38 * DEG); }
       if (D.tail === 'cant') { for (const sd of sides) fin(fx + sd * (sh.body === 'wing' ? D.b * 0.12 : R * 0.7), sh.body === 'wing' ? D.R * 0.5 : R * 0.4, finH * (sh.body === 'wing' ? 0.6 : 0.9), frc * 0.8, ftc, sh.body === 'wing' ? -L * 0.15 : 0, -sd * 22 * DEG); }
       if (D.tail === 'shark') {
@@ -4063,8 +4119,12 @@ const AircraftModel = (function () {
     for (const u of [0.25, 0.75]) { g.fillStyle = '#c9c8c2'; g.beginPath(); g.ellipse(u * 1024, 32, 20, 19, 0, 0, 7); g.fill(); g.fillStyle = '#7fb2e0'; g.beginPath(); g.ellipse(u * 1024, 32, 15, 14, 0, 0, 7); g.fill(); g.fillStyle = 'rgba(255,255,255,0.4)'; g.fillRect(u * 1024 - 8, 22, 5, 10); }
     const t = canvasTex(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; return t; }
   // point d'entrée : (type, livrée)
+  const CREW = { role: 'ligne', cc: 'cm' };
+  const FIGHTERS = ['chasseur', 'aurore', 'foudre', 'spectre'], MILITARY = ['militaire', 'forteresse', 'dragon'];
   function buildType(typeId, livKey, staticOnly) {
-    typeId = AC_TYPES[typeId] ? typeId : 'A320'; const liv = livery(livKey || defaultLivery(typeId));
+    typeId = AC_TYPES[typeId] ? typeId : 'A320';
+    { const sid = (AC_TYPES[typeId] && AC_TYPES[typeId].shapeOf) || typeId; CREW.role = FIGHTERS.includes(sid) ? 'chasse' : MILITARY.includes(sid) ? 'militaire' : 'ligne'; }
+    CREW.cc = (AC_TYPES[typeId] && AC_TYPES[typeId].cc) || (String(livKey || '').match(/^(?:nat|al):([a-z]{2})/) || [])[1] || (typeof Settings !== 'undefined' && Settings.data.airport && typeof AIRPORTS !== 'undefined' ? ((AIRPORTS.find(a => a.id === Settings.data.airport) || {}).cc || 'cm') : 'cm'); const liv = livery(livKey || defaultLivery(typeId));
     if (typeId === 'A320') { const r = build(liv, staticOnly); r.userData.typeId = 'A320'; r.userData.parts.rudders = [r.userData.parts.rudder]; return r; }
     const g = buildGen(typeId, liv, staticOnly); try { const D = acLayout(typeId); g.userData.D = D; g.userData.span = D.span || AC_TYPES[typeId].span; } catch (e) { } return g;
   }
@@ -4203,8 +4263,10 @@ const AircraftModel = (function () {
     const head = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.18, 0.1), seatM); head.position.set(0, 0.88, 0.3); seat.add(head);
     cp.add(seat);
     // commandant (4 galons, visible quand on n'est pas à sa place) et copilote (3 galons), en uniforme
-    { const fo = Humans.pilot(3, 2); fo.position.set(0.55, -0.31, -15.32); cp.add(fo); P.copilot = fo;
-      const cpt = Humans.pilot(4, 5); cpt.position.set(-0.55, -0.31, -15.32); cp.add(cpt); P.captain = cpt;
+    // l'équipage dépend de l'avion : commandant de bord en uniforme (ligne), pilotes militaires, pilote de chasse
+    const R = CREW.role, AFR = ['cm', 'ci', 'sn', 'td', 'cd', 'ng', 'ga'].includes(CREW.cc), mk = (st, sd) => R === 'ligne' ? Humans.pilot(st, AFR ? (sd === 5 ? 1 : 0) : sd) : Humans.warPilot(R, sd, CREW.cc);
+    { const fo = mk(3, 2); fo.position.set(0.55, -0.31, -15.32); cp.add(fo); P.copilot = fo; if (R === 'chasse') fo.visible = false; // chasseur : un seul pilote
+      const cpt = mk(4, 5); cpt.position.set(-0.55, -0.31, -15.32); cp.add(cpt); P.captain = cpt;
       const seat2 = seat.clone(); seat2.position.x = -0.55; cp.add(seat2); }
     cp.traverse(o => { if (o.isMesh && o !== shell) { o.receiveShadow = true; o.castShadow = true; } });
     // éclairage d'ambiance intérieur
@@ -4327,6 +4389,7 @@ const AC_ROWS = [
   ['dragon', 'DRAGON · avion-dragon cracheur de feu', '★★★ Monstres absolus', 133.7, 154.2, 36.8, 8, 2000, 3900, 4000, 150, 165, 150, 39000, 0.84, 0.88, 25, 0.34, 0.44, 850, 17, 5, 'dragon', { sweep: 40, special: 'dragon', bogies: 4 }],
   ['forteresse', 'FORTERESSE · porte-avions volant', '★★★ Monstres absolus', 170, 217.3, 45.2, 12, 2600, 5000, 5200, 150, 165, 150, 33000, 0.78, 0.82, 25, 0.3, 0.4, 1100, 20, 7, 'forteresse', { sweep: 28, special: 'forteresse', wx: 2.1, ry: 0.75, R: 0.05, bogies: 5 }],
   ['megalodon', 'MÉGALODON · requin géant de 175 m', '★★★ Monstres absolus', 175, 177.9, 61.7, 10, 2400, 4600, 4600, 150, 165, 150, 37000, 0.82, 0.86, 25, 0.32, 0.42, 1000, 19, 6, 'megalodon', { sweep: 36, special: 'megalodon', R: 0.075, dihedral: 9, tail: 'shark', bogies: 4, smallEng: 1 }],
+  ['mammouth', 'MAMMOUTH · le plus monstrueux du monde (420 m, 24 réacteurs)', '★★★ Monstres absolus', 420, 480, 96, 24, 5200, 10400, 14000, 150, 165, 150, 37000, 0.8, 0.85, 25, 0.24, 0.32, 2600, 40, 12, 'or', { sweep: 35, fus: 3, decks: 4, R: 0.035, canard: 1, hump: [0.05, 0.9, 0.3], bogies: 8, winglet: 1 }],
   ['aurore', 'AURORE · supersonique, aile delta (Mach 2,2)', '★ Le plus magnifique', 64.7, 34, 15.5, 4, 160, 900, 420, 160, 175, 160, 60000, 2.2, 2.6, 45, 1.2, 1.1, 95, 3.2, 2.5, 'aurore', { body: 'tube', R: 0.025, delta: 1, sweep: 58, taper: 0.06, eng: 'box', tail: 'fin', noseLen: 9, wingZ: 0.05 }],
   ['foudre', 'FOUDRE · hypersonique (Mach 3,5)', '★ Le plus magnifique', 47.6, 19.5, 8.6, 2, 60, 1100, 210, 170, 185, 170, 85000, 3.5, 4.2, 80, 3.5, 2.2, 40, 3.5, 3, 'foudre', { R: 0.03, delta: 1, sweep: 68, taper: 0.04, eng: 'ram', tail: 'cant', canard: 1, noseLen: 9, wingZ: 0.08, canopy: 1 }],
   ['spectre', 'SPECTRE · aile volante furtive', '★ Le plus magnifique', 49, 111.1, 14.9, 4, 170, 600, 480, 140, 150, 140, 50000, 0.85, 0.95, 45, 0.9, 0.9, 75, 2.4, 6, 'spectre', { body: 'wing', sweep: 34, eng: 'buried', tail: 'none', bogies: 1 }],
@@ -4373,21 +4436,21 @@ const AC_TYPES = {}; const AC_ORDER = [];
   // avion national de CHAQUE pays : sa grandeur dépend de la superficie du pays et de son développement
   const SIZE = { us: 1.8, cn: 1.8, ru: 2.0, ca: 1.8, br: 1.6, fr: 1.0, de: 0.95, gb: 0.9, jp: 0.95, be: 0.4, ae: 0.55, ma: 0.9, ng: 1.2, cm: 1.0, ci: 0.8, sn: 0.7, ga: 0.6, cd: 1.5, td: 1.2, ar: 1.4 };
   const spec = {}; NAT_ROWS.forEach(n => spec[n[0]] = n); const tails = ['T', 'twin', 'V', 'conv']; let ti = 0;
+  // CHAQUE PAYS reçoit un avion de FORME différente, choisi parmi les avions existants selon sa puissance et sa grandeur réelles
+  // (le plus puissant = le plus imposant), avec ses couleurs nationales
+  const NAT_SHAPE = { us: 'mammouth', cn: 'galaxie', ru: 'omega', jp: 'hyperion', de: 'leviathan', gb: 'colosse', fr: 'titan', ca: 'stratos', br: 'empereur', ae: 'baleine', ar: 'forteresse',
+    ng: 'super', be: 'b777x', ma: 'jumbo', cm: 'geant', ci: 'gros', sn: 'militaire', cd: 'connie', ga: 'atr', td: 'kingair' };
   for (const cc in COUNTRIES) {
-    const C = COUNTRIES[cc], n = spec[cc], dv = devOf(cc), sz = SIZE[cc] || 1;
-    const MINL = { cm: 68 }, ENG = { cm: 6 };
-    const L = Math.round(Math.min(160, Math.max(MINL[cc] || 40, 38 * Math.pow(dv, 1.7) * (0.75 + 0.5 * sz))) * 10) / 10;
-    const k = n ? L / n[2] : 1, span = n ? n[3] * k : L * 1.15, H = n ? n[4] * k : L * 0.26;
-    const nEng = ENG[cc] || (L < 50 ? 2 : L < 70 ? 4 : L < 100 ? 6 : 8);
-    const perf = L < 50 ? 'A321' : L < 60 ? 'gros' : L < 75 ? 'jumbo' : L < 95 ? 'super' : L < 120 ? 'titan' : L < 140 ? 'colosse' : 'leviathan';
-    const base = byId[perf];
-    add(Object.assign({}, base, { id: 'nat_' + cc, name: (n ? n[1] : C.n.toUpperCase() + ' ' + C.nat) + ' · avion national (' + Math.round(L) + ' m)', group: '🏳 Avions nationaux', L, span: Math.round(span * 10) / 10, H: Math.round(H * 10) / 10, nEng, liv: 'nat:' + cc, cc, armor: 1.6, armed: 1, perf, shape: { sweep: n ? n[5] : 24 + Math.round(dv * 9), tail: n ? n[7] : tails[ti++ % 4], bogies: nEng >= 6 ? 4 : 2, winglet: 1, R: 0.05 } }));
+    const C = COUNTRIES[cc], n = spec[cc]; const shp = NAT_SHAPE[cc] || 'gros'; const base = byId[shp] || byId.gros;
+    add(Object.assign({}, base, { id: 'nat_' + cc, name: (n ? n[1] : C.n.toUpperCase() + ' ' + C.nat) + ' · avion national (' + Math.round(base.L) + ' m, ' + base.nEng + ' réacteurs)', group: '🏳 Avions nationaux', liv: 'nat:' + cc, cc, armor: Math.max(base.armor || 1, 1.6), armed: 1, perf: shp, shapeOf: shp, shape: Object.assign({}, base.shape) }));
   }
-  ['dragon', 'forteresse', 'megalodon', 'aurore', 'foudre', 'spectre', 'phenix', 'b777x', 'phenom', 'premier', 'kingair', 'alice', 'atr', 'connie', 'jet', 'militaire', 'chasseur'].forEach(id => add(byId[id]));
+  ['dragon', 'forteresse', 'megalodon', 'mammouth', 'aurore', 'foudre', 'spectre', 'phenix', 'b777x', 'phenom', 'premier', 'kingair', 'alice', 'atr', 'connie', 'jet', 'militaire', 'chasseur'].forEach(id => add(byId[id]));
   for (const h of HELI_ROWS) add({ id: h[0], name: h[1], group: '🚁 Hélicoptères', L: h[2], span: h[3], H: h[4], nEng: 2, mass: h[5], thrust: h[5] * 14, S: 20, v1: 0, vr: 0, vapp: 60, ceil: 19000, cruise: 0.24, mmo: 0.3, bank: 30, rollAg: 1, pitchAg: 1, fuelMax: 2, ff: 0.15, armor: h[0] === 'heli-attaque' ? 2 : 1.2, liv: h[6], heli: 1, shape: { heli: h[0] } });
+  // avions des grandes villes : chacun sa FORME (avions existants), en grand, aux couleurs de la ville
+  const CITY_SHAPE = { NSI: 'titan', DLA: 'colosse', KBI: 'baleine', CDG: 'super', ABJ: 'jumbo', JFK: 'hyperion', BRU: 'b777x', FIH: 'geant', DSS: 'gros', SVO: 'leviathan', NDJ: 'stratos', YYZ: 'empereur', PEK: 'omega', IAD: 'forteresse', LED: 'megalodon', PVG: 'galaxie', LYS: 'dragon', YUL: 'connie' };
   for (const c of CITYPLANE_ROWS) {
-    const base = byId[c[5]]; const s = c[1];
-    add(Object.assign({}, base, { id: 'apl_' + c[0], name: 'AVION DE ' + c[0], group: '🏙 Avions des grandes villes', L: 39.6 * s, span: 53.1 * s, H: 10.58 * s, nEng: c[2], liv: 'city:' + c[0], ap: c[0], armor: 2, armed: 1, perf: c[5], shape: { sweep: c[3], tail: c[4], bogies: c[2] >= 8 ? 4 : 2, R: 0.05, winglet: 1 } }));
+    const shp = CITY_SHAPE[c[0]] || c[5]; const base = byId[shp] || byId.gros; const k = base.L < 90 ? 1.25 : 1.05;
+    add(Object.assign({}, base, { id: 'apl_' + c[0], name: 'AVION DE ' + c[0], group: '🏙 Avions des grandes villes', L: Math.round(base.L * k * 10) / 10, span: Math.round(base.span * k * 10) / 10, H: Math.round(base.H * k * 10) / 10, liv: 'city:' + c[0], ap: c[0], armor: Math.max(2, base.armor || 2), armed: 1, perf: shp, shapeOf: shp, shape: Object.assign({}, base.shape) }));
   }
 })();
 function acName(id) { const t = AC_TYPES[id]; if (!t) return id; if (t.ap) { const a = airportById(t.ap); return 'AVION DE ' + (a && a.city ? a.city.n : a ? a.name : t.ap).toUpperCase(); } return t.name; }
@@ -5457,7 +5520,7 @@ const UI = (function () {
     // changer d'avion = changement immédiat de la FORME (et de la livrée)
     selType.onchange = () => { info(); Settings.data.type = selType.value; Settings.data.livery = selLiv.value.startsWith('type:') ? '' : selLiv.value; Settings.save(); handlers.take(selType.value, Settings.data.livery); };
     selLiv.onchange = () => { let v = selLiv.value; if (v.startsWith('type:')) { selType.value = v.slice(5); v = ''; info(); } Settings.data.type = selType.value; Settings.data.livery = v; Settings.save(); handlers.take(selType.value, v); };
-    { const ogT = document.createElement('optgroup'); ogT.label = '▸ Changer la FORME de l\'avion (66 appareils)'; AC_ORDER.forEach((id, i) => addOpt(ogT, 'type:' + id, (i + 1) + '. ' + acName(id))); selLiv.appendChild(ogT); }
+    { const ogT = document.createElement('optgroup'); ogT.label = '▸ Changer la FORME de l\'avion (' + AC_ORDER.length + ' appareils)'; AC_ORDER.forEach((id, i) => addOpt(ogT, 'type:' + id, (i + 1) + '. ' + acName(id))); selLiv.appendChild(ogT); }
     // destination (route sur le radar) et langue de la radio
     const selDest = $('selDest'); for (const cc in COUNTRIES) { const L = AIRPORTS.filter(a => a.cc === cc); if (!L.length) continue; const og = document.createElement('optgroup'); og.label = COUNTRIES[cc].n; L.forEach(a => addOpt(og, a.id, a.id + ' — ' + a.name)); selDest.appendChild(og); }
     selDest.value = Settings.data.dest || ''; selDest.onchange = () => { Settings.data.dest = selDest.value; Settings.save(); toast('Destination : ' + airportById(selDest.value).name + ' — suivez la ligne rose du radar (Maj+N : pilote auto vers la destination).', 5000); };
@@ -7107,17 +7170,19 @@ const Extra = (function () {
     inp.onkeydown = e => { e.stopPropagation(); if (e.key === 'Enter') { const t = inp.value.trim(); if (t) { if (Net.online) Net.send({ t: 'chat', text: t }); chatShow(Settings.data.name + ' (moi)', t); if (!Net.online) T('Hors ligne : le message n\'est visible que par vous. Jouez en multijoueur pour parler aux autres.'); } box.classList.add('hidden'); inp.blur(); } if (e.key === 'Escape') { box.classList.add('hidden'); inp.blur(); } };
   }
   let rec = null, micStream = null, talking = false;
+  const soloQ = []; function soloPlay() { if (!soloQ.length) return; T('🔊 Voici votre voix (test du micro).', 2500); while (soloQ.length) voicePlay(soloQ.shift()); }
   async function talk(on) {
     if (on === talking) return; talking = on; const ind = document.getElementById('micInd');
     if (!on) { if (rec && rec.state !== 'inactive') rec.stop(); if (ind) ind.classList.add('hidden'); return; }
-    if (!Net.online) { T('Le micro sert à parler aux autres joueurs : jouez en multijoueur (en ligne).'); talking = false; return; }
+    // (le test solo rejoue la voix enregistrée dès que la touche 9 est relâchée)
+    const solo = !Net.online || !Net.players.size; // seul : TEST du micro, on réentend sa voix quand on relâche 9
     if (!navigator.mediaDevices || !window.MediaRecorder) { talking = false; return T('Ce navigateur ne permet pas le micro. Utilisez Chrome ou Edge, sur le site en https.', 5000); }
     try {
       if (!micStream) { const first = true; micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } }); if (!talking) { T('🎙 Micro autorisé ! Maintenant MAINTENEZ la touche 9 pendant que vous parlez.', 5000); return; } }
       if (!talking) return; if (ind) ind.classList.remove('hidden');
-      if (!Net.players.size) T('🎙 Vous êtes seul dans le salon : vous allez entendre votre propre voix (test du micro).', 3500);
+      if (solo) { soloQ.length = 0; T('🎙 TEST DU MICRO : parlez en maintenant 9, puis relâchez pour vous réentendre.', 3500); }
       const loop = () => { if (!talking) return; rec = new MediaRecorder(micStream, { mimeType: MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : '', audioBitsPerSecond: 12000 }); const parts = [];
-        rec.ondataavailable = e => parts.push(e.data); rec.onstop = async () => { const b = new Blob(parts, { type: rec.mimeType || 'audio/webm' }); if (b.size > 200 && b.size < 40000) { const r = new FileReader(); r.onload = () => { Net.send({ t: 'v', d: r.result, name: Settings.data.name }); if (!Net.players.size) voicePlay({ d: r.result }); }; r.readAsDataURL(b); } loop(); };
+        rec.ondataavailable = e => parts.push(e.data); rec.onstop = async () => { const b = new Blob(parts, { type: rec.mimeType || 'audio/webm' }); if (b.size > 200 && b.size < 40000) { const r = new FileReader(); r.onload = () => { if (solo) soloQ.push({ d: r.result }); else Net.send({ t: 'v', d: r.result, name: Settings.data.name }); if (solo && !talking) soloPlay(); }; r.readAsDataURL(b); } loop(); };
         rec.start(); setTimeout(() => rec.state !== 'inactive' && rec.stop(), 1500); };
       loop();
     } catch (e) { talking = false; T('Micro refusé ou indisponible. Autorisez le micro dans le navigateur (icône 🔒 à gauche de l\'adresse).', 5000); }
