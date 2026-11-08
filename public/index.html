@@ -381,7 +381,7 @@ body.incockpit.autoclean #pfd,body.incockpit.autoclean #status,body.incockpit.au
 <script>
 // ---- 00_util.js ----
 // ===== Outils communs =====
-const VERSION = 'Version 33 · 08/11';
+const VERSION = 'Version 34 · 08/11';
 const DEG = Math.PI / 180, RAD = 180 / Math.PI;
 const KT = 0.514444, FT = 0.3048;
 const clamp = (x, a, b) => x < a ? a : (x > b ? b : x);
@@ -3582,8 +3582,8 @@ const AircraftModel = (function () {
   function livery(key) {
     if (LIVERIES[key]) return LIVERIES[key];
     let L; const [t, a, b] = key.split(':');
-    if (NAMED_LIVERIES[key]) { const n = NAMED_LIVERIES[key]; const full = !['sanaga', 'mungo', 'kivu', 'sablon', 'essai', 'sahel', 'kribi', 'seine', 'lagune', 'atlas', 'belge', 'tricolore', 'constructeur', 'lion', 'ocean', 'rougenoir', 'electrique', 'acajou', 'samu'].includes(key);
-      return (LIVERIES[key] = { name: n[6], reg: regOf('cm', key.length * 7 + key.charCodeAt(0)), top: n[1], belly: n[2], stripes: n[3], text: n[4], tail: n[5], flag: n[5], logo: n[6] ? n[6][0] : '', logoCol: n[4], wing: full ? n[1] : null, engine: full ? n[2] : null, big: full, small: true, matte: ['armee', 'gris', 'desert', 'noir', 'spectre'].includes(key) }); }
+    if (NAMED_LIVERIES[key]) { const n = NAMED_LIVERIES[key]; const full = !['marbre', 'glacier', 'perle', 'royal', 'sanaga', 'mungo', 'kivu', 'sablon', 'essai', 'sahel', 'kribi', 'seine', 'lagune', 'atlas', 'belge', 'tricolore', 'constructeur', 'lion', 'ocean', 'rougenoir', 'electrique', 'acajou', 'samu'].includes(key);
+      return (LIVERIES[key] = { name: n[6], reg: regOf('cm', key.length * 7 + key.charCodeAt(0)), top: n[1], belly: n[2], stripes: n[3], text: n[4], tail: n[5], flag: n[5], logo: n[6] ? n[6][0] : '', logoCol: n[4], wing: full ? n[1] : null, engine: full ? n[2] : null, big: full, small: true, matte: ['armee', 'gris', 'desert', 'noir', 'spectre', 'camouflage', 'arctique', 'carbone'].includes(key) }); }
     if (t === 'al') L = airlineLivery(a, +b); else if (t === 'x') L = Object.assign({ reg: 'X-' + b, small: true }, EXTRA_AIRLINES[+a % EXTRA_AIRLINES.length]);
     else if (t === 'nat') L = nationalLivery(a, b === 's'); else if (t === 'city') L = cityLivery(airportById(a), b === 's'); else L = LIVERY_SANAGA;
     return (LIVERIES[key] = L);
@@ -4120,7 +4120,7 @@ const AircraftModel = (function () {
     const t = canvasTex(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; return t; }
   // point d'entrée : (type, livrée)
   const CREW = { role: 'ligne', cc: 'cm' };
-  const FIGHTERS = ['chasseur', 'aurore', 'foudre', 'spectre'], MILITARY = ['militaire', 'forteresse', 'dragon'];
+  const FIGHTERS = ['chasseur', 'aurore', 'foudre', 'spectre'], MILITARY = ['militaire', 'forteresse', 'dragon', 'goliath'];
   function buildType(typeId, livKey, staticOnly) {
     typeId = AC_TYPES[typeId] ? typeId : 'A320';
     { const sid = (AC_TYPES[typeId] && AC_TYPES[typeId].shapeOf) || typeId; CREW.role = FIGHTERS.includes(sid) ? 'chasse' : MILITARY.includes(sid) ? 'militaire' : 'ligne'; }
@@ -4390,6 +4390,8 @@ const AC_ROWS = [
   ['forteresse', 'FORTERESSE · porte-avions volant', '★★★ Monstres absolus', 170, 217.3, 45.2, 12, 2600, 5000, 5200, 150, 165, 150, 33000, 0.78, 0.82, 25, 0.3, 0.4, 1100, 20, 7, 'forteresse', { sweep: 28, special: 'forteresse', wx: 2.1, ry: 0.75, R: 0.05, bogies: 5 }],
   ['megalodon', 'MÉGALODON · requin géant de 175 m', '★★★ Monstres absolus', 175, 177.9, 61.7, 10, 2400, 4600, 4600, 150, 165, 150, 37000, 0.82, 0.86, 25, 0.32, 0.42, 1000, 19, 6, 'megalodon', { sweep: 36, special: 'megalodon', R: 0.075, dihedral: 9, tail: 'shark', bogies: 4, smallEng: 1 }],
   ['mammouth', 'MAMMOUTH · le plus monstrueux du monde (420 m, 24 réacteurs)', '★★★ Monstres absolus', 420, 480, 96, 24, 5200, 10400, 14000, 150, 165, 150, 37000, 0.8, 0.85, 25, 0.24, 0.32, 2600, 40, 12, 'or', { sweep: 35, fus: 3, decks: 4, R: 0.035, canard: 1, hump: [0.05, 0.9, 0.3], bogies: 8, winglet: 1 }],
+  ['souverain', 'SOUVERAIN · le plus grand du monde (500 m, un seul fuselage, roues géantes)', '★★★ Monstres absolus', 500, 560, 118, 28, 6400, 12800, 17000, 150, 165, 150, 37000, 0.8, 0.85, 25, 0.22, 0.3, 3200, 46, 14, 'empereur', { sweep: 34, decks: 5, R: 0.042, canard: 1, hump: [0.05, 0.9, 0.3], bogies: 10, winglet: 1, bigWheels: 1 }],
+  ['goliath', 'GOLIATH · transport de soldats GÉANT (1 200 soldats, 8 moteurs)', '★★★ Monstres absolus', 165, 172, 48, 8, 1300, 2600, 2800, 145, 150, 140, 35000, 0.74, 0.78, 30, 0.42, 0.5, 600, 14, 8, 'armee', { wing: 'high', tail: 'T', sweep: 25, sponsons: 1, R: 0.075, upsweep: 1, bogies: 6, bigWheels: 1 }],
   ['aurore', 'AURORE · supersonique, aile delta (Mach 2,2)', '★ Le plus magnifique', 64.7, 34, 15.5, 4, 160, 900, 420, 160, 175, 160, 60000, 2.2, 2.6, 45, 1.2, 1.1, 95, 3.2, 2.5, 'aurore', { body: 'tube', R: 0.025, delta: 1, sweep: 58, taper: 0.06, eng: 'box', tail: 'fin', noseLen: 9, wingZ: 0.05 }],
   ['foudre', 'FOUDRE · hypersonique (Mach 3,5)', '★ Le plus magnifique', 47.6, 19.5, 8.6, 2, 60, 1100, 210, 170, 185, 170, 85000, 3.5, 4.2, 80, 3.5, 2.2, 40, 3.5, 3, 'foudre', { R: 0.03, delta: 1, sweep: 68, taper: 0.04, eng: 'ram', tail: 'cant', canard: 1, noseLen: 9, wingZ: 0.08, canopy: 1 }],
   ['spectre', 'SPECTRE · aile volante furtive', '★ Le plus magnifique', 49, 111.1, 14.9, 4, 170, 600, 480, 140, 150, 140, 50000, 0.85, 0.95, 45, 0.9, 0.9, 75, 2.4, 6, 'spectre', { body: 'wing', sweep: 34, eng: 'buried', tail: 'none', bogies: 1 }],
@@ -4444,7 +4446,7 @@ const AC_TYPES = {}; const AC_ORDER = [];
     const C = COUNTRIES[cc], n = spec[cc]; const shp = NAT_SHAPE[cc] || 'gros'; const base = byId[shp] || byId.gros;
     add(Object.assign({}, base, { id: 'nat_' + cc, name: (n ? n[1] : C.n.toUpperCase() + ' ' + C.nat) + ' · avion national (' + Math.round(base.L) + ' m, ' + base.nEng + ' réacteurs)', group: '🏳 Avions nationaux', liv: 'nat:' + cc, cc, armor: Math.max(base.armor || 1, 1.6), armed: 1, perf: shp, shapeOf: shp, shape: Object.assign({}, base.shape) }));
   }
-  ['dragon', 'forteresse', 'megalodon', 'mammouth', 'aurore', 'foudre', 'spectre', 'phenix', 'b777x', 'phenom', 'premier', 'kingair', 'alice', 'atr', 'connie', 'jet', 'militaire', 'chasseur'].forEach(id => add(byId[id]));
+  ['dragon', 'forteresse', 'megalodon', 'mammouth', 'souverain', 'goliath', 'aurore', 'foudre', 'spectre', 'phenix', 'b777x', 'phenom', 'premier', 'kingair', 'alice', 'atr', 'connie', 'jet', 'militaire', 'chasseur'].forEach(id => add(byId[id]));
   for (const h of HELI_ROWS) add({ id: h[0], name: h[1], group: '🚁 Hélicoptères', L: h[2], span: h[3], H: h[4], nEng: 2, mass: h[5], thrust: h[5] * 14, S: 20, v1: 0, vr: 0, vapp: 60, ceil: 19000, cruise: 0.24, mmo: 0.3, bank: 30, rollAg: 1, pitchAg: 1, fuelMax: 2, ff: 0.15, armor: h[0] === 'heli-attaque' ? 2 : 1.2, liv: h[6], heli: 1, shape: { heli: h[0] } });
   // avions des grandes villes : chacun sa FORME (avions existants), en grand, aux couleurs de la ville
   const CITY_SHAPE = { NSI: 'titan', DLA: 'colosse', KBI: 'baleine', CDG: 'super', ABJ: 'jumbo', JFK: 'hyperion', BRU: 'b777x', FIH: 'geant', DSS: 'gros', SVO: 'leviathan', NDJ: 'stratos', YYZ: 'empereur', PEK: 'omega', IAD: 'forteresse', LED: 'megalodon', PVG: 'galaxie', LYS: 'dragon', YUL: 'connie' };
@@ -4470,7 +4472,7 @@ function acLayout(id) {
   D.gearH = T.heli ? 1.0 + D.R * 0.75 : sh.wing === 'high' ? D.R * 1.0 + 0.55 : D.R * 1.2 + (L > 30 ? 1.5 : 0.9);
   if (sh.body === 'wing') D.gearH = D.R * 1.1 + 2.2;
   if (id === 'chasseur') D.gearH = 2.0;
-  if (id === 'megalodon') D.gearH = D.R * 0.7 + 4;
+  if (id === 'megalodon' || T.shapeOf === 'megalodon') D.gearH = D.R * 1.25 + 4; // Mégalodon : train bien visible, roues avant comprises
   // aile
   D.wing = sh.wing || 'low'; D.sweep = (sh.sweep ?? 25) * DEG; D.taper = sh.taper ?? (sh.delta ? 0.08 : 0.26); D.dihedral = (sh.dihedral ?? (D.wing === 'high' ? -1 : 5)) * DEG;
   D.b = span / 2;
@@ -4521,6 +4523,7 @@ function acLayout(id) {
   if (id === 'chasseur') D.mainX = 1.6;
   D.wheelbase = D.mainZ - D.noseZ;
   D.wheelR = T.heli ? 0 : clamp(D.R * 0.36 + 0.08, 0.3, 2.0); // pneus proportionnés à l'avion (A320 ≈ 0,6 m de rayon)
+  if (!T.heli && (sh.bigWheels || id === 'megalodon' || T.shapeOf === 'megalodon')) D.wheelR = clamp(D.R * 0.5 + 0.3, 0.6, 4.5); // roues géantes
   D.bogies = sh.bogies || 1;
   // œil du pilote (même poste que l'A320, placé au nez)
   const noseShift = -L / 2 + 18.8 * Math.min(1, D.R / 1.98) * 0 - (-18.8);
@@ -4573,6 +4576,23 @@ function L2(D) { return D.L / 2; }
 
 // ---------- Livrées nommées (Partie 4) : plus de 60 au total avec les compagnies et les pays ----------
 const NAMED_LIVERIES = {
+  // nouvelles couleurs à choisir pour tous les avions
+  marbre: ['Blanc marbre · or rose', '#f7f5f2', '#e3d9cf', ['#b76e79', '#d4af37'], '#b76e79', ['#b76e79', '#d4af37'], 'MARBRE'],
+  ebene: ['Noir ébène · or', '#121212', '#0a0a0a', ['#d4af37', '#d4af37'], '#d4af37', ['#121212', '#d4af37'], 'ÉBÈNE'],
+  sahara: ['Sable du Sahara · terre cuite', '#e2c290', '#a0522d', ['#a0522d', '#6b3e1f'], '#6b3e1f', ['#a0522d', '#e2c290'], 'SAHARA'],
+  savane: ['Vert savane · ocre', '#6b8e23', '#c68e3f', ['#c68e3f', '#3b4d12'], '#ffffff', ['#6b8e23', '#c68e3f'], 'SAVANE'],
+  glacier: ['Blanc glacier · bleu glace', '#ffffff', '#cfe8f5', ['#7cc4e8', '#2b6c9e'], '#2b6c9e', ['#7cc4e8', '#2b6c9e'], 'GLACIER'],
+  volcan: ['Noir volcan · rouge lave', '#1e1b1b', '#3a1010', ['#ff3b1f', '#ff9a1f'], '#ff3b1f', ['#ff3b1f', '#ff9a1f'], 'VOLCAN'],
+  orchidee: ['Rose orchidée · violet', '#f2b5d4', '#6a1b5a', ['#6a1b5a', '#ffffff'], '#6a1b5a', ['#6a1b5a', '#f2b5d4'], 'ORCHIDÉE'],
+  menthe: ['Vert menthe · argent', '#98e2c6', '#4a8c74', ['#c0c0c0', '#4a8c74'], '#2f5d4d', ['#98e2c6', '#c0c0c0'], 'MENTHE'],
+  cuivre: ['Cuivre brillant · noir', '#b87333', '#2a1a10', ['#2a1a10', '#e8a87c'], '#2a1a10', ['#b87333', '#2a1a10'], 'CUIVRE'],
+  royal: ['Bleu roi · blanc · or', '#1d3fbf', '#f4f4f4', ['#d4af37', '#ffffff'], '#ffffff', ['#1d3fbf', '#d4af37'], 'ROYAL'],
+  pourpre: ['Pourpre · argent', '#5b0f6b', '#2e0636', ['#c0c0c0'], '#e0e0e0', ['#5b0f6b', '#c0c0c0'], 'POURPRE'],
+  soleil: ['Jaune soleil · orange', '#ffd23f', '#ff7b00', ['#ff7b00', '#e63946'], '#7a2e00', ['#ffd23f', '#ff7b00'], 'SOLEIL'],
+  camouflage: ['Camouflage forêt', '#4b5d3a', '#2f3b25', ['#6b5a3a', '#2f3b25'], '#e8e8e8', ['#4b5d3a', '#6b5a3a'], ''],
+  arctique: ['Camouflage arctique', '#e9edf0', '#b7c0c7', ['#8a949c', '#5d666e'], '#2a2f33', ['#b7c0c7', '#5d666e'], ''],
+  perle: ['Blanc perle · gris perle', '#fbfbf8', '#e6e6e1', ['#a9a9a4'], '#6e6e69', ['#e6e6e1', '#a9a9a4'], 'PERLE'],
+  carbone: ['Carbone mat · vert fluo', '#26292c', '#1b1d1f', ['#39ff14'], '#39ff14', ['#26292c', '#39ff14'], 'CARBONE'],
   aurore: ['Blanc nacré · bleu nuit · or (Aurore)', '#f3f0ea', '#18224a', ['#c9a43a', '#18224a'], '#18224a', ['#18224a', '#c9a43a'], 'AURORE'],
   foudre: ['Noir laqué · bleu électrique (Foudre)', '#0b0c10', '#0b0c10', ['#19b7ff', '#19b7ff'], '#19b7ff', ['#0b0c10', '#19b7ff'], 'FOUDRE'],
   spectre: ['Gris furtif (Spectre)', '#3b3f45', '#33363b', ['#2c2f33'], '#5a5f66', ['#3b3f45', '#2c2f33'], 'SPECTRE'],
@@ -4790,6 +4810,10 @@ class FlightModel {
       if (pitch > 28 * DEG) qT = Math.min(qT, -(pitch - 28 * DEG)); if (pitch < -14 * DEG) qT = Math.max(qT, (-14 * DEG - pitch));
     }
     if (stalled && !this.protections && !this.onGround) qT -= (aw - stallA) * 1.4 + 0.05;
+    // PALIER DE SAUVETAGE (touche I) : même en chute, en décrochage ou avion abîmé, le nez se RELÈVE toujours pour pouvoir se poser
+    if (input.palierUp) this._rescueT = 5; else if (this._rescueT > 0) this._rescueT -= dt;
+    const rescue = !this.onGround && !this.crashed && (input.palierUp || this._rescueT > 0);
+    if (rescue) { const want = Math.max(this.pitchHold ?? pitch, input.palierUp ? pitch + 4 * DEG : -90); qT = Math.max(qT, clamp((Math.min(want, 10 * DEG) - pitch) * 2.5, input.palierUp && pitch < 9 * DEG ? 0.04 : -0.08, 0.18) * Math.max(0.5, Math.cos(bank))); }
     if (this.onGround) { qT = input.pitch * S.maxQ * smooth(0.55, 0.95, auth); if (S.tailAng && pitch > S.tailAng * 0.8 && qT > 0) qT = Math.min(qT, (S.tailAng * 0.8 - pitch) * 2); }
     // roulis
     const bankLim = (S.bank || 35) * DEG, bankProt = Math.min(85 * DEG, bankLim * 1.9);
@@ -4811,6 +4835,8 @@ class FlightModel {
     if (contact.ground) this.groundRotation(dt, input, contact);
     // --- intégration ---
     this.vel.addScaledVector(acc, dt);
+    // en palier de sauvetage, l'avion « plane » : la descente est freinée jusqu'à environ 3,5 m/s (700 ft/min), assez doux pour se poser
+    if (!this.onGround && !this.crashed && (this._rescueT > 0) && this.vel.y < -3.5) { const k = Math.min(1, dt * (input.palierUp ? 7 : 1.5)); this.vel.y += (-3.5 - this.vel.y) * k; }
     if (rudd || (this._rudT = Math.max(0, (this._rudT || 0) - dt)) > 0) { if (rudd) this._rudT = 1.5; const hx = -Math.sin(e.y), hz = -Math.cos(e.y); const vx = this.vel.x, vz = this.vel.z; const ang = Math.atan2(vz * hx - vx * hz, vx * hx + vz * hz); this.vel.applyAxisAngle(this._yAxis || (this._yAxis = new THREE.Vector3(0, 1, 0)), ang * Math.min(1, dt * 1.2)); }
     this.pos.addScaledVector(this.vel, dt);
     const wl = this.w.length();
@@ -6539,6 +6565,7 @@ const Ops = (function () {
   function pitchHold(fm, d) { if (fm.pitchHold === undefined || !fm.holdingPath) fm.pitchHold = fm.euler().x; fm.holdingPath = true; fm.pitchHold = clamp(fm.pitchHold + d * 1 * DEG, -15 * DEG, 20 * DEG); T('PALIER : nez à ' + (fm.pitchHold * RAD >= 0 ? '+' : '') + (fm.pitchHold * RAD).toFixed(0) + '° (I = nez en haut, K = nez en bas) — l\'avion reste stable à ce réglage', 1500); }
   function control(dt, input) {
     const fm = ctx.fm(); if (fm.spec.heli || fm.crashed) return; runwayHold(dt, fm, input);
+    input.palierUp = !!(ctx.codes.KeyI && !fm.onGround && !ctx.codes.ShiftLeft && !ctx.codes.ShiftRight);
     if (!fm.onGround && !AP.on && (ctx.codes.KeyI || ctx.codes.KeyK)) { if (fm.pitchHold === undefined || !fm.holdingPath) fm.pitchHold = fm.euler().x; fm.holdingPath = true; fm.pitchHold = clamp(fm.pitchHold + (ctx.codes.KeyI ? 1 : -1) * 3 * DEG * dt, -15 * DEG, 20 * DEG); }
     if (fm.fuelLeak) fm.fuel = Math.max(0, fm.fuel - fm.spec.fuelMax * (fm.leakRate || 0.004) * dt); if (fm.gearJam) fm.gearDown = fm.gearPos > 0.5; if (fm.flapJam) fm.flaps = Math.round(fm.flapPos * 4);
     if (fm.hydLow) { input.pitch *= 0.4; input.roll *= 0.4; }
