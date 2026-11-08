@@ -234,6 +234,7 @@ body.incockpit.autoclean #pfd,body.incockpit.autoclean #status,body.incockpit.au
     <div class="k"><kbd>, / ;</kbd><span>Radar : zoomer / dézoomer</span></div>
     <div class="k"><kbd>:</kbd><span>Noms des montagnes et monuments</span></div>
     <div class="k"><kbd>V</kbd><span>Caméra suivante</span></div>
+    <div class="k"><kbd>Vues cockpit</kbd><span>Avec V : « Face aux pilotes (les deux) », « Face au commandant », « Face au copilote », « Cabine passagers »</span></div>
     <div class="k"><kbd>C</kbd><span>Écran dégagé (cacher les indicateurs)</span></div>
     <div class="k"><kbd>Souris</kbd><span>Cliquer-glisser = tourner la vue · molette = zoom · double-clic = recentrer</span></div>
     <h4>11 · Lumières, temps, météo, son</h4>
@@ -254,16 +255,25 @@ body.incockpit.autoclean #pfd,body.incockpit.autoclean #status,body.incockpit.au
     <div class="k"><kbd>Maj+V</kbd><span>Aller sur le porte-avions</span></div>
     <div class="k"><kbd>T (sur le pont)</kbd><span>Catapulte du porte-avions</span></div>
     <div class="k"><kbd>Maj+Q</kbd><span>Appeler l'escadrille</span></div>
-    <h4>13 · À pied et véhicules</h4>
-    <div class="k"><kbd>0 ou F9</kbd><span>Sortir de l'avion / remonter</span></div>
-    <div class="k"><kbd>Z Q S D ou flèches</kbd><span>Marcher (Maj = courir, J = sauter)</span></div>
-    <div class="k"><kbd>I (à pied)</kbd><span>Le mécanicien répare l'avion</span></div>
-    <div class="k"><kbd>1 à 7</kbd><span>Armes : revolver, magnum, carabine, sniper, pistolet, lance-roquettes, pistolet lourd</span></div>
-    <div class="k"><kbd>Espace</kbd><span>Tirer</span></div>
-    <div class="k"><kbd>R / C / P</kbd><span>Recharger / s'accroupir / à plat ventre</span></div>
+    <h4>13 · À pied, soldats et véhicules</h4>
+    <div class="k"><kbd>0 ou F9</kbd><span>Sortir de l'avion (tenue selon l'avion : commandant de bord, pilote de chasse, pilote militaire) — ton escouade de soldats descend avec toi</span></div>
+    <div class="k"><kbd>0 près d'un avion</kbd><span>Monter dans N'IMPORTE QUEL avion à côté de toi (garé, en roulage…) et prendre ses commandes</span></div>
+    <div class="k"><kbd>Z Q S D</kbd><span>Marcher dans tous les sens (avant, arrière, de côté)</span></div>
+    <div class="k"><kbd>← → / souris</kbd><span>Tourner</span></div>
+    <div class="k"><kbd>Maj</kbd><span>COURIR très vite</span></div>
+    <div class="k"><kbd>J</kbd><span>Sauter</span></div>
+    <div class="k"><kbd>C</kbd><span>S'accroupir</span></div>
+    <div class="k"><kbd>P</kbd><span>Se mettre à couvert : à plat ventre (on rampe avec Z)</span></div>
+    <div class="k"><kbd>Clic droit ou X</kbd><span>Viser (les deux mains sur l'arme)</span></div>
+    <div class="k"><kbd>Espace</kbd><span>Tirer (maintenir pour les armes automatiques)</span></div>
+    <div class="k"><kbd>1 à 7</kbd><span>Armes : 1 revolver · 2 magnum .44 · 3 colt de cow-boy · 4 pistolet · 5 carabine d'assaut · 6 mitraillette · 7 lance-roquettes</span></div>
+    <div class="k"><kbd>R</kbd><span>Recharger</span></div>
     <div class="k"><kbd>Tab / U</kbd><span>Viser une cible / la lâcher</span></div>
     <div class="k"><kbd>M</kbd><span>Coup de poing</span></div>
-    <div class="k"><kbd>F / T / G</kbd><span>Ordres à l'escouade / prendre un autre soldat / revenir au chef</span></div>
+    <div class="k"><kbd>T</kbd><span>Prendre le contrôle du soldat suivant (tu deviens lui, avec son arme) · G = revenir au chef</span></div>
+    <div class="k"><kbd>F</kbd><span>Ordres à l'escouade : suivre / assaut / tenir la position</span></div>
+    <div class="k"><kbd>Y</kbd><span>Changer l'arme d'un coéquipier</span></div>
+    <div class="k"><kbd>I (à pied)</kbd><span>Le mécanicien répare l'avion</span></div>
     <div class="k"><kbd>O / K</kbd><span>Vue 360° / vue de face</span></div>
     <div class="k"><kbd>Véhicules</kbd><span>Z/S ou ↑ ↓ avancer / reculer · Q/D ou ← → tourner · A tir automatique · Entrée missile · Y cible · 0 descendre</span></div>
     <h4>14 · Multijoueur</h4>
@@ -381,7 +391,7 @@ body.incockpit.autoclean #pfd,body.incockpit.autoclean #status,body.incockpit.au
 <script>
 // ---- 00_util.js ----
 // ===== Outils communs =====
-const VERSION = 'Version 34 · 08/11';
+const VERSION = 'Version 35 · 08/11';
 const DEG = Math.PI / 180, RAD = 180 / Math.PI;
 const KT = 0.514444, FT = 0.3048;
 const clamp = (x, a, b) => x < a ? a : (x > b ? b : x);
@@ -2395,17 +2405,353 @@ const Humans = (function () {
     return g;
   }
   // passagers en cabine (instanciés) : corps assis + tête au visage peint
+  // passagers assis réalistes (instanciés) : buste galbé, épaules, bras posés, cuisses, jambes, chaussures + tête au visage peint et cheveux
+  let seatedGeo = null;
+  function seated() {
+    if (seatedGeo) return seatedGeo; const up = new THREE.Vector3(0, 1, 0);
+    const seg = (B, a, b, r1, r2) => { const d = b.clone().sub(a); const L = d.length(); const g = new THREE.CylinderGeometry(r2, r1, L, 12); const m = new THREE.Matrix4().compose(a.clone().add(b).multiplyScalar(0.5), new THREE.Quaternion().setFromUnitVectors(up, d.normalize()), new THREE.Vector3(1, 1, 1)); B.geo(g, m); B.geo(new THREE.SphereGeometry(r2, 10, 8), new THREE.Matrix4().makeTranslation(b.x, b.y, b.z)); };
+    const top = new Build.GeoBuf(), low = new Build.GeoBuf(); const V = (x, y, z) => new THREE.Vector3(x, y, z);
+    const tor = new THREE.LatheGeometry([V(0.0001, 0), V(0.14, 0), V(0.15, 0.12), V(0.165, 0.28), V(0.175, 0.4), V(0.15, 0.5), V(0.06, 0.55), V(0.0001, 0.55)].map(v => new THREE.Vector2(v.x, v.y)), 20);
+    top.geo(tor, new THREE.Matrix4().compose(V(0, 0.08, 0.08), new THREE.Quaternion().setFromEuler(new THREE.Euler(-0.08, 0, 0)), V(1, 1, 0.62)));
+    for (const sd of [-1, 1]) { top.geo(new THREE.SphereGeometry(0.065, 12, 10), new THREE.Matrix4().makeTranslation(sd * 0.165, 0.53, 0.06)); seg(top, V(sd * 0.17, 0.53, 0.06), V(sd * 0.2, 0.3, 0.05), 0.055, 0.045); seg(top, V(sd * 0.2, 0.3, 0.05), V(sd * 0.13, 0.22, -0.2), 0.045, 0.035); }
+    top.geo(new THREE.CylinderGeometry(0.05, 0.055, 0.1, 12), new THREE.Matrix4().makeTranslation(0, 0.65, 0.05));
+    low.geo(new THREE.SphereGeometry(0.17, 16, 10), new THREE.Matrix4().compose(V(0, 0.08, 0.04), new THREE.Quaternion(), V(1, 0.6, 0.85)));
+    for (const sd of [-1, 1]) { seg(low, V(sd * 0.09, 0.08, 0.04), V(sd * 0.1, 0.11, -0.38), 0.085, 0.06); seg(low, V(sd * 0.1, 0.11, -0.38), V(sd * 0.1, -0.33, -0.42), 0.06, 0.045); low.geo(new THREE.SphereGeometry(0.05, 10, 8), new THREE.Matrix4().compose(V(sd * 0.1, -0.37, -0.48), new THREE.Quaternion(), V(0.9, 0.6, 1.8))); }
+    return (seatedGeo = { top: top.build(), low: low.build() });
+  }
   function cabinPeople(n, seed) {
-    const body = new THREE.InstancedMesh(new THREE.BoxGeometry(0.42, 0.55, 0.26), new THREE.MeshStandardMaterial({ roughness: 0.85 }), n);
+    const G = seated();
+    const body = new THREE.InstancedMesh(G.top, new THREE.MeshStandardMaterial({ roughness: 0.85 }), n), legs = new THREE.InstancedMesh(G.low, new THREE.MeshStandardMaterial({ roughness: 0.9 }), n);
     const heads = []; const perSkin = Math.ceil(n / SKINS.length) + 1;
-    for (let k = 0; k < SKINS.length; k++) heads.push(new THREE.InstancedMesh(new THREE.SphereGeometry(0.1, 20, 14), new THREE.MeshStandardMaterial({ map: faceTex(SKINS[k], HAIRS[k % HAIRS.length], k % 2), roughness: 0.6 }), perSkin));
-    heads.forEach(h => h.count = 0); const col = new THREE.Color(); const tops = ['#c0392b', '#2980b9', '#27ae60', '#f39c12', '#8e44ad', '#ecf0f1', '#2c3e50', '#d35400', '#16a085', '#7f8c8d'];
-    return { body, heads, set(i, x, y, z) {
-      const r = Math.abs(Math.sin(i * 12.9898 + seed) * 43758.5453) % 1; const m = new THREE.Matrix4().makeTranslation(x, y + 0.3, z); body.setMatrixAt(i, m); body.setColorAt(i, col.set(tops[Math.floor(r * tops.length)]));
-      const h = heads[Math.floor(r * 97) % heads.length]; const hm = new THREE.Matrix4().compose(new THREE.Vector3(x, y + 0.72, z - 0.02), new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), (r - 0.5) * 0.5), new THREE.Vector3(0.92, 1.15, 1)); h.setMatrixAt(h.count++, hm);
+    for (let k = 0; k < SKINS.length; k++) heads.push(new THREE.InstancedMesh(new THREE.SphereGeometry(0.1, 24, 16), new THREE.MeshStandardMaterial({ map: faceTex(SKINS[k], HAIRS[k % HAIRS.length], k % 2), roughness: 0.6 }), perSkin));
+    const hair = new THREE.InstancedMesh(new THREE.SphereGeometry(0.104, 18, 10, 0, Math.PI * 2, 0, Math.PI * 0.45), new THREE.MeshStandardMaterial({ roughness: 0.95 }), n);
+    heads.forEach(h => h.count = 0); const col = new THREE.Color(); const tops = ['#c0392b', '#2980b9', '#27ae60', '#f39c12', '#8e44ad', '#ecf0f1', '#2c3e50', '#d35400', '#16a085', '#7f8c8d', '#f5f0e6', '#1f1f1f'], pants = ['#1c2433', '#2b2b2b', '#3b3f46', '#4a3a2a', '#1f3a5f', '#5a5a5a'];
+    const body2 = Object.assign(body, {}); // compat
+    const api = { body: body2, heads: [...heads, legs, hair], set(i, x, y, z) {
+      const r = Math.abs(Math.sin(i * 12.9898 + seed) * 43758.5453) % 1; const m = new THREE.Matrix4().makeTranslation(x, y, z);
+      body.setMatrixAt(i, m); body.setColorAt(i, col.set(tops[Math.floor(r * tops.length)]).convertSRGBToLinear()); legs.setMatrixAt(i, m); legs.setColorAt(i, col.set(pants[Math.floor(r * 31) % pants.length]).convertSRGBToLinear());
+      const turn = (r - 0.5) * 0.5; const h = heads[Math.floor(r * 97) % heads.length]; const hm = new THREE.Matrix4().compose(new THREE.Vector3(x, y + 0.8, z + 0.04), new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), turn), new THREE.Vector3(0.88, 1.12, 0.98)); h.setMatrixAt(h.count++, hm);
+      hair.setMatrixAt(i, new THREE.Matrix4().compose(new THREE.Vector3(x, y + 0.815, z + 0.045), new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), turn), new THREE.Vector3(0.9, r > 0.5 ? 1.15 : 0.95, 1.02))); hair.setColorAt(i, col.set(HAIRS[Math.floor(r * 53) % HAIRS.length]).convertSRGBToLinear());
     } };
+    // les sièges vides : on cache aussi jambes et cheveux
+    const setM = body.setMatrixAt.bind(body); body.setMatrixAt = (i, m) => { setM(i, m); if (m.elements[0] === 0) { legs.setMatrixAt(i, m); hair.setMatrixAt(i, m); } };
+    return api;
   }
   return { faceTex, pilot, warPilot, cabinPeople };
+})();
+
+// ---- 05d_rig.js ----
+// ===== Personnages articulés réalistes (pilotes, commandants, soldats) + armes détaillées =====
+// Corps lisse (membres galbés en tour, articulations arrondies, mains à 5 doigts, bottes à semelle),
+// squelette articulé (bassin, colonne, poitrine, cou, tête, épaules, coudes, poignets, hanches, genoux, chevilles)
+// et animations : repos qui respire, marche, course, accroupi, à couvert/à plat ventre, saut, visée.
+const Rig = (function () {
+  const M = {}; // matériaux partagés
+  const std = (c, r, m) => new THREE.MeshStandardMaterial({ color: lin(c), roughness: r ?? 0.8, metalness: m ?? 0 });
+  function mat(key, c, r, m) { return M[key] || (M[key] = std(c, r, m)); }
+  // ---------- textures de tissu ----------
+  const TX = {};
+  function camoTex(kind) {
+    if (TX[kind]) return TX[kind];
+    const pal = kind === 'desert' ? ['#c2a878', '#a38a5c', '#d8c39a', '#7e6a45'] : kind === 'urbain' ? ['#7d8086', '#5b5e63', '#a5a8ad', '#3e4044'] : ['#5a6b3c', '#3f4c2a', '#7a7a4e', '#2b2f1f'];
+    const c = makeCanvas(256, 256), g = c.getContext('2d'); g.fillStyle = pal[0]; g.fillRect(0, 0, 256, 256);
+    let s = kind.length * 977; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
+    for (let k = 1; k < 4; k++) for (let i = 0; i < 26; i++) { g.fillStyle = pal[k]; g.beginPath(); const x = r() * 256, y = r() * 256; g.moveTo(x, y); for (let a = 0; a < 7; a++) { const ang = a / 7 * 6.283, rr = 8 + r() * 22; g.lineTo(x + Math.cos(ang) * rr * 1.5, y + Math.sin(ang) * rr); } g.closePath(); g.fill(); }
+    // trame du tissu
+    g.globalAlpha = 0.08; g.fillStyle = '#000'; for (let y = 0; y < 256; y += 2) g.fillRect(0, y, 256, 1); g.globalAlpha = 1;
+    const t = canvasTex(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(2, 2); return (TX[kind] = t);
+  }
+  function fabric(key, col, tex) { if (M[key]) return M[key]; const m = std(col, 0.92); if (tex) { m.map = camoTex(tex); m.color.set(0xffffff); } return (M[key] = m); }
+  // ---------- formes ----------
+  // membre galbé : profil de rayon le long de l'os (y = 0 en haut, -len en bas)
+  function limbGeo(len, prof, seg) {
+    const pts = []; const n = prof.length - 1;
+    pts.push(new THREE.Vector2(0.0001, 0)); for (let i = 0; i <= n; i++) pts.push(new THREE.Vector2(prof[i], -len * i / n)); pts.push(new THREE.Vector2(0.0001, -len));
+    const g = new THREE.LatheGeometry(pts, seg || 16); g.computeVertexNormals(); return g;
+  }
+  function mesh(geo, m, x, y, z, sx, sy, sz) { const o = new THREE.Mesh(geo, m); o.position.set(x || 0, y || 0, z || 0); if (sx) o.scale.set(sx, sy ?? sx, sz ?? sx); o.castShadow = true; return o; }
+  const rot = (o, ax, v) => { o.rotation[ax] = v; return o; };
+  const sph = (r, w, h) => new THREE.SphereGeometry(r, w || 16, h || 12);
+  // ---------- tête réaliste : crâne, mâchoire, nez, oreilles, yeux, sourcils, lèvres, cheveux, barbe ----------
+  function head(o) {
+    const g = new THREE.Group(); const skin = mat('skin' + o.skin, o.skin, 0.55);
+    const geo = new THREE.SphereGeometry(0.1, 40, 30); const P = geo.attributes.position;
+    for (let i = 0; i < P.count; i++) { let x = P.getX(i), y = P.getY(i), z = P.getZ(i);
+      const low = Math.max(0, -y / 0.1); x *= 1 - 0.28 * low; z *= 1 - 0.12 * low; if (z < 0) z *= 1.08; // mâchoire plus étroite, visage en avant
+      if (y < -0.04 && z < 0) z -= 0.012 * (1 - Math.abs(x) / 0.1); // menton
+      x *= 0.86; y *= 1.18; P.setXYZ(i, x, y, z); }
+    geo.computeVertexNormals();
+    const face = new THREE.MeshStandardMaterial({ map: Humans.faceTex(o.skin, o.hair || '#120c08'), roughness: 0.55 });
+    g.add(mesh(geo, face));
+    const nose = new THREE.Mesh(new THREE.ConeGeometry(0.016, 0.045, 10), skin); nose.rotation.x = -Math.PI / 2 - 0.35; nose.position.set(0, -0.01, -0.102); nose.scale.set(1, 1, 0.8); g.add(nose);
+    const tip = mesh(sph(0.012), skin, 0, -0.026, -0.108); g.add(tip);
+    for (const sx of [-1, 1]) {
+      g.add(mesh(sph(0.022, 10, 8), skin, sx * 0.087, 0.0, 0.005, 0.45, 1, 0.75)); // oreille
+      const eye = mesh(sph(0.0135, 14, 10), mat('eyeW', '#f4f1ea', 0.2), sx * 0.033, 0.018, -0.083); g.add(eye);
+      const iris = mesh(sph(0.0072, 10, 8), mat('iris', '#2a1a0e', 0.1), sx * 0.033, 0.018, -0.095); g.add(iris);
+      const lid = mesh(new THREE.SphereGeometry(0.0145, 12, 6, 0, Math.PI * 2, 0, Math.PI * 0.42), skin, sx * 0.033, 0.019, -0.083); g.add(lid);
+      const brow = mesh(new THREE.BoxGeometry(0.032, 0.006, 0.01), mat('hair' + o.hair, o.hair || '#120c08', 0.9), sx * 0.034, 0.04, -0.092); brow.rotation.z = -sx * 0.12; g.add(brow);
+    }
+    const lips = mesh(new THREE.TorusGeometry(0.016, 0.0045, 6, 16), mat('lips' + o.skin, o.lips || '#5a2f22', 0.5), 0, -0.052, -0.094, 1, 0.42, 0.6); g.add(lips);
+    if (!o.noHair) { const hair = mesh(new THREE.SphereGeometry(0.104, 28, 14, 0, Math.PI * 2, 0, Math.PI * 0.42), mat('hair' + o.hair, o.hair || '#120c08', 0.95), 0, 0.012, 0.006, 0.88, 1.2, 1.02); g.add(hair); }
+    if (o.beard) { const bd = mesh(new THREE.SphereGeometry(0.1, 26, 12, Math.PI * 0.12, Math.PI * 0.76, Math.PI * 0.56, Math.PI * 0.3), mat('beard', '#0d0907', 0.95), 0, 0.0, 0.0, 0.89, 1.2, 1.06); bd.rotation.y = Math.PI; g.add(bd);
+      g.add(mesh(new THREE.BoxGeometry(0.045, 0.007, 0.012), mat('beard', '#0d0907', 0.95), 0, -0.04, -0.097)); }
+    return g;
+  }
+  // ---------- main à 5 doigts ----------
+  function hand(m, sd, grip) {
+    const g = new THREE.Group(); g.add(mesh(sph(0.042, 12, 10), m, 0, -0.045, 0, 0.75, 1.0, 0.42));
+    for (let f = 0; f < 4; f++) { const fg = new THREE.Group(); fg.position.set((f - 1.5) * 0.017, -0.085, 0); const a = mesh(limbGeo(0.03, [0.0085, 0.008, 0.0075], 8), m); fg.add(a); const b = new THREE.Group(); b.position.y = -0.03; b.add(mesh(limbGeo(0.026 - Math.abs(f - 1.5) * 0.003, [0.0075, 0.007, 0.0055], 8), m)); fg.add(b); fg.rotation.x = grip ? 1.2 : 0.25; b.rotation.x = grip ? 1.3 : 0.3; g.add(fg); }
+    const th = new THREE.Group(); th.position.set(-sd * 0.03, -0.035, -0.012); th.add(mesh(limbGeo(0.045, [0.01, 0.009, 0.007], 8), m)); th.rotation.set(grip ? 0.9 : 0.3, 0, -sd * 0.6); g.add(th);
+    return g;
+  }
+  // ---------- botte / chaussure ----------
+  function boot(m, sole, high) {
+    const g = new THREE.Group();
+    if (high) g.add(mesh(limbGeo(0.17, [0.058, 0.056, 0.054], 14), m, 0, 0.1, 0));
+    g.add(mesh(sph(0.06, 16, 12), m, 0, -0.035, -0.06, 0.85, 0.65, 1.75)); // dessus du pied
+    g.add(mesh(sph(0.055, 14, 10), m, 0, -0.04, 0.02, 0.95, 0.85, 1.0)); // talon
+    const s = mesh(new THREE.BoxGeometry(0.105, 0.025, 0.29), sole, 0, -0.085, -0.055); g.add(s);
+    const toe = mesh(new THREE.CylinderGeometry(0.0525, 0.0525, 0.025, 16, 1, false, 0, Math.PI), sole, 0, -0.085, -0.2); toe.rotation.y = Math.PI / 2; g.add(toe);
+    if (high) for (let k = 0; k < 5; k++) g.add(mesh(new THREE.BoxGeometry(0.05, 0.004, 0.006), mat('lace', '#1a1a1a', 0.6), 0, 0.02 + k * 0.03, -0.055));
+    return g;
+  }
+
+  // ---------- personnage complet ----------
+  // kind : 'pilote' (commandant de bord), 'chasse' (pilote de chasse), 'militaire', 'soldat', 'ennemi'
+  function make(kind, seed, opts) {
+    seed = seed || 0; opts = opts || {};
+    const dark = ['#3b2318', '#2f1b11', '#4a2c1c', '#5c3a24'], light = ['#c58c66', '#8d5a3b', '#e0ac87'];
+    const skin = kind === 'ennemi' ? light[seed % light.length] : dark[seed % dark.length];
+    const O = { kind };
+    // tenue
+    const T = {
+      pilote: { top: fabric('shirtW', '#f2f2ee'), legs: fabric('navy', '#141c2e'), boot: mat('shoe', '#0b0b0b', 0.25, 0.1), glove: null },
+      chasse: { top: fabric('flight', '#4a5240'), legs: fabric('flight', '#4a5240'), boot: mat('bootB', '#141414', 0.45), glove: mat('gloveT', '#6b5a45', 0.75) },
+      militaire: { top: fabric('flight2', '#5e6a4c'), legs: fabric('flight2', '#5e6a4c'), boot: mat('bootB', '#141414', 0.45), glove: null },
+      soldat: { top: fabric('camoF', '#ffffff', 'foret'), legs: fabric('camoF', '#ffffff', 'foret'), boot: mat('bootB', '#141414', 0.45), glove: mat('gloveB', '#22241f', 0.7) },
+      ennemi: { top: fabric('camoD', '#ffffff', 'desert'), legs: fabric('camoD', '#ffffff', 'desert'), boot: mat('bootD', '#5a4630', 0.6), glove: mat('gloveB', '#22241f', 0.7) }
+    }[kind] || {};
+    const skinM = mat('skin' + skin, skin, 0.55); const sole = mat('sole', '#0a0a0a', 0.9);
+    const root = new THREE.Group(); const J = {};
+    const pelvis = new THREE.Group(); pelvis.position.y = 0.96; root.add(pelvis); J.pelvis = pelvis;
+    // bassin + abdomen + poitrine (galbés)
+    pelvis.add(mesh(sph(0.17, 22, 14), T.legs, 0, -0.02, 0, 1, 0.62, 0.68));
+    const spine = new THREE.Group(); spine.position.y = 0.06; pelvis.add(spine); J.spine = spine;
+    spine.add(mesh(limbGeo(0.24, [0.155, 0.16, 0.165, 0.17], 22), T.top, 0, 0.24, 0, 1, 1, 0.66));
+    const chest = new THREE.Group(); chest.position.y = 0.22; spine.add(chest); J.chest = chest;
+    const ch = mesh(limbGeo(0.24, [0.13, 0.19, 0.2, 0.19, 0.15], 24), T.top, 0, 0.26, 0, 1.08, 1, 0.68); chest.add(ch);
+    for (const sx of [-1, 1]) chest.add(mesh(sph(0.062, 16, 12), T.top, sx * 0.19, 0.225, 0, 1, 0.8, 0.95)); // deltoïdes
+    // cou + tête
+    const neck = new THREE.Group(); neck.position.y = 0.27; chest.add(neck); J.neck = neck; neck.add(mesh(limbGeo(0.09, [0.048, 0.05, 0.056], 14), skinM, 0, 0.09, 0));
+    const hd = new THREE.Group(); hd.position.y = 0.17; neck.add(hd); J.head = hd; hd.add(head({ skin, hair: '#0e0a08', beard: kind !== 'pilote' || seed % 2 === 0, noHair: ['chasse', 'soldat', 'ennemi'].includes(kind) }));
+    // bras
+    const arm = sd => {
+      const sh = new THREE.Group(); sh.position.set(sd * 0.215, 0.215, 0); chest.add(sh);
+      sh.add(mesh(limbGeo(0.29, [0.058, 0.062, 0.055, 0.047, 0.044], 16), T.top));
+      sh.add(mesh(sph(0.052), T.top, 0, -0.29, 0));
+      const el = new THREE.Group(); el.position.y = -0.29; sh.add(el);
+      el.add(mesh(limbGeo(0.26, [0.047, 0.05, 0.043, 0.034, 0.03], 16), kind === 'pilote' ? T.top : T.top));
+      if (kind === 'pilote') el.add(mesh(new THREE.CylinderGeometry(0.031, 0.031, 0.03, 12), mat('cuff', '#f2f2ee', 0.6), 0, -0.24, 0));
+      const wr = new THREE.Group(); wr.position.y = -0.26; el.add(wr); wr.add(hand(T.glove || skinM, sd, false));
+      return { sh, el, wr };
+    };
+    const AL = arm(-1), AR = arm(1); J.shL = AL.sh; J.elL = AL.el; J.wrL = AL.wr; J.shR = AR.sh; J.elR = AR.el; J.wrR = AR.wr;
+    // jambes
+    const leg = sd => {
+      const hp = new THREE.Group(); hp.position.set(sd * 0.095, -0.05, 0); pelvis.add(hp);
+      hp.add(mesh(limbGeo(0.44, [0.085, 0.09, 0.08, 0.066, 0.058], 18), T.legs));
+      hp.add(mesh(sph(0.06), T.legs, 0, -0.44, 0));
+      const kn = new THREE.Group(); kn.position.y = -0.44; hp.add(kn);
+      kn.add(mesh(limbGeo(0.42, [0.058, 0.062, 0.052, 0.042, 0.04], 16), T.legs));
+      const an = new THREE.Group(); an.position.y = -0.42; kn.add(an); an.add(boot(T.boot, sole, kind !== 'pilote'));
+      return { hp, kn, an };
+    };
+    const LL = leg(-1), LR = leg(1); J.hpL = LL.hp; J.knL = LL.kn; J.anL = LL.an; J.hpR = LR.hp; J.knR = LR.kn; J.anR = LR.an;
+    // ---------- accessoires selon la tenue ----------
+    const gold = mat('gold', '#d4af37', 0.3, 0.85);
+    if (kind === 'pilote') {
+      chest.add(mesh(new THREE.BoxGeometry(0.05, 0.3, 0.012), mat('tie', '#141c2e', 0.5), 0, 0.13, -0.137)); // cravate
+      chest.add(mesh(new THREE.BoxGeometry(0.14, 0.04, 0.03), mat('collar', '#f2f2ee', 0.6), 0, 0.27, -0.09));
+      for (const sx of [-1, 1]) { chest.add(mesh(new THREE.BoxGeometry(0.1, 0.014, 0.16), mat('navyE', '#141c2e', 0.6), sx * 0.15, 0.285, 0)); for (let k = 0; k < 4; k++) chest.add(mesh(new THREE.BoxGeometry(0.102, 0.016, 0.012), gold, sx * 0.15, 0.29, -0.06 + k * 0.025)); }
+      chest.add(mesh(new THREE.BoxGeometry(0.08, 0.018, 0.008), gold, -0.08, 0.17, -0.13)); // ailes de pilote
+      pelvis.add(rot(mesh(new THREE.TorusGeometry(0.155, 0.016, 6, 30), mat('belt', '#0b0b0b', 0.4), 0, 0.02, 0, 1, 1, 0.7), 'x', Math.PI / 2));
+      // casquette de commandant : calotte, bandeau doré, visière vernie, insigne (dans le cockpit : casque radio à la place)
+      if (opts.headset) { const hs = mesh(new THREE.TorusGeometry(0.112, 0.009, 6, 24, Math.PI), mat('hs', '#2a2a2a', 0.4), 0, 0.02, 0.0); hd.add(hs); for (const sx of [-1, 1]) hd.add(rot(mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.03, 14), mat('hs', '#2a2a2a', 0.4), sx * 0.1, -0.005, 0.005), 'z', Math.PI / 2)); const mic = mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.11, 6), mat('hs', '#2a2a2a', 0.4), -0.06, -0.05, -0.06); mic.rotation.set(0.5, 0.6, Math.PI / 2.4); hd.add(mic); }
+      const cap = new THREE.Group(); if (opts.headset) cap.visible = false; cap.position.set(0, 0.075, 0.005); hd.add(cap);
+      cap.add(mesh(new THREE.CylinderGeometry(0.118, 0.104, 0.07, 28), mat('capN', '#141c2e', 0.6), 0, 0.02, 0));
+      cap.add(mesh(new THREE.CylinderGeometry(0.106, 0.106, 0.022, 28), gold, 0, -0.012, 0));
+      const vis = mesh(new THREE.CylinderGeometry(0.11, 0.11, 0.008, 28, 1, false, Math.PI * 0.6, Math.PI * 0.8), mat('visor', '#050505', 0.15, 0.3), 0, -0.025, -0.02); vis.rotation.x = -0.25; cap.add(vis);
+      cap.add(mesh(sph(0.016, 10, 8), gold, 0, 0.02, -0.112, 1, 1, 0.4));
+    }
+    if (kind === 'chasse' || kind === 'militaire') {
+      for (const sx of [-1, 1]) chest.add(mesh(new THREE.BoxGeometry(0.045, 0.42, 0.012), mat('strap', '#2b2a24', 0.6), sx * 0.09, 0.12, -0.14));
+      chest.add(rot(mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.02, 16), mat('steel', '#9aa0a6', 0.3, 0.8), 0, 0.02, -0.15), 'x', Math.PI / 2));
+      chest.add(mesh(new THREE.BoxGeometry(0.1, 0.03, 0.01), mat('tag', '#222222', 0.5), 0.08, 0.2, -0.14));
+      for (const sd of [-1, 1]) { const pk = mesh(new THREE.BoxGeometry(0.03, 0.12, 0.13), T.legs, sd * 0.06, -0.22, -0.02); (sd < 0 ? LL : LR).hp.add(pk); }
+      if (kind === 'chasse') {
+        const hm = new THREE.Group(); hd.add(hm);
+        hm.add(mesh(new THREE.SphereGeometry(0.128, 28, 18, 0, Math.PI * 2, 0, Math.PI * 0.6), mat('helm', '#5b6150', 0.4), 0, 0.012, 0.008));
+        const vz = mesh(new THREE.SphereGeometry(0.132, 26, 10, Math.PI * 0.6, Math.PI * 0.8, Math.PI * 0.14, Math.PI * 0.2), mat('visorG', '#1a1508', 0.06, 0.9), 0, 0.012, 0.008); hm.add(vz);
+        for (const sx of [-1, 1]) hm.add(rot(mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.03, 16), mat('helm', '#5b6150', 0.4), sx * 0.115, -0.03, 0.01), 'z', Math.PI / 2));
+        const mask = mesh(new THREE.ConeGeometry(0.045, 0.075, 14), mat('mask', '#6e7266', 0.5), 0.11, -0.07, -0.05); mask.rotation.z = Math.PI / 2.2; hm.add(mask);
+      } else {
+        const cap = mesh(new THREE.SphereGeometry(0.11, 22, 10, 0, Math.PI * 2, 0, Math.PI * 0.4), mat('beret', '#3d4a2e', 0.85), 0.012, 0.045, 0.004, 1.05, 0.7, 1.1); cap.rotation.z = -0.15; hd.add(cap);
+        hd.add(mesh(new THREE.CircleGeometry(0.014, 12), gold, -0.05, 0.06, -0.095));
+      }
+    }
+    if (kind === 'soldat' || kind === 'ennemi') {
+      // gilet porte-plaques + poches à chargeurs, ceinturon, genouillères, sac à dos, casque avec couvre-casque et lunettes
+      const vestM = mat(kind === 'soldat' ? 'vestF' : 'vestD', kind === 'soldat' ? '#3a4228' : '#8a7550', 0.85);
+      chest.add(mesh(new THREE.BoxGeometry(0.36, 0.32, 0.075), vestM, 0, 0.1, -0.115)); chest.add(mesh(new THREE.BoxGeometry(0.36, 0.32, 0.06), vestM, 0, 0.1, 0.12));
+      for (let k = 0; k < 3; k++) chest.add(mesh(new THREE.BoxGeometry(0.075, 0.1, 0.045), vestM, (k - 1) * 0.09, 0.0, -0.165));
+      for (const sx of [-1, 1]) chest.add(mesh(new THREE.BoxGeometry(0.06, 0.05, 0.25), vestM, sx * 0.13, 0.27, 0));
+      pelvis.add(rot(mesh(new THREE.TorusGeometry(0.165, 0.022, 6, 30), mat('belt2', '#2a2a22', 0.7), 0, 0.03, 0, 1, 1, 0.72), 'x', Math.PI / 2));
+      chest.add(mesh(new THREE.BoxGeometry(0.3, 0.36, 0.14), mat('pack', kind === 'soldat' ? '#4b5531' : '#9a845a', 0.9), 0, 0.12, 0.21));
+      for (const L of [LL, LR]) L.kn.add(mesh(sph(0.05, 12, 8), mat('pad', '#1e211a', 0.6), 0, -0.02, -0.04, 1, 1, 0.6));
+      const hm = new THREE.Group(); hd.add(hm);
+      hm.add(mesh(new THREE.SphereGeometry(0.13, 26, 14, 0, Math.PI * 2, 0, Math.PI * 0.55), fabric(kind === 'soldat' ? 'camoF' : 'camoD', '#fff', kind === 'soldat' ? 'foret' : 'desert'), 0, 0.02, 0.008, 1, 0.95, 1.05));
+      hm.add(rot(mesh(new THREE.TorusGeometry(0.128, 0.008, 6, 28), mat('rim', '#2a2c22', 0.7), 0, 0.012, 0.008, 1, 1, 1.05), 'x', Math.PI / 2));
+      const gog = mesh(new THREE.BoxGeometry(0.14, 0.035, 0.03), mat('gog', '#111111', 0.2, 0.4), 0, 0.07, -0.11); hm.add(gog);
+      hm.add(mesh(new THREE.BoxGeometry(0.008, 0.06, 0.008), mat('strap', '#2b2a24', 0.6), -0.1, -0.04, -0.02)); hm.add(mesh(new THREE.BoxGeometry(0.008, 0.06, 0.008), mat('strap', '#2b2a24', 0.6), 0.1, -0.04, -0.02));
+      if (kind === 'ennemi') { AL.sh.add(mesh(new THREE.CylinderGeometry(0.063, 0.063, 0.06, 14), mat('band', '#c81e1e', 0.7), 0, -0.1, 0)); }
+      else { const fl = makeCanvas(48, 32); try { drawFlag2D(fl.getContext('2d'), 'cm', 0, 0, 48, 32); } catch (e) { } const pt = new THREE.Mesh(new THREE.PlaneGeometry(0.07, 0.045), new THREE.MeshBasicMaterial({ map: canvasTex(fl) })); pt.position.set(-0.061, -0.08, 0); pt.rotation.y = -Math.PI / 2; AL.sh.add(pt); }
+    }
+    root.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+    root.userData.rig = { J, kind, ph: Math.random() * 6, t: 0, gun: null, stance: 0, air: 0 };
+    return root;
+  }
+  // ---------- tenir une arme ----------
+  function hold(root, gun) {
+    const R = root.userData.rig; if (R.gun) R.J.wrR.remove(R.gun); R.gun = gun || null; if (!gun) return;
+    gun.rotation.set(-Math.PI / 2, 0, 0); gun.position.set(0, -0.08, -0.01); R.J.wrR.add(gun); R.twoHands = !!gun.userData.long;
+  }
+  // ---------- animation ----------
+  // st : { speed (m/s), stance 0 debout / 1 accroupi / 2 couché, air (en saut), aim (vise), dt }
+  function animate(root, st) {
+    const R = root.userData.rig, J = R.J; const dt = st.dt || 0.016; R.t += dt;
+    const sp = st.speed || 0, run = sp > 4, moving = sp > 0.2; R.ph += dt * (moving ? (run ? 9.5 : 5.2 + sp * 0.4) : 0);
+    const p = R.ph, s = Math.sin(p), c = Math.cos(p); const A = run ? 1.0 : Math.min(1, sp / 1.6) * 0.55;
+    const breathe = Math.sin(R.t * 1.6) * 0.012;
+    // réinitialise
+    root.rotation.x = 0; J.pelvis.position.y = 0.96; J.pelvis.rotation.set(0, 0, 0);
+    let lean = run ? 0.22 : moving ? 0.05 : 0;
+    J.spine.rotation.set(lean * 0.5 + breathe, run ? s * 0.08 : 0, 0); J.chest.rotation.set(lean * 0.5 - breathe, run ? -s * 0.12 : 0, 0);
+    J.neck.rotation.set(-lean * 0.6, 0, 0); J.head.rotation.set(0, 0, 0);
+    // jambes : hanche, genou, cheville
+    const legPose = (hp, kn, an, ph) => { const sw = Math.sin(ph); hp.rotation.set(sw * 0.62 * A, 0, 0); const bend = Math.max(0, Math.sin(ph - 1.2)) * (run ? 1.7 : 0.95) * A + (moving ? 0.08 : 0.03); kn.rotation.set(-bend, 0, 0); an.rotation.set(bend * 0.35 - sw * 0.15 * A, 0, 0); };
+    legPose(J.hpL, J.knL, J.anL, p); legPose(J.hpR, J.knR, J.anR, p + Math.PI);
+    J.pelvis.position.y = 0.96 - (moving ? Math.abs(c) * (run ? 0.045 : 0.022) : 0) + (run ? 0.02 : 0);
+    // bras : balancier opposé aux jambes, coudes pliés en courant
+    const armPose = (sh, el, ph, sd) => { sh.rotation.set(-Math.sin(ph) * (run ? 0.75 : 0.42) * A, 0, sd * 0.08); el.rotation.set((run ? 1.45 : 0.25) + Math.max(0, Math.sin(ph)) * 0.25 * A, 0, 0); };
+    armPose(J.shL, J.elL, p + Math.PI, -1); armPose(J.shR, J.elR, p, 1);
+    // accroupi
+    if (st.stance === 1) { J.pelvis.position.y = 0.55; for (const [hp, kn, an] of [[J.hpL, J.knL, J.anL], [J.hpR, J.knR, J.anR]]) { hp.rotation.x = 1.25 + (moving ? Math.sin(p) * 0.25 : 0); kn.rotation.x = -2.1; an.rotation.x = 0.85; } J.hpL.rotation.z = -0.12; J.hpR.rotation.z = 0.12; J.spine.rotation.x = 0.35; J.neck.rotation.x = -0.3; }
+    // à plat ventre / à couvert au sol
+    if (st.stance === 2) { root.rotation.x = 0; J.pelvis.position.y = 0.17; J.pelvis.rotation.x = -Math.PI / 2 + 0.05; J.hpL.rotation.set(0.05 + (moving ? s * 0.3 : 0), 0, -0.25); J.hpR.rotation.set(0.05 - (moving ? s * 0.3 : 0), 0, 0.25); J.knL.rotation.x = -0.25; J.knR.rotation.x = -0.25 - (moving ? Math.max(0, s) * 0.8 : 0); J.anL.rotation.x = 0.9; J.anR.rotation.x = 0.9; J.neck.rotation.x = -1.1; J.spine.rotation.x = 0; J.chest.rotation.x = -0.1;
+      J.shL.rotation.set(2.6 + (moving ? c * 0.3 : 0), 0, -0.3); J.shR.rotation.set(2.6 - (moving ? c * 0.3 : 0), 0, 0.3); J.elL.rotation.x = 0.9; J.elR.rotation.x = 0.9; }
+    // saut : jambes repliées, bras en l'air
+    if (st.air) { J.hpL.rotation.x = 0.9; J.hpR.rotation.x = 0.5; J.knL.rotation.x = -1.4; J.knR.rotation.x = -1.0; J.shL.rotation.x = -0.6; J.shR.rotation.x = -0.6; J.shL.rotation.z = -0.5; J.shR.rotation.z = 0.5; }
+    // visée : bras tendu vers l'avant (une main pour les pistolets, deux mains pour les armes longues)
+    if (R.gun && st.stance !== 2 && (st.aim || !run)) {
+      const up = st.aim ? 1.5 : 1.05; J.shR.rotation.set(up, 0, R.twoHands ? -0.12 : 0.02); J.elR.rotation.set(R.twoHands ? 0.25 : 0.05, 0, 0); J.wrR.rotation.set(0, 0, 0);
+      if (R.twoHands || st.aim) { J.shL.rotation.set(up - 0.05, 0, 0.55); J.elL.rotation.set(R.twoHands ? 1.0 : 0.6, 0, 0); J.chest.rotation.y = R.twoHands ? 0.25 : 0; J.head.rotation.y = R.twoHands ? -0.2 : 0; }
+    }
+  }
+
+  // ================= ARMES DÉTAILLÉES =================
+  // repère : poignée à l'origine, canon vers -z, haut vers +y
+  const GM = () => ({ blued: mat('g_blued', '#1b1e21', 0.32, 0.85), steel: mat('g_steel', '#b9bec5', 0.22, 0.95), poly: mat('g_poly', '#17191b', 0.72, 0.05), wood: mat('g_wood', '#6b3a1e', 0.5, 0.0), ivory: mat('g_ivory', '#efe6d2', 0.35, 0.0), brass: mat('g_brass', '#b08d3c', 0.3, 0.9), rubber: mat('g_rub', '#0e0e0e', 0.9, 0), olive: mat('g_olive', '#4b5a2a', 0.6, 0.2), tan: mat('g_tan', '#8d7a55', 0.7, 0.1), glass: mat('g_glass', '#1c3a52', 0.05, 0.6) });
+  const box = (w, h, d, m, x, y, z, rx) => { const o = mesh(new THREE.BoxGeometry(w, h, d), m, x, y, z); if (rx) o.rotation.x = rx; return o; };
+  const cyl = (r1, r2, len, m, x, y, z, seg) => { const o = mesh(new THREE.CylinderGeometry(r1, r2, len, seg || 18), m, x, y, z); o.rotation.x = Math.PI / 2; return o; };
+  function revolverParts(g, G, o) {
+    const metal = o.metal, bl = o.barrel; // carcasse, barillet à 6 chambres, canon avec guidon, chien, détente, pontet, crosse
+    g.add(box(0.026, 0.05, 0.075, metal, 0, 0.07, -0.035));
+    const cy = cyl(0.021, 0.021, 0.042, metal, 0, 0.07, -0.05, 24); g.add(cy);
+    for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2; g.add(cyl(0.0045, 0.0045, 0.044, G.rubber, Math.cos(a) * 0.012, 0.07 + Math.sin(a) * 0.012, -0.05, 8)); if (o.fluted) g.add(box(0.004, 0.004, 0.034, G.blued, Math.cos(a + 0.5) * 0.021, 0.07 + Math.sin(a + 0.5) * 0.021, -0.05)); }
+    g.add(cyl(0.0085, 0.0085, bl, metal, 0, 0.083, -0.072 - bl / 2, 16)); g.add(cyl(0.0035, 0.0035, 0.01, G.rubber, 0, 0.083, -0.073 - bl, 8));
+    if (o.rib) g.add(box(0.008, 0.01, bl, metal, 0, 0.095, -0.072 - bl / 2));
+    if (o.ejector) g.add(cyl(0.0045, 0.0045, bl * 0.75, metal, 0, 0.068, -0.072 - bl * 0.375, 10));
+    else g.add(box(0.012, 0.012, bl * 0.9, metal, 0, 0.072, -0.072 - bl * 0.45));
+    g.add(box(0.003, 0.012, 0.004, metal, 0, 0.098, -0.07 - bl));
+    const ham = box(0.008, 0.026, 0.014, metal, 0, 0.1, 0.004); ham.rotation.x = -0.5; g.add(ham);
+    const tg = mesh(new THREE.TorusGeometry(0.017, 0.0028, 6, 16, Math.PI), o.guard || metal, 0, 0.044, -0.025); tg.rotation.set(0, Math.PI / 2, Math.PI); g.add(tg);
+    const tr = box(0.004, 0.018, 0.006, metal, 0, 0.044, -0.024); tr.rotation.x = 0.3; g.add(tr);
+    const grip = new THREE.Group(); grip.position.set(0, 0.045, 0.012); grip.rotation.x = 0.32; g.add(grip);
+    grip.add(box(0.03, 0.085, 0.034, o.grip, 0, -0.04, 0)); grip.add(mesh(sph(0.02, 12, 8), o.grip, 0, -0.085, 0.004, 0.75, 0.6, 0.95));
+    for (let k = 0; k < 6; k++) grip.add(box(0.032, 0.002, 0.034, G.rubber, 0, -0.012 - k * 0.011, 0)); // quadrillage
+  }
+  function make_gun(kind) {
+    const G = GM(); const g = new THREE.Group(); g.userData.kind = kind;
+    if (kind === 'revolver') revolverParts(g, G, { metal: G.blued, barrel: 0.1, grip: G.wood, rib: true });
+    else if (kind === 'magnum') revolverParts(g, G, { metal: G.steel, barrel: 0.2, grip: G.rubber, rib: true, fluted: true });
+    else if (kind === 'cowboy') revolverParts(g, G, { metal: G.blued, barrel: 0.19, grip: G.ivory, ejector: true, guard: G.brass, fluted: true });
+    else if (kind === 'pistolet') {
+      // pistolet semi-automatique : glissière crantée, carcasse polymère, rails, chargeur
+      g.add(box(0.028, 0.03, 0.185, G.blued, 0, 0.087, -0.06));
+      for (let k = 0; k < 7; k++) g.add(box(0.03, 0.022, 0.003, G.rubber, 0, 0.088, 0.02 - k * 0.006));
+      g.add(box(0.004, 0.006, 0.006, G.blued, 0, 0.105, -0.145)); g.add(box(0.016, 0.006, 0.006, G.blued, 0, 0.105, 0.025));
+      g.add(cyl(0.0055, 0.0055, 0.01, G.rubber, 0, 0.09, -0.153, 10));
+      g.add(box(0.026, 0.022, 0.15, G.poly, 0, 0.062, -0.055));
+      g.add(box(0.022, 0.008, 0.06, G.poly, 0, 0.049, -0.105)); // rail
+      const tg = box(0.006, 0.006, 0.05, G.poly, 0, 0.032, -0.04); g.add(tg); g.add(box(0.006, 0.026, 0.006, G.poly, 0, 0.045, -0.064));
+      g.add(box(0.005, 0.016, 0.006, G.poly, 0, 0.045, -0.035));
+      const grip = new THREE.Group(); grip.position.set(0, 0.05, 0.012); grip.rotation.x = 0.3; g.add(grip);
+      grip.add(box(0.03, 0.105, 0.045, G.poly, 0, -0.05, 0)); for (let k = 0; k < 5; k++) grip.add(box(0.032, 0.003, 0.046, G.rubber, 0, -0.02 - k * 0.016, 0));
+      grip.add(box(0.026, 0.012, 0.046, G.blued, 0, -0.108, 0.001));
+    } else if (kind === 'carabine') {
+      // carabine d'assaut : boîtier, garde-main à rails, canon, cache-flamme, viseur point rouge, chargeur courbe, poignée, crosse réglable
+      g.userData.long = true;
+      g.add(box(0.032, 0.05, 0.2, G.blued, 0, 0.065, -0.06)); g.add(box(0.03, 0.04, 0.12, G.blued, 0, 0.03, -0.04));
+      g.add(box(0.012, 0.012, 0.22, G.blued, 0, 0.096, -0.07)); // rail supérieur
+      const hg = mesh(new THREE.CylinderGeometry(0.024, 0.024, 0.22, 8), G.blued, 0, 0.068, -0.27); hg.rotation.x = Math.PI / 2; g.add(hg);
+      for (const a of [0, Math.PI / 2, -Math.PI / 2]) { const r = box(0.01, 0.01, 0.2, G.rubber, Math.sin(a) * 0.026, 0.068 + Math.cos(a) * 0.026, -0.27); g.add(r); }
+      g.add(cyl(0.007, 0.007, 0.16, G.blued, 0, 0.068, -0.46, 12)); g.add(cyl(0.011, 0.009, 0.045, G.blued, 0, 0.068, -0.56, 12));
+      g.add(box(0.006, 0.05, 0.012, G.blued, 0, 0.1, -0.37));
+      g.add(cyl(0.018, 0.018, 0.06, G.poly, 0, 0.122, -0.06, 16)); g.add(cyl(0.015, 0.015, 0.004, G.glass, 0, 0.122, -0.092, 16));
+      const mag = new THREE.Group(); mag.position.set(0, 0.012, -0.075); g.add(mag); for (let k = 0; k < 5; k++) { const sg = box(0.024, 0.03, 0.06, G.blued, 0, -k * 0.026, -k * 0.006); sg.rotation.x = -k * 0.08; mag.add(sg); }
+      const grip = box(0.026, 0.085, 0.035, G.poly, 0, -0.005, 0.03); grip.rotation.x = 0.35; g.add(grip);
+      const tg = mesh(new THREE.TorusGeometry(0.018, 0.003, 6, 14, Math.PI), G.blued, 0, 0.012, -0.005); tg.rotation.set(0, Math.PI / 2, Math.PI); g.add(tg);
+      g.add(cyl(0.015, 0.015, 0.2, G.blued, 0, 0.06, 0.13, 12)); const st = box(0.04, 0.07, 0.14, G.poly, 0, 0.045, 0.19); g.add(st); g.add(box(0.036, 0.085, 0.015, G.rubber, 0, 0.04, 0.265));
+      g.add(box(0.008, 0.008, 0.03, G.blued, 0.018, 0.085, 0.03)); // levier d'armement
+    } else if (kind === 'mitraillette') {
+      // pistolet-mitrailleur compact : boîtier tubulaire, chargeur courbe, guidon en anneau, crosse rétractable
+      g.userData.long = true;
+      g.add(cyl(0.022, 0.022, 0.26, G.blued, 0, 0.075, -0.08, 20)); g.add(cyl(0.012, 0.012, 0.22, G.blued, 0, 0.1, -0.1, 12));
+      g.add(cyl(0.008, 0.008, 0.06, G.blued, 0, 0.075, -0.24, 12));
+      const ring = mesh(new THREE.TorusGeometry(0.012, 0.003, 6, 16), G.blued, 0, 0.115, -0.2); g.add(ring); g.add(box(0.004, 0.012, 0.004, G.blued, 0, 0.11, -0.2));
+      g.add(box(0.034, 0.05, 0.08, G.poly, 0, 0.04, -0.14)); // garde-main
+      const mag = new THREE.Group(); mag.position.set(0, 0.04, -0.05); g.add(mag); for (let k = 0; k < 6; k++) { const sg = box(0.02, 0.026, 0.035, G.blued, 0, -k * 0.022, -k * 0.009); sg.rotation.x = -k * 0.1; mag.add(sg); }
+      const grip = box(0.026, 0.08, 0.035, G.poly, 0, 0.005, 0.03); grip.rotation.x = 0.3; g.add(grip);
+      const tg = mesh(new THREE.TorusGeometry(0.016, 0.003, 6, 14, Math.PI), G.poly, 0, 0.035, 0.0); tg.rotation.set(0, Math.PI / 2, Math.PI); g.add(tg);
+      for (const sx of [-1, 1]) g.add(cyl(0.004, 0.004, 0.18, G.steel, sx * 0.018, 0.07, 0.12, 8)); g.add(box(0.045, 0.06, 0.012, G.rubber, 0, 0.06, 0.21));
+    } else if (kind === 'lance-roquettes') {
+      // lance-roquettes : tube, boucliers thermiques en bois, poignées, optique, roquette (ogive, corps, ailettes)
+      g.userData.long = true;
+      g.add(cyl(0.032, 0.032, 0.95, G.olive, 0, 0.1, -0.05, 20)); g.add(cyl(0.045, 0.034, 0.12, G.olive, 0, 0.1, 0.46, 20));
+      g.add(cyl(0.04, 0.04, 0.2, G.wood, 0, 0.1, -0.1, 20)); g.add(cyl(0.04, 0.04, 0.12, G.wood, 0, 0.1, 0.12, 20));
+      const gr = box(0.025, 0.08, 0.035, G.poly, 0, 0.035, 0.0); gr.rotation.x = 0.25; g.add(gr); const gr2 = box(0.025, 0.08, 0.035, G.poly, 0, 0.035, -0.25); gr2.rotation.x = 0.25; g.add(gr2);
+      g.add(cyl(0.016, 0.016, 0.12, G.blued, -0.05, 0.16, -0.06, 14)); g.add(box(0.02, 0.04, 0.02, G.blued, -0.04, 0.135, -0.06));
+      const w = new THREE.Group(); w.position.set(0, 0.1, -0.53); g.add(w);
+      const og = new THREE.LatheGeometry([new THREE.Vector2(0.0001, -0.28), new THREE.Vector2(0.02, -0.25), new THREE.Vector2(0.045, -0.17), new THREE.Vector2(0.052, -0.08), new THREE.Vector2(0.03, -0.02), new THREE.Vector2(0.022, 0.06)], 20); og.rotateX(Math.PI / 2);
+      w.add(mesh(og, G.olive)); w.add(cyl(0.004, 0.004, 0.05, G.steel, 0, 0, -0.3, 8));
+      for (let k = 0; k < 4; k++) { const f = box(0.002, 0.03, 0.05, G.olive, Math.cos(k * Math.PI / 2) * 0.03, Math.sin(k * Math.PI / 2) * 0.03, 0.07); f.rotation.z = k * Math.PI / 2; w.add(f); }
+    }
+    g.traverse(o => { if (o.isMesh) o.castShadow = true; });
+    // bout du canon (pour la flamme)
+    const z = { revolver: -0.18, magnum: -0.28, cowboy: -0.27, pistolet: -0.16, carabine: -0.6, mitraillette: -0.28, 'lance-roquettes': -0.84 }[kind] || -0.2;
+    const mz = new THREE.Object3D(); mz.position.set(0, kind === 'lance-roquettes' ? 0.1 : 0.075, z); g.add(mz); g.userData.muzzle = mz;
+    return g;
+  }
+  // assis aux commandes (cockpit)
+  function sit(root, seat) {
+    const J = root.userData.rig.J; J.pelvis.position.set(0, 0.1, 0.05);
+    for (const [hp, kn, an, sd] of [[J.hpL, J.knL, J.anL, -1], [J.hpR, J.knR, J.anR, 1]]) { hp.rotation.set(1.45, 0, sd * 0.06); kn.rotation.set(-1.35, 0, 0); an.rotation.set(-0.1, 0, 0); }
+    J.spine.rotation.set(-0.08, 0, 0); J.chest.rotation.set(0.02, 0, 0); J.neck.rotation.set(0.06, 0, 0);
+    J.shL.rotation.set(0.75, 0, -0.12); J.elL.rotation.set(0.85, 0, 0); J.shR.rotation.set(0.75, 0, 0.12); J.elR.rotation.set(0.85, 0, 0);
+    root.userData.rig.seated = true; return root;
+  }
+  return { make, animate, hold, sit, gun: make_gun, camoTex };
 })();
 
 // ---- 06_airports.js ----
@@ -2701,7 +3047,10 @@ const Airports = (function () {
       parked.push({ key: ty + '|' + lk, m: new THREE.Matrix4().compose(new THREE.Vector3(g.x, (D2.gearH + 0.02) * sc, g.z), new THREE.Quaternion().setFromAxisAngle(Yax, g.rot), new THREE.Vector3(sc, sc, sc)) });
     });
     const planes = AircraftModel.fleet(parked); grp.add(planes); anim.planes = planes;
-    a.parked = parked.map(p => { const v = new THREE.Vector3().setFromMatrixPosition(p.m); const sc = new THREE.Vector3().setFromMatrixScale(p.m).x; const bar = p.key.indexOf('|'); const D = bar > 0 ? acLayout(p.key.slice(0, bar)) : null; const [x, z] = toWorld(a, v.x, v.z); return { x, z, y: a.elev + v.y, r: (D ? Math.max(D.L, D.span) * 0.42 : 17) * sc, h: D ? D.H * sc : 12 }; });
+    a.parked = parked.map(p => { const v = new THREE.Vector3().setFromMatrixPosition(p.m); const sc = new THREE.Vector3().setFromMatrixScale(p.m).x; const bar = p.key.indexOf('|'); const D = bar > 0 ? acLayout(p.key.slice(0, bar)) : null; const [x, z] = toWorld(a, v.x, v.z);
+      const f = new THREE.Vector3(0, 0, -1).applyQuaternion(new THREE.Quaternion().setFromRotationMatrix(p.m)); const [fx, fz] = toWorld(a, v.x + f.x * 10, v.z + f.z * 10); const hdg = ((Math.atan2(fx - x, -(fz - z)) * RAD) % 360 + 360) % 360;
+      return { x, z, y: a.elev + v.y, r: (D ? Math.max(D.L, D.span) * 0.42 : 17) * sc, h: D ? D.H * sc : 12, key: sc === 1 ? p.key : null, m: p.m, hdg }; });
+    a.parkedFleet = planes;
 
     // --- Tour de contrôle (fût évasé + vigie vitrée), radar tournant ---
     { const tw = new Build.GeoBuf(); const tx = a.tower.lx, tz = a.tower.lz, Ht = a.towerH;
@@ -2851,6 +3200,8 @@ const Airports = (function () {
     const r = a.L.rw[k || 0]; const lz = fromEnd ? -(r.len / 2 - 120) : r.len / 2 - 120; const [x, z] = toWorld(a, r.x, lz);
     return { x, z, hdg: a.hdg + (fromEnd ? 180 : 0) };
   }
+  // un avion garé qu'on « emprunte » à pied disparaît de sa place
+  function hideParked(a, p) { const z = new THREE.Matrix4().makeScale(0, 0, 0); if (a.parkedFleet) a.parkedFleet.children.forEach(im => { const i = im.userData.ms ? im.userData.ms.indexOf(p.m) : -1; if (i >= 0) { im.setMatrixAt(i, z); im.instanceMatrix.needsUpdate = true; } }); const k = a.parked.indexOf(p); if (k >= 0) a.parked.splice(k, 1); }
   function gateStart(a, L) { const g = (a.freeGates && (a.freeGates.find(q => q.i === 1) || a.freeGates[0])) || a.L.gates[1] || a.L.gates[0]; const off = Math.max(0, (L || 37) / 2 - 18.8); const [x, z] = toWorld(a, g.x + Math.sin(g.rot) * off, g.z + Math.cos(g.rot) * off); return { x, z, hdg: a.hdg + (g.side > 0 ? 90 : -90), gate: g }; }
   // zone aplanie (pour le relief) : poids 0..1 et altitude
   function flatWeight(x, z) {
@@ -2870,7 +3221,7 @@ const Airports = (function () {
       if (Math.hypot(lx - a.tower.lx, lz - a.tower.lz) < 25) return a.elev + a.towerH + 14; }
     return null;
   }
-  return { update, surfaceType, roofAt, nearest, runwayStart, gateStart, flatWeight, toLocal, toWorld, built };
+  return { hideParked, update, surfaceType, roofAt, nearest, runwayStart, gateStart, flatWeight, toLocal, toWorld, built };
 })();
 
 // ---- 06b_cities.js ----
@@ -3616,7 +3967,7 @@ const AircraftModel = (function () {
     const bySig = new Map();
     for (const it of list) for (const p of staticTemplate(it.key).parts) { if (!bySig.has(p.sig)) bySig.set(p.sig, { p, ms: [] }); bySig.get(p.sig).ms.push(it.m); }
     const g = new THREE.Group();
-    for (const { p, ms } of bySig.values()) { const im = new THREE.InstancedMesh(p.geo, p.mat, ms.length); ms.forEach((m, i) => im.setMatrixAt(i, m)); im.castShadow = true; im.receiveShadow = true; im.frustumCulled = false; g.add(im); }
+    for (const { p, ms } of bySig.values()) { const im = new THREE.InstancedMesh(p.geo, p.mat, ms.length); im.userData.ms = ms; ms.forEach((m, i) => im.setMatrixAt(i, m)); im.castShadow = true; im.receiveShadow = true; im.frustumCulled = false; g.add(im); }
     return g;
   }
 
@@ -4099,6 +4450,11 @@ const AircraftModel = (function () {
     const R = D ? D.R : 1.98, L = D ? D.L : 37.7, z0 = D ? D.noseZ + D.noseLen * 0.4 + 4 : -13, z1 = D ? D.L * 0.3 : 9.5; const g = new THREE.Group();
     const floorY = -R * 0.38; const wall = new THREE.Mesh(new THREE.CylinderGeometry(R * 0.93, R * 0.93, z1 - z0, 40, 1, true), new THREE.MeshStandardMaterial({ map: cabinWallTex(), side: THREE.BackSide, roughness: 0.7 }));
     wall.rotation.x = Math.PI / 2; wall.position.z = (z0 + z1) / 2; g.add(wall); wall.material.map.repeat.set(1, (z1 - z0) / 0.53);
+    // cloisons avant et arrière : la cabine est fermée de partout (plus de trou quand on tourne la vue)
+    { const bm = new THREE.MeshStandardMaterial({ color: lin('#dedbd3'), roughness: 0.7, side: THREE.DoubleSide }); const dm = new THREE.MeshStandardMaterial({ color: lin('#b9b4aa'), roughness: 0.6 });
+      for (const [zz, sd] of [[z0, 1], [z1, -1]]) { const d = new THREE.Mesh(new THREE.CircleGeometry(R * 0.94, 40), bm); d.position.z = zz; g.add(d); const door = new THREE.Mesh(new THREE.BoxGeometry(0.85, 1.9, 0.04), dm); door.position.set(0, floorY + 0.95, zz + sd * 0.03); g.add(door); const sign = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.12), new THREE.MeshBasicMaterial({ color: 0x3cff8a })); sign.position.set(0, floorY + 2.05, zz + sd * 0.05); if (sd < 0) sign.rotation.y = Math.PI; g.add(sign); } }
+    // plafond et sous-plancher fermés
+    { const ceil = new THREE.Mesh(new THREE.PlaneGeometry(R * 1.2, z1 - z0), new THREE.MeshStandardMaterial({ color: lin('#f1efe9'), roughness: 0.6, side: THREE.DoubleSide })); ceil.rotation.x = Math.PI / 2; ceil.position.set(0, R * 0.82, (z0 + z1) / 2); g.add(ceil); }
     const fl = new THREE.Mesh(new THREE.PlaneGeometry(R * 1.7, z1 - z0), new THREE.MeshStandardMaterial({ color: lin('#2b3550'), roughness: 0.95 })); fl.rotation.x = -Math.PI / 2; fl.position.set(0, floorY, (z0 + z1) / 2); g.add(fl);
     const aisle = new THREE.Mesh(new THREE.PlaneGeometry(0.5, z1 - z0), new THREE.MeshStandardMaterial({ color: lin('#6a1824'), roughness: 0.9 })); aisle.rotation.x = -Math.PI / 2; aisle.position.set(0, floorY + 0.005, (z0 + z1) / 2); g.add(aisle);
     for (const sd of [-1, 1]) { const bin = new THREE.Mesh(new THREE.BoxGeometry(R * 0.42, R * 0.22, z1 - z0), new THREE.MeshStandardMaterial({ color: 0xe9e9e4, roughness: 0.5 })); bin.position.set(sd * R * 0.6, R * 0.5, (z0 + z1) / 2); g.add(bin); }
@@ -4109,7 +4465,7 @@ const AircraftModel = (function () {
     const seats = new THREE.InstancedMesh(sb.build(), new THREE.MeshStandardMaterial({ color: lin('#1f3a6b'), roughness: 0.9 }), n); const ppl = Humans.cabinPeople(n, L | 0); let k = 0;
     for (let r = 0; r < rows; r++) for (const sd of [-1, 1]) for (let c = 0; c < perSide; c++) {
       const x = sd * (0.42 + c * 0.5), z = z0 + 0.8 + r * pitch; seats.setMatrixAt(k, new THREE.Matrix4().makeTranslation(x, floorY, z));
-      if ((r * 7 + c * 3 + (sd > 0 ? 1 : 0)) % 6 !== 0) ppl.set(k, x, floorY + 0.42, z + 0.05); else ppl.body.setMatrixAt(k, new THREE.Matrix4().makeScale(0, 0, 0)); k++;
+      if ((r * 7 + c * 3 + (sd > 0 ? 1 : 0)) % 6 !== 0) ppl.set(k, x, floorY + 0.48, z + 0.02); else ppl.body.setMatrixAt(k, new THREE.Matrix4().makeScale(0, 0, 0)); k++;
     }
     g.add(seats, ppl.body, ...ppl.heads); const amb = new THREE.PointLight(0xfff2dc, 0.8, R * 6, 2); amb.position.set(0, R * 0.6, (z0 + z1) / 2); g.add(amb);
     g.visible = false; root.add(g); P.cabin = g; P.cabinEye = [0, floorY + 1.62, z0 + 0.3]; return g;
@@ -4264,9 +4620,9 @@ const AircraftModel = (function () {
     cp.add(seat);
     // commandant (4 galons, visible quand on n'est pas à sa place) et copilote (3 galons), en uniforme
     // l'équipage dépend de l'avion : commandant de bord en uniforme (ligne), pilotes militaires, pilote de chasse
-    const R = CREW.role, AFR = ['cm', 'ci', 'sn', 'td', 'cd', 'ng', 'ga'].includes(CREW.cc), mk = (st, sd) => R === 'ligne' ? Humans.pilot(st, AFR ? (sd === 5 ? 1 : 0) : sd) : Humans.warPilot(R, sd, CREW.cc);
-    { const fo = mk(3, 2); fo.position.set(0.55, -0.31, -15.32); cp.add(fo); P.copilot = fo; if (R === 'chasse') fo.visible = false; // chasseur : un seul pilote
-      const cpt = mk(4, 5); cpt.position.set(-0.55, -0.31, -15.32); cp.add(cpt); P.captain = cpt;
+    const R = CREW.role, AFR = ['cm', 'ci', 'sn', 'td', 'cd', 'ng', 'ga'].includes(CREW.cc), mk = (st, sd) => { const o = Rig.sit(Rig.make(R === 'ligne' ? 'pilote' : R, sd === 5 ? 0 : 1, { headset: true })); o.scale.setScalar(0.97); return o; };
+    { const fo = mk(3, 2); fo.position.set(0.55, -0.31, -15.22); cp.add(fo); P.copilot = fo; if (R === 'chasse') fo.visible = false; // chasseur : un seul pilote
+      const cpt = mk(4, 5); cpt.position.set(-0.55, -0.31, -15.22); cp.add(cpt); P.captain = cpt;
       const seat2 = seat.clone(); seat2.position.x = -0.55; cp.add(seat2); }
     cp.traverse(o => { if (o.isMesh && o !== shell) { o.receiveShadow = true; o.castShadow = true; } });
     // éclairage d'ambiance intérieur
@@ -5006,6 +5362,9 @@ const CAMERAS = [
   { id: 'cockpit', label: 'Cockpit 3D (pilote)', inside: true },
   { id: 'derriere', label: 'Cockpit : derrière les pilotes', inside: true, eye: [0, 1.05, -14.6], fov: 72 },
   { id: 'grandangle', label: 'Cockpit grand angle', inside: true, eye: [0.2, 1.15, -14.2], fov: 95 },
+  { id: 'pilotes', label: 'Face aux pilotes (les deux)', inside: true, eye: [0, 0.74, -16.2], fov: 84, back: true },
+  { id: 'commandant', label: 'Face au commandant (gros plan)', inside: true, eye: [-0.5, 0.7, -16.05], fov: 50, back: true },
+  { id: 'copilote', label: 'Face au copilote (gros plan)', inside: true, eye: [0.5, 0.7, -16.05], fov: 50, back: true },
   { id: 'tour', label: 'Tour de contrôle', fixed: 'tour' },
   { id: 'passage', label: 'Passage (de loin)', fixed: 'passage' },
   { id: 'train', label: "Train d'atterrissage", fixed: 'train' },
@@ -5041,7 +5400,7 @@ const CameraRig = (function () {
     if (C.inside) {
       const co = fm.spec.D && fm.spec.D.cpOff; const eye = (C.cabin ? new THREE.Vector3(...(fm.cabinEye || [0, 0.4, 9])) : C.eye ? new THREE.Vector3(...C.eye).add(co ? new THREE.Vector3(...co) : new THREE.Vector3()) : fm.spec.eye ? new THREE.Vector3(...fm.spec.eye) : AircraftModel.EYE.clone()).applyQuaternion(fm.q).add(fm.pos);
       cam.position.copy(eye);
-      tq.copy(fm.q).multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(off.el * DEG - (C.cabin ? 0.12 : 0.16), off.yaw * DEG + (C.cabin ? Math.PI : 0), 0, 'YXZ')));
+      tq.copy(fm.q).multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(off.el * DEG - (C.cabin ? 0.12 : C.back ? 0.1 : 0.16), off.yaw * DEG + (C.cabin || C.back ? Math.PI : 0), 0, 'YXZ')));
       cam.quaternion.copy(tq); cam.fov = (C.fov || 68) / Math.sqrt(off.zoom) * (fm.hyper ? 1.25 : 1); cam.updateProjectionMatrix();
       return true;
     }
@@ -5646,7 +6005,10 @@ const Game = (function () {
     fm.pos.y = Terrain.heightAt(fm.pos.x, fm.pos.z) + fm.spec.gearH + 0.02;
     setProgress(1, 'Prêt !');
     CameraRig.attach(camAbs, renderer.domElement); CameraRig.setById('orbite'); UI.setNet(false, 'Hors ligne · mode solo');
-    Ops.init({ fm: () => fm, S, codes, input, airport: () => currentAirport, model: () => model, rebuild: () => { Damage.clearAll(); rebuildModel(); } }); Ops.syncDest(); Extra.init({ fm: () => fm, S, codes, goto: id => goto(id, true) });
+    Ops.init({ fm: () => fm, S, codes, input, airport: () => currentAirport, model: () => model, rebuild: () => { Damage.clearAll(); rebuildModel(); } }); Ops.syncDest(); Extra.init({ fm: () => fm, S, codes, goto: id => goto(id, true), board: b => { // monter dans n'importe quel avion à côté de soi
+      Ops.claimAircraft(b); setAircraft(b.ty, b.liv); Settings.data.type = b.ty; Settings.data.livery = b.liv; Settings.save();
+      fm.reset(b.x, groundH(b.x, b.z), b.z, b.hdg || 0); Ops.resetFlight(); fm.missiles = (model.userData.parts.missiles || []).length * 3; CameraRig.setById('poursuite'); CameraRig.recenter();
+      UI.toast('✈ Vous êtes monté dans : ' + acName(b.ty) + ' — vous avez les commandes !', 5000); } });
     setupKeys();
     document.getElementById('loading').classList.add('hidden');
     UI.show('menu', true);
@@ -5725,6 +6087,8 @@ const Game = (function () {
   const codeOf = {};
   function normCode(e) { let c = e.code; if (e.key && e.key.length === 1) { const ch = e.key.normalize('NFD')[0].toUpperCase(); if (ch >= 'A' && ch <= 'Z') c = 'Key' + ch; else if (c.startsWith('Key')) c = 'Char' + e.key; } codeOf[e.code] = c; return c; }
   function setupKeys() {
+    window.addEventListener('mousedown', e => { if (e.button === 2) codes.Mouse2 = true; }); window.addEventListener('mouseup', e => { if (e.button === 2) codes.Mouse2 = false; });
+    window.addEventListener('contextmenu', e => { if (Extra.foot && Extra.foot.active) e.preventDefault(); });
     window.addEventListener('keydown', e => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
       const k = e.key.length === 1 ? e.key.toLowerCase() : e.key; const sh = e.shiftKey; const code = normCode(e);
@@ -6632,6 +6996,15 @@ const Ops = (function () {
     cloudMatW = new THREE.MeshLambertMaterial({ color: 0xf4f6f8, transparent: true, opacity: 0.86, depthWrite: false }); cloudMatD = new THREE.MeshLambertMaterial({ color: 0x5c6470, transparent: true, opacity: 0.9, depthWrite: false });
     if (!Settings.data.dest) { const a = c.airport(); if (a) { const o = AIRPORTS.filter(x => x !== a).sort((p, q) => Math.hypot(p.x - a.x, p.z - a.z) - Math.hypot(q.x - a.x, q.z - a.z))[0]; Settings.data.dest = o.id; } }
   }
+  // avion le plus proche d'un piéton (trafic, avions garés aux portes) : pour monter dedans avec 0
+  function nearAircraft(pos) {
+    let best = null;
+    for (const o of AI) { if (o.dead || !o.pos || !o.ty || o.kind === 'escort') continue; if (o.pos.y - Terrain.heightAt(o.pos.x, o.pos.z) > 40) continue; const L = acLayout(o.ty); const gap = Math.hypot(o.pos.x - pos.x, o.pos.z - pos.z) - Math.max(L.L, L.span) * 0.42; if (!best || gap < best.gap) best = { gap, ty: o.ty, liv: o.liv, x: o.pos.x, z: o.pos.z, hdg: o.hdg, ai: o }; }
+    const a = Airports.nearest(pos.x, pos.z);
+    if (a && a.parked) for (const p of a.parked) { const gap = Math.hypot(p.x - pos.x, p.z - pos.z) - p.r; if (gap > 60 || !p.key) continue; if (!best || gap < best.gap) { const bar = p.key.indexOf('|'); best = { gap, ty: bar > 0 ? p.key.slice(0, bar) : 'A320', liv: bar > 0 ? p.key.slice(bar + 1) : p.key, x: p.x, z: p.z, hdg: p.hdg, park: p, a }; } }
+    return best;
+  }
+  function claimAircraft(b) { if (b.ai) { const i = AI.indexOf(b.ai); if (i >= 0) remove(i); } if (b.park) { Airports.hideParked(b.a, b.park); } }
   function takeNearestAI() { const fm = ctx.fm(); const o = nearestAI(fm); if (!o || o.pos.distanceTo(fm.pos) > 30000) return false; const pos = o.pos.clone(), h = o.hdg, spd = o.spd, ty = o.ty, liv = o.liv; remove(AI.indexOf(o)); return { pos, h, spd, ty, liv }; }
   // ---------- PORTE-AVIONS (4) : pont d'envol, catapulte (T), brins d'arrêt, chasseurs garés ----------
   const CARRIERS = [{ n: 'Porte-avions Golfe de Guinée', lat: 3.05, lon: 8.35, hdg: 30, f: 40 }, { n: 'Porte-avions Atlantique (Brest)', lat: 47.6, lon: -6.6, hdg: 250, f: 40 }, { n: 'Porte-avions New York', lat: 39.9, lon: -72.2, hdg: 60, f: 30 }, { n: 'Porte-avions Mer de Chine', lat: 30.6, lon: 123.6, hdg: 0, f: 20 }];
@@ -6780,7 +7153,7 @@ const Ops = (function () {
     else { const v = tg.pos.clone().add(new THREE.Vector3((Math.random() - 0.5) * 3, Math.random() * 2, (Math.random() - 0.5) * 3)).sub(from).normalize().multiplyScalar(700); shots.push({ kind: 'gun', pos: from.clone(), vel: v, life: 2 }); } }
   function nearestEnemy(pos, range) { let b = null, bd = range; for (const o of ground) { if (o.dead) continue; const d = o.pos.distanceTo(pos); if (d < bd) { bd = d; b = o; } } return b; }
   function fireDir(from, dir, kind) { shots.push({ kind: 'gun', pos: from.clone(), vel: dir.clone().normalize().multiplyScalar(kind === 'sniper' ? 1100 : 750), life: 2 }); }
-  return { get target() { return target; }, netHit, myWing, get hp() { return hp; }, cloudsChanged, strike: () => lightning(ctx.fm()), hitAI: (f) => { const o = AI.find(o => o.kind === 'tfc' && o.role === 'dep'); if (o) { aiFull(o); Damage.hit(o.obj, new THREE.Vector3(f * 15, 0, 0), 30, { motion: { vel: new THREE.Vector3(), pos: o.pos.clone() } }); o.stuck = true; return o.pos; } }, get traffic() { return AI.filter(o => o.kind === 'tfc').map(o => o.G.R.name + o.role[0] + ':' + o.phase + ':' + Math.round(o.along ?? o.al)).join(' '); }, repair: () => repair(ctx.fm()), randomFailure, addGround(o) { ground.push(o); }, shootAt, nearestEnemy, fireDir, setTarget(o) { target = o; }, pip, deckAt, declareWar, gotoBattle, peace, init, key, control, update, radar, AP, radio, syncDest, takeNearestAI, resetFlight() { gh.h = null; gh.user = false; repair(ctx.fm()); nukes = 3; hp = 100; AP.on = false; AP.full = false; AP.taxi = null; AP.land = false; AP.appr = false; atc.phase = ''; }, get target() { return target; } };
+  return { nearAircraft, claimAircraft, get target() { return target; }, netHit, myWing, get hp() { return hp; }, cloudsChanged, strike: () => lightning(ctx.fm()), hitAI: (f) => { const o = AI.find(o => o.kind === 'tfc' && o.role === 'dep'); if (o) { aiFull(o); Damage.hit(o.obj, new THREE.Vector3(f * 15, 0, 0), 30, { motion: { vel: new THREE.Vector3(), pos: o.pos.clone() } }); o.stuck = true; return o.pos; } }, get traffic() { return AI.filter(o => o.kind === 'tfc').map(o => o.G.R.name + o.role[0] + ':' + o.phase + ':' + Math.round(o.along ?? o.al)).join(' '); }, repair: () => repair(ctx.fm()), randomFailure, addGround(o) { ground.push(o); }, shootAt, nearestEnemy, fireDir, setTarget(o) { target = o; }, pip, deckAt, declareWar, gotoBattle, peace, init, key, control, update, radar, AP, radio, syncDest, takeNearestAI, resetFlight() { gh.h = null; gh.user = false; repair(ctx.fm()); nukes = 3; hp = 100; AP.on = false; AP.full = false; AP.taxi = null; AP.land = false; AP.appr = false; atc.phase = ''; }, get target() { return target; } };
 })();
 
 // ---- 14b_wreck.js ----
@@ -7009,28 +7382,18 @@ const Extra = (function () {
 
   // ---------- À PIED ----------
   const foot = { active: false, obj: null, pos: new THREE.Vector3(), hdg: 0, vy: 0, phase: 0, proxy: null };
-  function humanMesh() {
-    const g = new THREE.Group(); const m = c => new THREE.MeshStandardMaterial({ color: c, roughness: 0.8 });
-    const shirt = m(0xf2f2f0), navy = m(0x141c2e), skin = m(0x7a4a2c), gold = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.8, roughness: 0.3 });
-    const torso = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.62, 0.26), shirt); torso.position.y = 1.25; g.add(torso);
-    const tie = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.36, 0.01), navy); tie.position.set(0, 1.3, -0.135); g.add(tie);
-    for (const sx of [-0.19, 0.19]) { const ep = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.03, 0.2), navy); ep.position.set(sx, 1.57, 0); g.add(ep); const st = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.035, 0.03), gold); st.position.set(sx, 1.59, -0.05); g.add(st); }
-    const head = new THREE.Mesh(new THREE.SphereGeometry(0.12, 28, 18), new THREE.MeshStandardMaterial({ map: Humans.faceTex('#5c3a24', '#120c08'), roughness: 0.6 })); head.scale.y = 1.15; head.position.y = 1.72; g.add(head);
-    const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.08, 14), navy); cap.position.y = 1.85; g.add(cap);
-    const legs = [], arms = [];
-    for (const sx of [-0.12, 0.12]) { const lg = new THREE.Group(); lg.position.set(sx, 0.95, 0); const l = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.9, 0.18), navy); l.position.y = -0.45; lg.add(l); const sh = new THREE.Mesh(new THREE.BoxGeometry(0.17, 0.08, 0.28), m(0x0a0a0a)); sh.position.set(0, -0.9, -0.05); lg.add(sh); g.add(lg); legs.push(lg);
-      const ag = new THREE.Group(); ag.position.set(sx * 2.25, 1.52, 0); const a = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.6, 0.12), shirt); a.position.y = -0.3; ag.add(a); const h = new THREE.Mesh(new THREE.SphereGeometry(0.055, 8, 6), skin); h.position.y = -0.63; ag.add(h); g.add(ag); arms.push(ag); }
-    g.userData = { legs, arms }; g.traverse(o => o.castShadow = true); return g;
-  }
+  // le pilote qui sort de l'avion : tenue selon l'avion (commandant de bord, pilote de chasse, pilote militaire)
+  function pilotKind() { const ty = Settings.data.type || 'A320'; const sid = (AC_TYPES[ty] && AC_TYPES[ty].shapeOf) || ty; return ['chasseur', 'aurore', 'foudre', 'spectre'].includes(sid) ? 'chasse' : ['militaire', 'forteresse', 'dragon', 'goliath'].includes(sid) ? 'militaire' : 'pilote'; }
+  function humanMesh() { const g = Rig.make(pilotKind(), 1); g.userData.kindFor = pilotKind(); Rig.hold(g, Rig.gun(WEAPONS[W6.wi][4])); return g; }
   function footToggle() {
     const fm = ctx.fm();
     if (!foot.active) {
       if (!fm.onGround && fm.agl > 3) return T('On ne peut pas sortir en vol ! Posez-vous d\'abord.');
-      if (!foot.obj) { foot.obj = humanMesh(); }
+      if (!foot.obj || foot.obj.userData.kindFor !== pilotKind()) { foot.obj = humanMesh(); }
       const side = new THREE.Vector3(-(fm.spec.D ? fm.spec.D.R * 1.6 + 3 : 6), 0, fm.spec.D ? fm.spec.D.noseZ + 6 : -10).applyQuaternion(fm.q).add(fm.pos);
       foot.pos.set(side.x, Terrain.surfaceAt ? Terrain.surfaceAt(side.x, side.z) : Terrain.heightAt(side.x, side.z), side.z); foot.hdg = ((-fm.euler().y * RAD) + 360) % 360;
       World.add(foot.obj); foot.active = true; fm.parking = true; fm.throttle = 0; ctx.S.lever = 0; W6.won = false; setTimeout(spawnSquad, 50);
-      T('Vous êtes à pied. Z/Q/S/D ou flèches = marcher, ← → tourner, Maj = courir, J = sauter, I = réparer l\'avion (mécanicien), 0 = remonter.', 7000);
+      T('À PIED : Z/Q/S/D = marcher · souris ou ← → = tourner · Maj = COURIR vite · J = sauter · C = accroupi · P = à couvert (à plat ventre) · Espace = tirer · clic droit maintenu = viser · 1 à 7 = armes · R = recharger · I = mécanicien · 0 près de N\'IMPORTE QUEL avion = monter dedans.', 9000);
     } else {
       const d = Math.hypot(foot.pos.x - fm.pos.x, foot.pos.z - fm.pos.z); const max = 25 + (fm.spec.D ? fm.spec.D.L / 2 : 20);
       if (d > max) { T('Trop loin de l\'avion (' + Math.round(d) + ' m) — retour à votre avion.'); }
@@ -7040,14 +7403,14 @@ const Extra = (function () {
   function footUpdate(dt) {
     const c = ctx.codes; const fwd = (c.KeyZ || c.KeyW || c.ArrowUp ? 1 : 0) - (c.KeyS || c.ArrowDown ? 1 : 0); const str = (c.KeyD ? 1 : 0) - (c.KeyQ || c.KeyA ? 1 : 0);
     const turn = (c.ArrowRight ? 1 : 0) - (c.ArrowLeft ? 1 : 0); const run = c.ShiftLeft || c.ShiftRight;
-    foot.hdg += turn * 110 * dt; const sp = (run ? 6.5 : 2.4); const h = foot.hdg * DEG;
+    foot.hdg += turn * 110 * dt; const sp = W6.stance === 2 ? 0.8 : W6.stance === 1 ? (run ? 3 : 1.4) : (run ? 7.5 : 2.2); const h = foot.hdg * DEG;
     const vx = (Math.sin(h) * fwd + Math.cos(h) * str) * sp, vz = (-Math.cos(h) * fwd + Math.sin(h) * str) * sp;
     foot.pos.x += vx * dt; foot.pos.z += vz * dt;
     const gy = Terrain.surfaceAt ? Terrain.surfaceAt(foot.pos.x, foot.pos.z) : Terrain.heightAt(foot.pos.x, foot.pos.z);
     foot.vy -= 9.8 * dt; foot.pos.y += foot.vy * dt; if (foot.pos.y < gy) { foot.pos.y = gy; foot.vy = 0; }
-    const moving = Math.abs(fwd) + Math.abs(str) > 0; foot.phase += moving ? dt * sp * 2.6 : 0; const sw = moving ? Math.sin(foot.phase) * 0.6 : 0;
-    const U = foot.obj.userData; U.legs[0].rotation.x = sw; U.legs[1].rotation.x = -sw; U.arms[0].rotation.x = -sw * 0.8; U.arms[1].rotation.x = sw * 0.8;
-    foot.obj.position.copy(foot.pos); foot.obj.rotation.set(0, -h, 0);
+    const moving = Math.abs(fwd) + Math.abs(str) > 0;
+    Rig.animate(foot.obj, { speed: moving ? sp : 0, stance: W6.stance, air: foot.pos.y > gy + 0.05, aim: !!(ctx.codes.Mouse2 || ctx.codes.KeyX), dt });
+    foot.obj.position.copy(foot.pos); foot.obj.rotation.y = -h;
   }
   // objet « caméra » qui imite l'avion pour suivre le piéton
   const camProxy = { pos: new THREE.Vector3(), q: new THREE.Quaternion(), vel: new THREE.Vector3(), spec: { scale: 0.09, pts: { mainR: [0.5, -1, 0] }, gearH: 1 }, hyper: false, _fwd: new THREE.Vector3(),
@@ -7056,49 +7419,41 @@ const Extra = (function () {
     camProxy.spec.scale = 0.09; if (!foot.active) return fm; camProxy.pos.copy(foot.pos); camProxy.pos.y += 1.6; camProxy.q.setFromEuler(new THREE.Euler(0, -foot.hdg * DEG, 0, 'YXZ')); return camProxy; }
   function footKey(code, sh) {
     if (!foot.active) return false; const fm = ctx.fm();
-    if (code === 'Digit0' || code === 'F9' || code === 'KeyE') { const pv = veh.list.find(v => v.pos.distanceTo(foot.pos) < 7); if (pv) { World.remove(foot.obj); foot.active = false; veh.cur = pv; foot.inVeh = true; T('Vous remontez dans : ' + VEH[pv.kind][0]); return true; } clearSquad(); footToggle(); return true; }
+    if (code === 'Digit0' || code === 'F9' || code === 'KeyE') { const pv = veh.list.find(v => v.pos.distanceTo(foot.pos) < 7); if (pv) { World.remove(foot.obj); foot.active = false; veh.cur = pv; foot.inVeh = true; T('Vous remontez dans : ' + VEH[pv.kind][0]); return true; }
+      // N'IMPORTE QUEL avion à côté de moi : je monte dedans et je prends les commandes
+      const dOwn = Math.hypot(foot.pos.x - fm.pos.x, foot.pos.z - fm.pos.z) - (fm.spec.D ? fm.spec.D.L / 2 : 20); const other = Ops.nearAircraft(foot.pos);
+      if (other && other.gap < 14 && other.gap < dOwn) { clearSquad(); World.remove(foot.obj); foot.active = false; ctx.board(other); return true; }
+      clearSquad(); footToggle(); return true; }
     if (lot6Key(code)) return true;
-    if (code === 'KeyJ') { if (foot.vy === 0) foot.vy = 4.2; return true; }
+    if (code === 'KeyJ') { if (foot.vy === 0) { foot.vy = 4.6; W6.stance = 0; } return true; }
     if (code === 'KeyI') { const d = Math.hypot(foot.pos.x - fm.pos.x, foot.pos.z - fm.pos.z); if (d < 20 + (fm.spec.D ? fm.spec.D.L / 2 : 20)) { Ops.repair(); fm.crashed = false; fm.crashReason = ''; UI.show('crash', false); T('🔧 Le mécanicien a réparé l\'avion : ailes, moteurs, structure, train, volets et commandes OK.'); } else T('Approchez-vous de l\'avion pour le réparer (' + Math.round(d) + ' m).'); return true; }
     if (['KeyH', 'KeyV', 'KeyN', 'Escape', 'Digit8', 'Digit9', 'F7', 'F8'].includes(code)) return false;
     return true; // les autres touches ne pilotent pas l'avion quand on est à pied
   }
 
   // ================= LOT 6 : SOLDATS, ARMES À PIED, ENNEMIS, VÉHICULES PILOTABLES =================
-  const WEAPONS = [['Revolver', 0.5, 30, 6], ['Magnum', 0.7, 50, 6], ['Carabine', 0.11, 22, 30], ['Sniper', 1.3, 140, 5], ['Pistolet', 0.3, 18, 15], ['Lance-roquettes', 2.2, 220, 1], ['Pistolet lourd', 0.4, 38, 8]];
-  const W6 = { wi: 2, ammo: 30, cd: 0, squad: [], enemies: [], stance: 0, hp: 100, order: 0, view: 0 };
+  // 7 armes : [nom, cadence (s), dégâts, munitions, modèle 3D, rafale automatique]
+  const WEAPONS = [['Revolver', 0.5, 30, 6, 'revolver'], ['Magnum .44', 0.7, 55, 6, 'magnum'], ['Colt de cow-boy', 0.6, 40, 6, 'cowboy'], ['Pistolet', 0.28, 18, 15, 'pistolet'], ['Carabine d\'assaut', 0.1, 24, 30, 'carabine', 1], ['Mitraillette', 0.07, 16, 32, 'mitraillette', 1], ['Lance-roquettes', 2.2, 220, 1, 'lance-roquettes']];
+  const W6 = { wi: 4, ammo: 30, cd: 0, squad: [], enemies: [], stance: 0, hp: 100, order: 0, view: 0 };
   const ORDERS = ['SUIVRE', 'ASSAUT', 'TENIR LA POSITION'];
-  function soldierMesh(enemy) {
-    const g = new THREE.Group(); const m = c => new THREE.MeshStandardMaterial({ color: c, roughness: 0.85 });
-    const camo = m(enemy ? 0x4a3b2a : 0x4b5320), dark = m(0x1f2318), skin = m(enemy ? 0x8d5a3b : 0x5c3a24), gun = m(0x111111);
-    const torso = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.6, 0.28), camo); torso.position.y = 1.24; g.add(torso);
-    const vest = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.38, 0.3), dark); vest.position.y = 1.3; g.add(vest);
-    const head = new THREE.Mesh(new THREE.SphereGeometry(0.115, 20, 14), new THREE.MeshStandardMaterial({ map: Humans.faceTex(enemy ? '#8d5a3b' : '#5c3a24', '#120c08'), roughness: 0.6 })); head.scale.y = 1.12; head.position.y = 1.7; g.add(head);
-    const helm = new THREE.Mesh(new THREE.SphereGeometry(0.14, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2), camo); helm.position.y = 1.74; g.add(helm);
-    if (enemy) { const band = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.06, 0.13), m(0xc81e1e)); band.position.set(0.27, 1.42, 0); g.add(band); }
-    const legs = [], arms = [];
-    for (const sx of [-0.12, 0.12]) { const lg = new THREE.Group(); lg.position.set(sx, 0.95, 0); const l = new THREE.Mesh(new THREE.BoxGeometry(0.17, 0.9, 0.19), camo); l.position.y = -0.45; lg.add(l); const b = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.12, 0.3), dark); b.position.set(0, -0.88, -0.05); lg.add(b); g.add(lg); legs.push(lg);
-      const ag = new THREE.Group(); ag.position.set(sx * 2.3, 1.5, 0); const a = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.55, 0.13), camo); a.position.y = -0.27; ag.add(a); ag.rotation.x = -1.1; g.add(ag); arms.push(ag); }
-    const rifle = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.09, 0.85), gun); rifle.position.set(0.12, 1.28, -0.45); g.add(rifle);
-    g.userData = { legs, arms }; g.traverse(o => o.castShadow = true); return g;
-  }
+  function soldierMesh(enemy, wi, seed) { const g = Rig.make(enemy ? 'ennemi' : 'soldat', seed || 0); Rig.hold(g, Rig.gun(WEAPONS[wi ?? (enemy ? 5 : 4)][4])); return g; }
   function spawnSquad() {
-    if (W6.squad.length) return; for (let k = 0; k < 5; k++) { const o = { obj: soldierMesh(false), pos: foot.pos.clone().add(new THREE.Vector3((k - 2) * 2.5, 0, 4 + (k % 2) * 2)), hdg: foot.hdg, cd: 1 + k * 0.3, ph: k, wi: 2 }; World.add(o.obj); W6.squad.push(o); }
+    if (W6.squad.length) return; for (let k = 0; k < 5; k++) { const o = { obj: soldierMesh(false, k === 0 ? 6 : k % 2 ? 4 : 5, k), pos: foot.pos.clone().add(new THREE.Vector3((k - 2) * 2.5, 0, 4 + (k % 2) * 2)), hdg: foot.hdg, cd: 1 + k * 0.3, ph: k, wi: k === 0 ? 6 : k % 2 ? 4 : 5 }; World.add(o.obj); W6.squad.push(o); }
     // patrouille ennemie à 300 m devant
-    const h = foot.hdg * DEG; for (let k = 0; k < 6; k++) { const p = foot.pos.clone().add(new THREE.Vector3(Math.sin(h) * (280 + k * 12) + (k - 3) * 8, 0, -Math.cos(h) * (280 + k * 12))); p.y = Terrain.heightAt(p.x, p.z); const o = { obj: soldierMesh(true), pos: p.clone().add(new THREE.Vector3(0, 1.2, 0)), hp: 40, name: 'Soldat ennemi', ground: true, kind: 'soldier', cd: 2 + k, ph: k, hdg: foot.hdg + 180 }; World.add(o.obj); Ops.addGround(o); W6.enemies.push(o); }
+    const h = foot.hdg * DEG; for (let k = 0; k < 6; k++) { const p = foot.pos.clone().add(new THREE.Vector3(Math.sin(h) * (280 + k * 12) + (k - 3) * 8, 0, -Math.cos(h) * (280 + k * 12))); p.y = Terrain.heightAt(p.x, p.z); const o = { obj: soldierMesh(true, 5, k), pos: p.clone().add(new THREE.Vector3(0, 1.2, 0)), hp: 40, name: 'Soldat ennemi', ground: true, kind: 'soldier', cd: 2 + k, ph: k, hdg: foot.hdg + 180 }; World.add(o.obj); Ops.addGround(o); W6.enemies.push(o); }
     T('Votre escouade de 5 soldats vous suit. Patrouille ennemie à 300 m ! Espace = tirer · 1–7 = armes · Tab = cible · F = ordres · T = prendre un autre soldat.', 8000);
   }
   function clearSquad() { W6.squad.forEach(o => World.remove(o.obj)); W6.squad.length = 0; W6.enemies.forEach(o => { World.remove(o.obj); o.dead = true; }); W6.enemies.length = 0; }
-  function walkAnim(o, moving, dt) { o.ph += moving ? dt * 7 : 0; const sw = moving ? Math.sin(o.ph) * 0.6 : 0; const U = o.obj.userData; U.legs[0].rotation.x = sw; U.legs[1].rotation.x = -sw; }
+  function walkAnim(o, moving, dt, fast) { Rig.animate(o.obj, { speed: moving ? (fast ? 6 : 2.4) : 0, stance: 0, aim: !moving, dt }); }
   function lot6Update(dt) {
     if (!foot.active) return; const fm = ctx.fm(); W6.cd -= dt;
     // tir continu (carabine) en maintenant Espace
-    if (ctx.codes.Space && W6.wi === 2 && W6.cd <= 0) shoot();
+    if (ctx.codes.Space && WEAPONS[W6.wi][5] && W6.cd <= 0) shoot();
     W6.squad.forEach((o, k) => {
       const h = foot.hdg * DEG, row = 1 + (k >> 1), side = k % 2 ? 1 : -1; const want = W6.order === 2 ? o.pos.clone() : foot.pos.clone().add(new THREE.Vector3(-Math.sin(h) * 3 * row + Math.cos(h) * side * 2.5, 0, Math.cos(h) * 3 * row + Math.sin(h) * side * 2.5));
       const en = Ops.nearestEnemy(o.pos, W6.order === 1 ? 600 : 350); if (W6.order === 1 && en) want.copy(en.pos).add(new THREE.Vector3(side * 20, 0, 25));
       const d = want.clone().sub(o.pos); d.y = 0; const dist = d.length(); const moving = dist > 1.5; if (moving) { o.pos.addScaledVector(d.normalize(), Math.min(dist, (dist > 15 ? 6 : 2.6) * dt)); o.hdg = Math.atan2(d.x, -d.z) * RAD; }
-      o.pos.y = Terrain.heightAt(o.pos.x, o.pos.z); walkAnim(o, moving, dt); if (en) o.hdg = Math.atan2(en.pos.x - o.pos.x, -(en.pos.z - o.pos.z)) * RAD;
+      o.pos.y = Terrain.heightAt(o.pos.x, o.pos.z); walkAnim(o, moving, dt, dist > 15); if (en) o.hdg = Math.atan2(en.pos.x - o.pos.x, -(en.pos.z - o.pos.z)) * RAD;
       o.obj.position.copy(o.pos); o.obj.rotation.set(0, -o.hdg * DEG, 0);
       o.cd -= dt; if (en && o.cd < 0) { o.cd = 0.9 + Math.random() * 0.6; Ops.shootAt(o.pos.clone().add(new THREE.Vector3(0, 1.4, 0)), en, 'gun'); }
     });
@@ -7109,18 +7464,18 @@ const Extra = (function () {
       e.cd -= dt; if (dist < 450 && e.cd < 0) { e.cd = 2.5 + Math.random() * 3; Ops.fireDir(e.pos.clone().add(new THREE.Vector3(0, 0.3, 0)), foot.pos.clone().add(new THREE.Vector3((Math.random() - 0.5) * 4, 1.4, (Math.random() - 0.5) * 4)).sub(e.pos)); if (Math.random() < (W6.stance ? 0.06 : 0.14)) { W6.hp -= 10; T('Vous êtes touché ! Santé ' + Math.max(0, W6.hp) + ' % — mettez-vous à couvert (C ou P).', 2000); if (W6.hp <= 0) { W6.hp = 100; foot.pos.copy(fm.pos).add(new THREE.Vector3(8, 0, 8)); T('Vous avez été évacué près de votre avion. Santé 100 %.', 4000); } } }
     }
     if (W6.enemies.length && W6.enemies.every(e => e.dead) && !W6.won) { W6.won = true; T('🏆 Patrouille ennemie neutralisée !', 5000); }
-    foot.obj.scale.y = W6.stance === 1 ? 0.7 : W6.stance === 2 ? 0.35 : 1;
   }
   function shoot() {
     const w = WEAPONS[W6.wi]; if (W6.cd > 0) return; if (W6.ammo <= 0) { T('Chargeur vide — R pour recharger.', 1200); return; } W6.ammo--; W6.cd = w[1];
+    { const R = foot.obj && foot.obj.userData.rig; const mz = R && R.gun && R.gun.userData.muzzle; if (mz) { const v = new THREE.Vector3(); mz.getWorldPosition(v); v.x += World.ox; v.z += World.oz; for (let k = 0; k < 6; k++) Particles.emit(v.x, v.y, v.z, (Math.random() - 0.5) * 2, (Math.random() - 0.5) * 2, (Math.random() - 0.5) * 2, W6.wi === 6 ? 1.2 : 0.25, 0.6, 3, 2.2, 0.8, 1, 0.06); if (W6.wi === 6) for (let k = 0; k < 10; k++) Particles.emit(v.x, v.y, v.z, (Math.random() - 0.5) * 3, Math.random() * 2, (Math.random() - 0.5) * 3, 1.5, 3, 0.7, 0.7, 0.7, 0.6, 2); } }
     const from = foot.pos.clone().add(new THREE.Vector3(0, 1.45 * (W6.stance === 2 ? 0.3 : W6.stance ? 0.7 : 1), 0)); const tg = Ops.target && !Ops.target.dead && Ops.target.pos.distanceTo(foot.pos) < 1500 ? Ops.target : Ops.nearestEnemy(foot.pos, 600);
-    if (W6.wi === 5) { if (tg) Ops.shootAt(from, tg, 'msl'); else T('Pas de cible pour la roquette (Tab).'); return; }
-    if (tg) { const dmgRoll = Math.random() < (W6.wi === 3 ? 0.95 : 0.6); Ops.shootAt(from, tg, 'gun'); if (dmgRoll) { tg.hp -= w[2]; if (tg.hp <= 0 && !tg.dead) { tg.dead = true; Ops.kills = (Ops.kills || 0) + 1; T('💥 ' + tg.name + ' neutralisé', 1500); } } }
-    else Ops.fireDir(from, new THREE.Vector3(Math.sin(foot.hdg * DEG), 0.02, -Math.cos(foot.hdg * DEG)), W6.wi === 3 ? 'sniper' : 'gun');
+    if (W6.wi === 6) { if (tg) Ops.shootAt(from, tg, 'msl'); else T('Pas de cible pour la roquette (Tab).'); return; }
+    if (tg) { const dmgRoll = Math.random() < (W6.wi === 1 ? 0.8 : 0.6); Ops.shootAt(from, tg, 'gun'); if (dmgRoll) { tg.hp -= w[2]; if (tg.hp <= 0 && !tg.dead) { tg.dead = true; Ops.kills = (Ops.kills || 0) + 1; T('💥 ' + tg.name + ' neutralisé', 1500); } } }
+    else Ops.fireDir(from, new THREE.Vector3(Math.sin(foot.hdg * DEG), 0.02, -Math.cos(foot.hdg * DEG)), W6.wi === 1 ? 'sniper' : 'gun');
   }
   function lot6Key(code) {
     if (code === 'Space') { shoot(); return true; }
-    if (/^Digit[1-7]$/.test(code)) { W6.wi = +code.slice(5) - 1; W6.ammo = WEAPONS[W6.wi][3]; T('Arme : ' + WEAPONS[W6.wi][0] + ' (' + W6.ammo + ' coups)', 1500); return true; }
+    if (/^Digit[1-7]$/.test(code)) { W6.wi = +code.slice(5) - 1; W6.ammo = WEAPONS[W6.wi][3]; if (foot.obj) Rig.hold(foot.obj, Rig.gun(WEAPONS[W6.wi][4])); T('Arme : ' + WEAPONS[W6.wi][0] + ' (' + W6.ammo + ' coups)', 1500); return true; }
     if (code === 'KeyR') { W6.ammo = WEAPONS[W6.wi][3]; T('Rechargé : ' + W6.ammo + ' coups', 1000); return true; }
     if (code === 'KeyC') { W6.stance = W6.stance === 1 ? 0 : 1; T(W6.stance ? 'Accroupi (moins visible)' : 'Debout', 1000); return true; }
     if (code === 'KeyP' || code === 'KeyB') { W6.stance = W6.stance === 2 ? 0 : 2; T(W6.stance ? 'À plat ventre / à couvert' : 'Debout', 1000); return true; }
@@ -7128,9 +7483,9 @@ const Extra = (function () {
     if (code === 'KeyU') { Ops.setTarget(null); T('Cible lâchée', 1000); return true; }
     if (code === 'KeyM') { const e = Ops.nearestEnemy(foot.pos, 3); if (e) { e.hp -= 25; if (e.hp <= 0) { e.dead = true; T('💥 Ennemi neutralisé au corps à corps'); } } else T('Coup de poing dans le vide…', 900); return true; }
     if (code === 'KeyF') { W6.order = (W6.order + 1) % 3; T('Ordre à l\'escouade : ' + ORDERS[W6.order], 2000); return true; }
-    if (code === 'KeyT') { const s = W6.squad[W6.ctrl = ((W6.ctrl ?? -1) + 1) % Math.max(1, W6.squad.length)]; if (s) { const p = s.pos.clone(); s.pos.copy(foot.pos); foot.pos.copy(p); T('Vous contrôlez le soldat ' + (W6.ctrl + 1), 1500); } return true; }
+    if (code === 'KeyT') { const s = W6.squad[W6.ctrl = ((W6.ctrl ?? -1) + 1) % Math.max(1, W6.squad.length)]; if (s) { const p = s.pos.clone(), h = s.hdg, ob = s.obj, wi = s.wi; s.pos.copy(foot.pos); s.hdg = foot.hdg; s.obj = foot.obj; s.wi = W6.wi; foot.obj = ob; foot.pos.copy(p); foot.hdg = h; W6.wi = wi; W6.ammo = WEAPONS[wi][3]; T('🎮 Vous contrôlez maintenant le soldat ' + (W6.ctrl + 1) + ' (' + WEAPONS[wi][0] + ') — T = soldat suivant', 2000); } return true; }
     if (code === 'KeyG') { T('Retour au chef d\'escouade', 1200); W6.ctrl = -1; return true; }
-    if (code === 'KeyY' || code === 'KeyN') { const s = W6.squad[0]; if (s) { s.wi = (s.wi + 1) % 7; T('Arme du coéquipier : ' + WEAPONS[s.wi][0], 1500); } return true; }
+    if (code === 'KeyY' || code === 'KeyN') { const s = W6.squad[0]; if (s) { s.wi = (s.wi + 1) % 7; Rig.hold(s.obj, Rig.gun(WEAPONS[s.wi][4])); T('Arme du coéquipier : ' + WEAPONS[s.wi][0], 1500); } return true; }
     if (code === 'KeyO') { CameraRig.setById('orbite'); return true; } if (code === 'KeyK') { CameraRig.setById('face'); return true; }
     return false;
   }
