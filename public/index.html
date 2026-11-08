@@ -246,9 +246,12 @@ body.incockpit.autoclean #pfd,body.incockpit.autoclean #status,body.incockpit.au
     <div class="k"><kbd>Maj+R</kbd><span>Voix radio marche / arrêt</span></div>
     <h4>12 · Combat (avion armé)</h4>
     <div class="k"><kbd>1 ou F2</kbd><span>Canon : tirer en rafale (maintenir)</span></div>
-    <div class="k"><kbd>2, F3 ou Entrée</kbd><span>Tirer un missile</span></div>
+    <div class="k"><kbd>2 ou F3</kbd><span>Missile GUIDÉ (suit la cible)</span></div>
+    <div class="k"><kbd>7</kbd><span>Missile LONGUE PORTÉE à grande explosion (gros, va très loin)</span></div>
+    <div class="k"><kbd>Entrée</kbd><span>Missile FURTIF (sombre, discret, très rapide)</span></div>
     <div class="k"><kbd>3 ou F4</kbd><span>Lâcher une bombe</span></div>
-    <div class="k"><kbd>5</kbd><span>Bombe atomique (3 par vol)</span></div>
+    <div class="k"><kbd>5</kbd><span>Bombe atomique (3 par vol) : grosse bombe avec le signe radioactif</span></div>
+    <div class="k"><kbd>Avion touché</kbd><span>Il explose (BOUM), perd une aile, prend feu et tombe jusqu'au crash au sol</span></div>
     <div class="k"><kbd>Y</kbd><span>Cible suivante</span></div>
     <div class="k"><kbd>F6</kbd><span>Lâcher la cible</span></div>
     <div class="k"><kbd>Retour ←</kbd><span>Leurres (contre les missiles)</span></div>
@@ -256,7 +259,8 @@ body.incockpit.autoclean #pfd,body.incockpit.autoclean #status,body.incockpit.au
     <div class="k"><kbd>T (sur le pont)</kbd><span>Catapulte du porte-avions</span></div>
     <div class="k"><kbd>Maj+Q</kbd><span>Appeler l'escadrille</span></div>
     <h4>13 · À pied, soldats et véhicules</h4>
-    <div class="k"><kbd>0 ou F9</kbd><span>Sortir de l'avion (tenue selon l'avion : commandant de bord, pilote de chasse, pilote militaire) — ton escouade de soldats descend avec toi</span></div>
+    <div class="k"><kbd>0 ou F9</kbd><span>Sortir de l'avion (tenue selon l'avion) — ton escouade descend avec toi. Choisis son TYPE et son NOMBRE (0 à 60) dans le panneau H : soldats, hommes en noir / agents secrets, intervention rapide (tout en noir, gilet pare-balles, bottes), ou mélange</span></div>
+    <div class="k"><kbd>B</kbd><span>Saluer (les passagers et les agents de l'aéroport te saluent quand tu passes près d'eux)</span></div>
     <div class="k"><kbd>0 près d'un avion</kbd><span>Monter dans N'IMPORTE QUEL avion à côté de toi (garé, en roulage…) et prendre ses commandes</span></div>
     <div class="k"><kbd>Z Q S D</kbd><span>Marcher dans tous les sens (avant, arrière, de côté)</span></div>
     <div class="k"><kbd>← → / souris</kbd><span>Tourner</span></div>
@@ -367,6 +371,8 @@ body.incockpit.autoclean #pfd,body.incockpit.autoclean #status,body.incockpit.au
     <label>Vitesse du temps</label>
     <select id="selTime"><option value="1">Temps réel</option><option value="60">× 60 (1 h par minute)</option><option value="600">× 600</option><option value="0">Arrêté</option></select>
     <label>Météo</label><select id="selWeather"></select>
+    <label>Mon escouade quand je sors de l'avion (0)</label><select id="selSquadKind"><option value="soldat">Militaires (treillis, casque)</option><option value="agent">Hommes en noir (agents secrets)</option><option value="intervention">Intervention rapide (tout en noir, gilets pare-balles)</option><option value="mix">Mélange des trois</option></select>
+    <label>Nombre d'hommes : <b id="squadNv">5</b></label><input type="range" id="squadN" min="0" max="60" step="1" value="5">
     <label>Escadrilles de Rafale (Maj+Q ou bouton)</label><select id="selSquad"><option value="1">1 escadrille (4 Rafale)</option><option value="2">2 escadrilles (8 Rafale)</option><option value="3">3 escadrilles (12 Rafale)</option><option value="4">4 escadrilles (16 Rafale)</option></select>
     <select id="selSquadLiv"><option value="">Couleurs de mon pays</option><option value="gris">Rafale gris</option><option value="desert">Rafale désert</option></select>
     <button id="btnSquad" style="width:100%;margin-top:6px">✈ Lancer / rappeler mes escadrilles</button>
@@ -391,7 +397,7 @@ body.incockpit.autoclean #pfd,body.incockpit.autoclean #status,body.incockpit.au
 <script>
 // ---- 00_util.js ----
 // ===== Outils communs =====
-const VERSION = 'Version 35 · 08/11';
+const VERSION = 'Version 36 · 08/11';
 const DEG = Math.PI / 180, RAD = 180 / Math.PI;
 const KT = 0.514444, FT = 0.3048;
 const clamp = (x, a, b) => x < a ? a : (x > b ? b : x);
@@ -1930,7 +1936,7 @@ const Weather = (function () {
 
 // ===== Particules (sillage, poussière, fumée, étincelles) =====
 const Particles = (function () {
-  const MAX = 3000; let pts, geo, pos, col, size, alpha, life, vel, maxLife, grow, n = 0, mat;
+  const MAX = 7000; let pts, geo, pos, col, size, alpha, life, vel, maxLife, grow, n = 0, mat;
   function init(scene) {
     geo = new THREE.BufferGeometry();
     pos = new Float32Array(MAX * 3); col = new Float32Array(MAX * 3); size = new Float32Array(MAX); alpha = new Float32Array(MAX);
@@ -2476,10 +2482,17 @@ const Rig = (function () {
   function head(o) {
     const g = new THREE.Group(); const skin = mat('skin' + o.skin, o.skin, 0.55);
     const geo = new THREE.SphereGeometry(0.1, 40, 30); const P = geo.attributes.position;
-    for (let i = 0; i < P.count; i++) { let x = P.getX(i), y = P.getY(i), z = P.getZ(i);
-      const low = Math.max(0, -y / 0.1); x *= 1 - 0.28 * low; z *= 1 - 0.12 * low; if (z < 0) z *= 1.08; // mâchoire plus étroite, visage en avant
-      if (y < -0.04 && z < 0) z -= 0.012 * (1 - Math.abs(x) / 0.1); // menton
-      x *= 0.86; y *= 1.18; P.setXYZ(i, x, y, z); }
+    // crâne humain : arrière de la tête bombé, tempes plates, arcade sourcilière, pommettes, mâchoire en V, menton
+    for (let i = 0; i < P.count; i++) { let x = P.getX(i), y = P.getY(i), z = P.getZ(i); const nx = x / 0.1, ny = y / 0.1, nz = z / 0.1;
+      x *= 0.84; if (ny > 0.1) x *= 1 - 0.06 * ny; // tempes
+      if (nz > 0 && ny > -0.3) z *= 1.08; // occiput
+      if (nz < 0) z *= 0.94; // visage moins bombé
+      if (nz < -0.55 && ny > 0.12 && ny < 0.38) z -= 0.007 * (1 - Math.abs(nx)); // arcade sourcilière
+      if (nz < -0.3 && ny < 0.05 && ny > -0.35 && Math.abs(nx) > 0.35) { x *= 1.04; z -= 0.004; } // pommettes
+      if (nz < -0.5 && ny < -0.1 && ny > -0.35 && Math.abs(nx) < 0.5) z += 0.004; // creux sous les pommettes
+      if (ny < -0.15) { const k = Math.min(1, (-ny - 0.15) / 0.85); x *= 1 - 0.38 * k; if (nz > 0) z *= 1 - 0.45 * k; } // mâchoire en V, nuque
+      if (ny < -0.62 && nz < -0.2) z -= 0.012 * (1 - Math.abs(nx) * 1.6); // menton
+      y *= 1.2; P.setXYZ(i, x, y, z); }
     geo.computeVertexNormals();
     const face = new THREE.MeshStandardMaterial({ map: Humans.faceTex(o.skin, o.hair || '#120c08'), roughness: 0.55 });
     g.add(mesh(geo, face));
@@ -2492,7 +2505,8 @@ const Rig = (function () {
       const lid = mesh(new THREE.SphereGeometry(0.0145, 12, 6, 0, Math.PI * 2, 0, Math.PI * 0.42), skin, sx * 0.033, 0.019, -0.083); g.add(lid);
       const brow = mesh(new THREE.BoxGeometry(0.032, 0.006, 0.01), mat('hair' + o.hair, o.hair || '#120c08', 0.9), sx * 0.034, 0.04, -0.092); brow.rotation.z = -sx * 0.12; g.add(brow);
     }
-    const lips = mesh(new THREE.TorusGeometry(0.016, 0.0045, 6, 16), mat('lips' + o.skin, o.lips || '#5a2f22', 0.5), 0, -0.052, -0.094, 1, 0.42, 0.6); g.add(lips);
+    const lips = mesh(new THREE.TorusGeometry(0.016, 0.0045, 6, 16), mat('lips' + o.skin, o.lips || '#5a2f22', 0.5), 0, -0.052, -0.094, 1, 0.42, 0.6); g.add(lips); g.userData.lips = lips;
+    const mouth = mesh(new THREE.CircleGeometry(0.012, 14), mat('mouth', '#1a0606', 0.9), 0, -0.052, -0.0985, 1, 0.05, 1); mouth.rotation.y = Math.PI; g.add(mouth); g.userData.mouth = mouth;
     if (!o.noHair) { const hair = mesh(new THREE.SphereGeometry(0.104, 28, 14, 0, Math.PI * 2, 0, Math.PI * 0.42), mat('hair' + o.hair, o.hair || '#120c08', 0.95), 0, 0.012, 0.006, 0.88, 1.2, 1.02); g.add(hair); }
     if (o.beard) { const bd = mesh(new THREE.SphereGeometry(0.1, 26, 12, Math.PI * 0.12, Math.PI * 0.76, Math.PI * 0.56, Math.PI * 0.3), mat('beard', '#0d0907', 0.95), 0, 0.0, 0.0, 0.89, 1.2, 1.06); bd.rotation.y = Math.PI; g.add(bd);
       g.add(mesh(new THREE.BoxGeometry(0.045, 0.007, 0.012), mat('beard', '#0d0907', 0.95), 0, -0.04, -0.097)); }
@@ -2501,7 +2515,7 @@ const Rig = (function () {
   // ---------- main à 5 doigts ----------
   function hand(m, sd, grip) {
     const g = new THREE.Group(); g.add(mesh(sph(0.042, 12, 10), m, 0, -0.045, 0, 0.75, 1.0, 0.42));
-    for (let f = 0; f < 4; f++) { const fg = new THREE.Group(); fg.position.set((f - 1.5) * 0.017, -0.085, 0); const a = mesh(limbGeo(0.03, [0.0085, 0.008, 0.0075], 8), m); fg.add(a); const b = new THREE.Group(); b.position.y = -0.03; b.add(mesh(limbGeo(0.026 - Math.abs(f - 1.5) * 0.003, [0.0075, 0.007, 0.0055], 8), m)); fg.add(b); fg.rotation.x = grip ? 1.2 : 0.25; b.rotation.x = grip ? 1.3 : 0.3; g.add(fg); }
+    for (let f = 0; f < 4; f++) { const fg = new THREE.Group(); fg.position.set((f - 1.5) * 0.017, -0.085, 0); const a = mesh(limbGeo(0.03, [0.0085, 0.008, 0.0075], 8), m); fg.add(a); const b = new THREE.Group(); b.position.y = -0.03; b.add(mesh(limbGeo(0.026 - Math.abs(f - 1.5) * 0.003, [0.0075, 0.007, 0.0055], 8), m)); fg.add(b); const idx = (sd > 0 ? f === 0 : f === 3); fg.rotation.x = grip ? (idx ? 0.55 : 1.35) : 0.25; b.rotation.x = grip ? (idx ? 0.6 : 1.45) : 0.3; g.add(fg); }
     const th = new THREE.Group(); th.position.set(-sd * 0.03, -0.035, -0.012); th.add(mesh(limbGeo(0.045, [0.01, 0.009, 0.007], 8), m)); th.rotation.set(grip ? 0.9 : 0.3, 0, -sd * 0.6); g.add(th);
     return g;
   }
@@ -2522,7 +2536,10 @@ const Rig = (function () {
   function make(kind, seed, opts) {
     seed = seed || 0; opts = opts || {};
     const dark = ['#3b2318', '#2f1b11', '#4a2c1c', '#5c3a24'], light = ['#c58c66', '#8d5a3b', '#e0ac87'];
-    const skin = kind === 'ennemi' ? light[seed % light.length] : dark[seed % dark.length];
+    // peaux et cheveux variés : pilotes noirs, métis, blancs…
+    const ALL = ['#3b2318', '#5c3a24', '#8d5a3b', '#c58c66', '#e0ac87', '#f1c9a5', '#2f1b11', '#6b4430'];
+    const skin = opts.skin || (kind === 'ennemi' ? light[seed % light.length] : ALL[seed % ALL.length]);
+    const lightSkin = ['#c58c66', '#e0ac87', '#f1c9a5'].includes(skin); const hairC = lightSkin ? ['#3b2716', '#7a5a35', '#c9a35a', '#1c140e', '#8a8a8a'][(seed >> 1) % 5] : '#0e0a08';
     const O = { kind };
     // tenue
     const T = {
@@ -2530,7 +2547,11 @@ const Rig = (function () {
       chasse: { top: fabric('flight', '#4a5240'), legs: fabric('flight', '#4a5240'), boot: mat('bootB', '#141414', 0.45), glove: mat('gloveT', '#6b5a45', 0.75) },
       militaire: { top: fabric('flight2', '#5e6a4c'), legs: fabric('flight2', '#5e6a4c'), boot: mat('bootB', '#141414', 0.45), glove: null },
       soldat: { top: fabric('camoF', '#ffffff', 'foret'), legs: fabric('camoF', '#ffffff', 'foret'), boot: mat('bootB', '#141414', 0.45), glove: mat('gloveB', '#22241f', 0.7) },
-      ennemi: { top: fabric('camoD', '#ffffff', 'desert'), legs: fabric('camoD', '#ffffff', 'desert'), boot: mat('bootD', '#5a4630', 0.6), glove: mat('gloveB', '#22241f', 0.7) }
+      ennemi: { top: fabric('camoD', '#ffffff', 'desert'), legs: fabric('camoD', '#ffffff', 'desert'), boot: mat('bootD', '#5a4630', 0.6), glove: mat('gloveB', '#22241f', 0.7) },
+      agent: { top: fabric('suitB', '#121315'), legs: fabric('suitB', '#121315'), boot: mat('shoe', '#0b0b0b', 0.25, 0.1), glove: null },
+      intervention: { top: fabric('tacB', '#1a1b1d'), legs: fabric('tacB', '#1a1b1d'), boot: mat('bootB', '#141414', 0.45), glove: mat('gloveB', '#22241f', 0.7) },
+      civil: { top: fabric('civT' + (seed % 6), ['#c0392b', '#2980b9', '#27ae60', '#f39c12', '#ecf0f1', '#8e44ad'][seed % 6]), legs: fabric('civL' + (seed % 4), ['#1c2433', '#3b3f46', '#4a3a2a', '#1f3a5f'][seed % 4]), boot: mat('shoeC', '#2a1f18', 0.5), glove: null },
+      agentpiste: { top: fabric('vestY', '#f2c200'), legs: fabric('navy', '#141c2e'), boot: mat('bootB', '#141414', 0.45), glove: null }
     }[kind] || {};
     const skinM = mat('skin' + skin, skin, 0.55); const sole = mat('sole', '#0a0a0a', 0.9);
     const root = new THREE.Group(); const J = {};
@@ -2544,7 +2565,7 @@ const Rig = (function () {
     for (const sx of [-1, 1]) chest.add(mesh(sph(0.062, 16, 12), T.top, sx * 0.19, 0.225, 0, 1, 0.8, 0.95)); // deltoïdes
     // cou + tête
     const neck = new THREE.Group(); neck.position.y = 0.27; chest.add(neck); J.neck = neck; neck.add(mesh(limbGeo(0.09, [0.048, 0.05, 0.056], 14), skinM, 0, 0.09, 0));
-    const hd = new THREE.Group(); hd.position.y = 0.17; neck.add(hd); J.head = hd; hd.add(head({ skin, hair: '#0e0a08', beard: kind !== 'pilote' || seed % 2 === 0, noHair: ['chasse', 'soldat', 'ennemi'].includes(kind) }));
+    const hd = new THREE.Group(); hd.position.y = 0.17; neck.add(hd); J.head = hd; const HD = head({ skin, hair: hairC, beard: kind !== 'pilote' || seed % 2 === 0, noHair: ['chasse', 'soldat', 'ennemi', 'intervention'].includes(kind) }); hd.add(HD); J.lips = HD.userData.lips; J.mouth = HD.userData.mouth;
     // bras
     const arm = sd => {
       const sh = new THREE.Group(); sh.position.set(sd * 0.215, 0.215, 0); chest.add(sh);
@@ -2553,10 +2574,10 @@ const Rig = (function () {
       const el = new THREE.Group(); el.position.y = -0.29; sh.add(el);
       el.add(mesh(limbGeo(0.26, [0.047, 0.05, 0.043, 0.034, 0.03], 16), kind === 'pilote' ? T.top : T.top));
       if (kind === 'pilote') el.add(mesh(new THREE.CylinderGeometry(0.031, 0.031, 0.03, 12), mat('cuff', '#f2f2ee', 0.6), 0, -0.24, 0));
-      const wr = new THREE.Group(); wr.position.y = -0.26; el.add(wr); wr.add(hand(T.glove || skinM, sd, false));
-      return { sh, el, wr };
+      const wr = new THREE.Group(); wr.position.y = -0.26; el.add(wr); const hOpen = hand(T.glove || skinM, sd, false), hGrip = hand(T.glove || skinM, sd, true); hGrip.visible = false; wr.add(hOpen, hGrip);
+      return { sh, el, wr, hOpen, hGrip };
     };
-    const AL = arm(-1), AR = arm(1); J.shL = AL.sh; J.elL = AL.el; J.wrL = AL.wr; J.shR = AR.sh; J.elR = AR.el; J.wrR = AR.wr;
+    const AL = arm(-1), AR = arm(1); J.shL = AL.sh; J.elL = AL.el; J.wrL = AL.wr; J.shR = AR.sh; J.elR = AR.el; J.wrR = AR.wr; J.hands = { L: [AL.hOpen, AL.hGrip], R: [AR.hOpen, AR.hGrip] };
     // jambes
     const leg = sd => {
       const hp = new THREE.Group(); hp.position.set(sd * 0.095, -0.05, 0); pelvis.add(hp);
@@ -2600,6 +2621,27 @@ const Rig = (function () {
         hd.add(mesh(new THREE.CircleGeometry(0.014, 12), gold, -0.05, 0.06, -0.095));
       }
     }
+    if (kind === 'agent') { // homme en noir : costume, chemise blanche, cravate noire, lunettes noires, oreillette
+      chest.add(mesh(new THREE.BoxGeometry(0.1, 0.2, 0.01), mat('shirtW2', '#f4f4f2', 0.6), 0, 0.17, -0.14)); chest.add(mesh(new THREE.BoxGeometry(0.035, 0.22, 0.012), mat('tieB', '#050505', 0.4), 0, 0.15, -0.148));
+      for (const sx of [-1, 1]) { const lap = mesh(new THREE.BoxGeometry(0.06, 0.2, 0.012), fabric('suitB', '#121315'), sx * 0.06, 0.17, -0.145); lap.rotation.z = sx * 0.35; chest.add(lap); }
+      const gl = new THREE.Group(); gl.position.set(0, 0.018, -0.095); hd.add(gl); for (const sx of [-1, 1]) gl.add(mesh(new THREE.BoxGeometry(0.034, 0.02, 0.006), mat('glass', '#050505', 0.05, 0.6), sx * 0.033, 0, 0)); gl.add(mesh(new THREE.BoxGeometry(0.03, 0.004, 0.004), mat('glass', '#050505', 0.05, 0.6), 0, 0.006, 0));
+      hd.add(mesh(new THREE.CylinderGeometry(0.002, 0.002, 0.1, 6), mat('wire', '#d8d8d8', 0.4), 0.092, -0.05, 0.02));
+    }
+    if (kind === 'agentpiste') { // agent de piste : gilet jaune fluo à bandes, casque antibruit, casquette
+      for (const yy of [0.05, 0.16]) chest.add(mesh(new THREE.CylinderGeometry(0.205, 0.2, 0.025, 20), mat('refl', '#d9dde2', 0.25, 0.6), 0, yy, 0, 1, 1, 0.7));
+      const cap = mesh(new THREE.SphereGeometry(0.108, 20, 10, 0, Math.PI * 2, 0, Math.PI * 0.45), mat('capY', '#f2c200', 0.7), 0, 0.03, 0.005, 0.95, 0.8, 1.05); hd.add(cap); hd.add(mesh(new THREE.BoxGeometry(0.12, 0.008, 0.07), mat('capY', '#f2c200', 0.7), 0, 0.025, -0.11));
+    }
+    if (kind === 'intervention') { // bataillon d'intervention rapide : tout en noir, gilet pare-balles lourd, cagoule, casque balistique
+      const vm = mat('vestN', '#0e0f10', 0.75); chest.add(mesh(new THREE.BoxGeometry(0.38, 0.36, 0.085), vm, 0, 0.1, -0.12)); chest.add(mesh(new THREE.BoxGeometry(0.38, 0.36, 0.07), vm, 0, 0.1, 0.125));
+      for (let k = 0; k < 4; k++) chest.add(mesh(new THREE.BoxGeometry(0.07, 0.11, 0.05), vm, (k - 1.5) * 0.085, 0.0, -0.18));
+      const pl = makeCanvas(128, 32), pg = pl.getContext('2d'); pg.fillStyle = '#0e0f10'; pg.fillRect(0, 0, 128, 32); pg.fillStyle = '#e8e8e8'; pg.font = 'bold 22px Arial'; pg.textAlign = 'center'; pg.fillText('POLICE', 64, 24);
+      const tag = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 0.05), new THREE.MeshBasicMaterial({ map: canvasTex(pl) })); tag.position.set(0, 0.2, 0.162); chest.add(tag);
+      hd.add(mesh(sph(0.106, 24, 16), mat('bala', '#0b0b0b', 0.9), 0, -0.01, 0.004, 0.88, 1.2, 1.0)); // cagoule (visage caché sauf les yeux)
+      const hm = mesh(new THREE.SphereGeometry(0.132, 26, 14, 0, Math.PI * 2, 0, Math.PI * 0.52), mat('helmN', '#151617', 0.5), 0, 0.022, 0.008, 1, 0.95, 1.05); hd.add(hm);
+      hd.add(mesh(new THREE.BoxGeometry(0.15, 0.04, 0.03), mat('gog', '#111111', 0.2, 0.4), 0, 0.075, -0.112));
+      for (const L of [LL, LR]) L.kn.add(mesh(sph(0.05, 12, 8), mat('pad', '#1e211a', 0.6), 0, -0.02, -0.04, 1, 1, 0.6));
+      pelvis.add(rot(mesh(new THREE.TorusGeometry(0.165, 0.022, 6, 30), mat('belt2', '#2a2a22', 0.7), 0, 0.03, 0, 1, 1, 0.72), 'x', Math.PI / 2));
+    }
     if (kind === 'soldat' || kind === 'ennemi') {
       // gilet porte-plaques + poches à chargeurs, ceinturon, genouillères, sac à dos, casque avec couvre-casque et lunettes
       const vestM = mat(kind === 'soldat' ? 'vestF' : 'vestD', kind === 'soldat' ? '#3a4228' : '#8a7550', 0.85);
@@ -2623,7 +2665,10 @@ const Rig = (function () {
   }
   // ---------- tenir une arme ----------
   function hold(root, gun) {
-    const R = root.userData.rig; if (R.gun) R.J.wrR.remove(R.gun); R.gun = gun || null; if (!gun) return;
+    const R = root.userData.rig; if (R.gun) R.J.wrR.remove(R.gun); R.gun = gun || null; const H = R.J.hands;
+    // doigts refermés sur la crosse (index sur la détente) ; main gauche en soutien pour les armes longues
+    if (H) { H.R[0].visible = !gun; H.R[1].visible = !!gun; const two = !!(gun && gun.userData.long); H.L[0].visible = !two; H.L[1].visible = two; }
+    if (!gun) return;
     gun.rotation.set(-Math.PI / 2, 0, 0); gun.position.set(0, -0.08, -0.01); R.J.wrR.add(gun); R.twoHands = !!gun.userData.long;
   }
   // ---------- animation ----------
@@ -2677,9 +2722,15 @@ const Rig = (function () {
     const ham = box(0.008, 0.026, 0.014, metal, 0, 0.1, 0.004); ham.rotation.x = -0.5; g.add(ham);
     const tg = mesh(new THREE.TorusGeometry(0.017, 0.0028, 6, 16, Math.PI), o.guard || metal, 0, 0.044, -0.025); tg.rotation.set(0, Math.PI / 2, Math.PI); g.add(tg);
     const tr = box(0.004, 0.018, 0.006, metal, 0, 0.044, -0.024); tr.rotation.x = 0.3; g.add(tr);
-    const grip = new THREE.Group(); grip.position.set(0, 0.045, 0.012); grip.rotation.x = 0.32; g.add(grip);
-    grip.add(box(0.03, 0.085, 0.034, o.grip, 0, -0.04, 0)); grip.add(mesh(sph(0.02, 12, 8), o.grip, 0, -0.085, 0.004, 0.75, 0.6, 0.95));
-    for (let k = 0; k < 6; k++) grip.add(box(0.032, 0.002, 0.034, G.rubber, 0, -0.012 - k * 0.011, 0)); // quadrillage
+    // crosse « manche de charrue » des revolvers de cow-boy (style Django) : elle part vers le BAS et s'incurve vers l'ARRIÈRE, se termine par un talon arrondi
+    { let y = 0.046, z = 0.006; const n = 7;
+      for (let k = 0; k < n; k++) { const a = 0.22 + k * 0.1, len = 0.0145; const w = 0.027 + k * 0.0012, d = 0.03 + k * 0.0016; y -= Math.cos(a) * len * 0.5; z += Math.sin(a) * len * 0.5;
+        const seg = box(w, len + 0.002, d, o.grip, 0, y, z); seg.rotation.x = -a; g.add(seg);
+        const strap = box(0.012, len + 0.002, 0.004, metal, 0, y + Math.sin(a) * 0.0, z + Math.cos(a) * d / 2); strap.rotation.x = -a; g.add(strap); // dos de crosse en acier
+        y -= Math.cos(a) * len * 0.5; z += Math.sin(a) * len * 0.5; }
+      const butt = mesh(sph(0.02, 14, 10), o.grip, 0, y - 0.004, z + 0.004, 0.72, 0.55, 1.05); g.add(butt);
+      const cap = mesh(sph(0.021, 14, 10), metal, 0, y - 0.008, z + 0.006, 0.6, 0.35, 1.0); g.add(cap);
+      for (const sx of [-1, 1]) g.add(rot(mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.002, 10), metal, sx * 0.0145, 0.012, 0.018), 'z', Math.PI / 2)); }
   }
   function make_gun(kind) {
     const G = GM(); const g = new THREE.Group(); g.userData.kind = kind;
@@ -2696,7 +2747,7 @@ const Rig = (function () {
       g.add(box(0.022, 0.008, 0.06, G.poly, 0, 0.049, -0.105)); // rail
       const tg = box(0.006, 0.006, 0.05, G.poly, 0, 0.032, -0.04); g.add(tg); g.add(box(0.006, 0.026, 0.006, G.poly, 0, 0.045, -0.064));
       g.add(box(0.005, 0.016, 0.006, G.poly, 0, 0.045, -0.035));
-      const grip = new THREE.Group(); grip.position.set(0, 0.05, 0.012); grip.rotation.x = 0.3; g.add(grip);
+      const grip = new THREE.Group(); grip.position.set(0, 0.05, 0.012); grip.rotation.x = -0.32; g.add(grip);
       grip.add(box(0.03, 0.105, 0.045, G.poly, 0, -0.05, 0)); for (let k = 0; k < 5; k++) grip.add(box(0.032, 0.003, 0.046, G.rubber, 0, -0.02 - k * 0.016, 0));
       grip.add(box(0.026, 0.012, 0.046, G.blued, 0, -0.108, 0.001));
     } else if (kind === 'carabine') {
@@ -2710,7 +2761,7 @@ const Rig = (function () {
       g.add(box(0.006, 0.05, 0.012, G.blued, 0, 0.1, -0.37));
       g.add(cyl(0.018, 0.018, 0.06, G.poly, 0, 0.122, -0.06, 16)); g.add(cyl(0.015, 0.015, 0.004, G.glass, 0, 0.122, -0.092, 16));
       const mag = new THREE.Group(); mag.position.set(0, 0.012, -0.075); g.add(mag); for (let k = 0; k < 5; k++) { const sg = box(0.024, 0.03, 0.06, G.blued, 0, -k * 0.026, -k * 0.006); sg.rotation.x = -k * 0.08; mag.add(sg); }
-      const grip = box(0.026, 0.085, 0.035, G.poly, 0, -0.005, 0.03); grip.rotation.x = 0.35; g.add(grip);
+      const grip = box(0.026, 0.085, 0.035, G.poly, 0, -0.005, 0.04); grip.rotation.x = -0.35; g.add(grip);
       const tg = mesh(new THREE.TorusGeometry(0.018, 0.003, 6, 14, Math.PI), G.blued, 0, 0.012, -0.005); tg.rotation.set(0, Math.PI / 2, Math.PI); g.add(tg);
       g.add(cyl(0.015, 0.015, 0.2, G.blued, 0, 0.06, 0.13, 12)); const st = box(0.04, 0.07, 0.14, G.poly, 0, 0.045, 0.19); g.add(st); g.add(box(0.036, 0.085, 0.015, G.rubber, 0, 0.04, 0.265));
       g.add(box(0.008, 0.008, 0.03, G.blued, 0.018, 0.085, 0.03)); // levier d'armement
@@ -2722,7 +2773,7 @@ const Rig = (function () {
       const ring = mesh(new THREE.TorusGeometry(0.012, 0.003, 6, 16), G.blued, 0, 0.115, -0.2); g.add(ring); g.add(box(0.004, 0.012, 0.004, G.blued, 0, 0.11, -0.2));
       g.add(box(0.034, 0.05, 0.08, G.poly, 0, 0.04, -0.14)); // garde-main
       const mag = new THREE.Group(); mag.position.set(0, 0.04, -0.05); g.add(mag); for (let k = 0; k < 6; k++) { const sg = box(0.02, 0.026, 0.035, G.blued, 0, -k * 0.022, -k * 0.009); sg.rotation.x = -k * 0.1; mag.add(sg); }
-      const grip = box(0.026, 0.08, 0.035, G.poly, 0, 0.005, 0.03); grip.rotation.x = 0.3; g.add(grip);
+      const grip = box(0.026, 0.08, 0.035, G.poly, 0, 0.005, 0.04); grip.rotation.x = -0.3; g.add(grip);
       const tg = mesh(new THREE.TorusGeometry(0.016, 0.003, 6, 14, Math.PI), G.poly, 0, 0.035, 0.0); tg.rotation.set(0, Math.PI / 2, Math.PI); g.add(tg);
       for (const sx of [-1, 1]) g.add(cyl(0.004, 0.004, 0.18, G.steel, sx * 0.018, 0.07, 0.12, 8)); g.add(box(0.045, 0.06, 0.012, G.rubber, 0, 0.06, 0.21));
     } else if (kind === 'lance-roquettes') {
@@ -2730,7 +2781,7 @@ const Rig = (function () {
       g.userData.long = true;
       g.add(cyl(0.032, 0.032, 0.95, G.olive, 0, 0.1, -0.05, 20)); g.add(cyl(0.045, 0.034, 0.12, G.olive, 0, 0.1, 0.46, 20));
       g.add(cyl(0.04, 0.04, 0.2, G.wood, 0, 0.1, -0.1, 20)); g.add(cyl(0.04, 0.04, 0.12, G.wood, 0, 0.1, 0.12, 20));
-      const gr = box(0.025, 0.08, 0.035, G.poly, 0, 0.035, 0.0); gr.rotation.x = 0.25; g.add(gr); const gr2 = box(0.025, 0.08, 0.035, G.poly, 0, 0.035, -0.25); gr2.rotation.x = 0.25; g.add(gr2);
+      const gr = box(0.025, 0.08, 0.035, G.poly, 0, 0.035, 0.01); gr.rotation.x = -0.25; g.add(gr); const gr2 = box(0.025, 0.08, 0.035, G.poly, 0, 0.035, -0.24); gr2.rotation.x = -0.25; g.add(gr2);
       g.add(cyl(0.016, 0.016, 0.12, G.blued, -0.05, 0.16, -0.06, 14)); g.add(box(0.02, 0.04, 0.02, G.blued, -0.04, 0.135, -0.06));
       const w = new THREE.Group(); w.position.set(0, 0.1, -0.53); g.add(w);
       const og = new THREE.LatheGeometry([new THREE.Vector2(0.0001, -0.28), new THREE.Vector2(0.02, -0.25), new THREE.Vector2(0.045, -0.17), new THREE.Vector2(0.052, -0.08), new THREE.Vector2(0.03, -0.02), new THREE.Vector2(0.022, 0.06)], 20); og.rotateX(Math.PI / 2);
@@ -2751,7 +2802,18 @@ const Rig = (function () {
     J.shL.rotation.set(0.75, 0, -0.12); J.elL.rotation.set(0.85, 0, 0); J.shR.rotation.set(0.75, 0, 0.12); J.elR.rotation.set(0.85, 0, 0);
     root.userData.rig.seated = true; return root;
   }
-  return { make, animate, hold, sit, gun: make_gun, camoTex };
+  // pilote aux commandes : mains sur le mini-manche et la manette des gaz, tête qui regarde, bouche qui parle à la radio
+  function fly(root, c, seat, t) {
+    const R = root.userData.rig; if (!R || !R.seated) return; const J = R.J; const sd = seat; // -1 = commandant (gauche), +1 = copilote (droite)
+    const stick = sd < 0 ? [J.shL, J.elL, J.wrL] : [J.shR, J.elR, J.wrR], thr = sd < 0 ? [J.shR, J.elR] : [J.shL, J.elL];
+    stick[0].rotation.set(0.62 - (c.ctrlPitch || 0) * 0.12, 0, sd * 0.22 + (c.ctrlRoll || 0) * 0.12); stick[1].rotation.set(1.05 + (c.ctrlPitch || 0) * 0.1, 0, 0); stick[2].rotation.set(0, 0, -(c.ctrlRoll || 0) * 0.35);
+    thr[0].rotation.set(0.55 + (c.throttle || 0) * 0.45, 0, -sd * 0.42); thr[1].rotation.set(1.15 - (c.throttle || 0) * 0.3, 0, 0);
+    const look = Math.sin(t * 0.23 + sd) * 0.35 + (c.ctrlRoll || 0) * 0.3; J.head.rotation.set(Math.sin(t * 0.31) * 0.05 + (c.ctrlPitch || 0) * 0.05, look, 0); J.neck.rotation.y = look * 0.3;
+    // il parle (radio) : la bouche s'ouvre et se ferme
+    const talk = window.RADIO_T && performance.now() - window.RADIO_T < 2600 && ((window.RADIO_WHO === 'Équipage' || window.RADIO_WHO === 'Pilote') ? sd < 0 : sd > 0);
+    if (J.mouth) J.mouth.scale.y = talk ? 0.25 + Math.abs(Math.sin(t * 13 + sd)) * 0.75 : 0.05; if (J.lips) J.lips.scale.y = talk ? 0.42 + Math.abs(Math.sin(t * 13 + sd)) * 0.3 : 0.42;
+  }
+  return { fly, make, animate, hold, sit, gun: make_gun, camoTex };
 })();
 
 // ---- 06_airports.js ----
@@ -4620,7 +4682,7 @@ const AircraftModel = (function () {
     cp.add(seat);
     // commandant (4 galons, visible quand on n'est pas à sa place) et copilote (3 galons), en uniforme
     // l'équipage dépend de l'avion : commandant de bord en uniforme (ligne), pilotes militaires, pilote de chasse
-    const R = CREW.role, AFR = ['cm', 'ci', 'sn', 'td', 'cd', 'ng', 'ga'].includes(CREW.cc), mk = (st, sd) => { const o = Rig.sit(Rig.make(R === 'ligne' ? 'pilote' : R, sd === 5 ? 0 : 1, { headset: true })); o.scale.setScalar(0.97); return o; };
+    const R = CREW.role, AFR = ['cm', 'ci', 'sn', 'td', 'cd', 'ng', 'ga'].includes(CREW.cc), mk = (st, sd) => { const o = Rig.sit(Rig.make(R === 'ligne' ? 'pilote' : R, Math.floor(Math.random() * 64), { headset: true })); o.scale.setScalar(0.97); return o; };
     { const fo = mk(3, 2); fo.position.set(0.55, -0.31, -15.22); cp.add(fo); P.copilot = fo; if (R === 'chasse') fo.visible = false; // chasseur : un seul pilote
       const cpt = mk(4, 5); cpt.position.set(-0.55, -0.31, -15.22); cp.add(cpt); P.captain = cpt;
       const seat2 = seat.clone(); seat2.position.x = -0.55; cp.add(seat2); }
@@ -4684,6 +4746,7 @@ const AircraftModel = (function () {
     if (P.wingG && s.broken && !P.dmgSplit) { for (const sd of [1, -1]) { if (s.broken === sd || s.broken === 2) { P.wingG[sd].rotation.z = -sd * (s.broken === 2 ? 0.45 : 0.32); P.wingG[sd].rotation.x = 0.12; } } if (s.broken === 2 && P.rudders) P.rudders.forEach(r => r.visible = false); }
     else if (P.wingG) { const k = clamp((s.span || 36) / 60, 0.25, 2.2); const gs = Math.abs(s.groundSpeed || 0); let f = s.onGround ? -0.004 * k + (Math.random() - 0.5) * 0.0012 * k * Math.min(1, gs / 30) : (0.01 + ((s.gload || 1) - 1) * 0.018) * k; /* au sol : léger affaissement, petites vibrations seulement en roulant vite */ f = clamp(f, -0.03, 0.09); P._flex = (P._flex || 0) + (f - (P._flex || 0)) * Math.min(1, dt * 4); for (const sd of [1, -1]) P.wingG[sd].rotation.z = sd * P._flex; }
     if (P.captain) P.captain.visible = s.cam !== 'cockpit' && s.cam !== 'cabine';
+    if (viewInside && P.captain && P.captain.userData.rig) { Rig.fly(P.captain, s, -1, t); if (P.copilot && P.copilot.visible !== false) Rig.fly(P.copilot, s, 1, t); }
     if (P.cabin) P.cabin.visible = viewInside && s.cam === 'cabine'; if (P.cabin && s.cam === 'cabine') P.cockpit.visible = false;
     // gouvernes
     // ailerons : l'un monte, l'autre descend (l'axe de charnière est déjà inversé d'un côté à l'autre)
@@ -4880,6 +4943,7 @@ function acLayout(id) {
   D.wheelbase = D.mainZ - D.noseZ;
   D.wheelR = T.heli ? 0 : clamp(D.R * 0.36 + 0.08, 0.3, 2.0); // pneus proportionnés à l'avion (A320 ≈ 0,6 m de rayon)
   if (!T.heli && (sh.bigWheels || id === 'megalodon' || T.shapeOf === 'megalodon')) D.wheelR = clamp(D.R * 0.5 + 0.3, 0.6, 4.5); // roues géantes
+  if (id === 'goliath' || T.shapeOf === 'goliath') D.gearH = D.R * 0.8 + D.wheelR * 2.1 + 1.2; // Goliath : train haut, la roue AVANT sort bien sous le nez
   D.bogies = sh.bogies || 1;
   // œil du pilote (même poste que l'A320, placé au nez)
   const noseShift = -L / 2 + 18.8 * Math.min(1, D.R / 1.98) * 0 - (-18.8);
@@ -5920,6 +5984,8 @@ const UI = (function () {
     $('btnFiche').onclick = () => { $('fiche').classList.toggle('hidden'); ficheT = 0; }; $('btnFicheClose').onclick = () => $('fiche').classList.add('hidden');
     document.querySelectorAll('#fiche [data-h]').forEach(b => { const code = b.dataset.k; b.onpointerdown = e => { e.preventDefault(); window.__sim.codes[code] = true; }; const up = () => window.__sim.codes[code] = false; b.onpointerup = up; b.onpointerleave = up; });
     document.querySelectorAll('#fiche [data-k]:not([data-h])').forEach(b => b.onclick = () => { const code = b.dataset.k, sh = !!b.dataset.s; const key = code.startsWith('Key') ? (sh ? code.slice(3) : code.slice(3).toLowerCase()) : code; window.dispatchEvent(new KeyboardEvent('keydown', { key, code, shiftKey: sh })); setTimeout(() => window.dispatchEvent(new KeyboardEvent('keyup', { key, code, shiftKey: sh })), 60); b.blur(); });
+    $('selSquadKind').value = Settings.data.squadKind || 'soldat'; $('selSquadKind').onchange = e => { Settings.data.squadKind = e.target.value; Settings.save(); e.target.blur(); UI.toast('Escouade : ' + e.target.selectedOptions[0].text + ' (au prochain 0)', 3000); };
+    $('squadN').value = Settings.data.squadN ?? 5; $('squadNv').textContent = $('squadN').value; $('squadN').oninput = e => { Settings.data.squadN = +e.target.value; $('squadNv').textContent = e.target.value; Settings.save(); }; $('squadN').onchange = e => e.target.blur();
     $('selSquad').value = String(Settings.data.squad || 2); $('selSquad').onchange = e => { Settings.data.squad = +e.target.value; Settings.save(); e.target.blur(); UI.toast('Escadrilles : ' + e.target.selectedOptions[0].text + ' — Maj+Q pour les lancer', 3000); };
     $('selSquadLiv').value = Settings.data.squadLiv || ''; $('selSquadLiv').onchange = e => { Settings.data.squadLiv = e.target.value; Settings.save(); e.target.blur(); };
     $('btnSquad').onclick = e => { e.target.blur(); window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Q', code: 'KeyQ', shiftKey: true })); setTimeout(() => window.dispatchEvent(new KeyboardEvent('keyup', { key: 'Q', code: 'KeyQ', shiftKey: true })), 60); };
@@ -6051,7 +6117,10 @@ const Game = (function () {
     resetDamage();
     let p; const big = fm.spec.D && fm.spec.D.L > 60 && !fm.spec.heli;
     if (fm.spec.heli) { const h = a.L.heli; const [x, z] = Airports.toWorld(a, h.x, h.z); p = { x, z, hdg: a.hdg }; }
-    else if (mode === 'poste') p = Airports.gateStart(a, fm.spec.D ? fm.spec.D.L : 37); else p = Airports.runwayStart(a, 0);
+    else if (mode === 'poste') p = Airports.gateStart(a, fm.spec.D ? fm.spec.D.L : 37);
+    else { // les avions géants partent de la PLUS GRANDE piste de l'aéroport
+      let ri = 0; if (fm.spec.D && Math.max(fm.spec.D.L, fm.spec.D.span || 0) > 90 && a.L && a.L.rw) a.L.rw.forEach((r, i) => { if (r.len > a.L.rw[ri].len || (r.len === a.L.rw[ri].len && (r.w || 0) > (a.L.rw[ri].w || 0))) ri = i; });
+      p = Airports.runwayStart(a, ri); }
     if (mode === 'poste' && !fm.spec.heli && !quiet) UI.toast('Au poste : Maj+8 = embarquer · Maj+9 = fermer les portes et SORTIE AUTOMATIQUE jusqu\'à la piste (Maj+9 ou B pour l\'arrêter). Ou sortez vous-même : marche arrière E / Origine.', 9000);
     fm.reset(p.x, a.elev + 0.2 * (mode === 'poste' ? 1 : 1.6), p.z, p.hdg); fm.engOn = new Array(fm.spec.nEng || 2).fill(true); fm.reverse = false; fm.hyper = false; fm.taxiReverse = false; fm.missiles = fm.spec.heli ? 0 : 99; try { Ops.repair(); } catch (e) { }
     if (fm.spec.heli) { fm.n1 = 0; fm.parking = false; }
@@ -6311,7 +6380,7 @@ const Game = (function () {
     camera.position.set(camAbs.position.x - World.ox, camAbs.position.y, camAbs.position.z - World.oz); camera.quaternion.copy(camAbs.quaternion);
     if (camera.fov !== camAbs.fov) { camera.fov = camAbs.fov; camera.updateProjectionMatrix(); }
     model.position.copy(fm.pos); model.quaternion.copy(fm.q);
-    AircraftModel.animate(model, { airbrake: fm.airbrake, broken: fm.broken, span: fm.spec.span, gload: fm.gload, cam: CameraRig.current.id, missiles: fm.missiles, ctrlPitch: input.pitch, ctrlRoll: input.roll, ctrlYaw: input.yaw, flapPos: fm.flapPos, spoiler: fm.spoiler, onGround: fm.onGround, gearPos: fm.gearPos, groundSpeed: fm.groundSpeed, steer: fm.steer, n1: fm.n1, lightsStrobe: fm.lightsStrobe, lightsLanding: fm.lightsLanding }, t, dt, inside);
+    AircraftModel.animate(model, { throttle: fm.throttle, airbrake: fm.airbrake, broken: fm.broken, span: fm.spec.span, gload: fm.gload, cam: CameraRig.current.id, missiles: fm.missiles, ctrlPitch: input.pitch, ctrlRoll: input.roll, ctrlYaw: input.yaw, flapPos: fm.flapPos, spoiler: fm.spoiler, onGround: fm.onGround, gearPos: fm.gearPos, groundSpeed: fm.groundSpeed, steer: fm.steer, n1: fm.n1, lightsStrobe: fm.lightsStrobe, lightsLanding: fm.lightsLanding }, t, dt, inside);
     document.getElementById('pfd').style.visibility = inside ? 'hidden' : 'visible';
     { const Sc = Sky.sunLight.shadow.camera; const ext = inside ? 14 : 90; if (Sc.right !== ext) { Sc.left = Sc.bottom = -ext; Sc.right = Sc.top = ext; Sc.updateProjectionMatrix(); } }
     if (inside) safe('cockpit', () => AircraftModel.updateCockpit(model, fm, ((-fm.euler().y * RAD) % 360 + 360) % 360));
@@ -6429,13 +6498,14 @@ const Ops = (function () {
       const order = [() => wingPt(-1)]; for (let k = 0; k < N; k++) order.push(() => eng(k)); order.push(() => wingPt(1), () => new THREE.Vector3(0, (D.R || 2) * 0.8, 0), () => new THREE.Vector3(0, (D.R || 2), (D.L || 40) * 0.32));
       const pt = order[Math.min(f, order.length - 1)](); Damage.fx(T, pt, 'feu', 0.25 + f * 0.04);
       msg = '🔥 ' + n + 'ᵉ frappe : ' + (f === 0 ? 'le FEU prend sur l\'aile gauche !' : f <= N ? 'le moteur ' + f + ' prend feu !' : 'le feu gagne la carlingue !') + ' Atterrissage d\'urgence !';
-    } else { Damage.fx(T, wingPt(-1), 'feu', 1); Damage.fx(T, wingPt(1), 'feu', 0.9); for (let k = 0; k < N; k++) Damage.fx(T, eng(k), 'feu', 1); Damage.fx(T, new THREE.Vector3(0, (D.R || 2) * 0.8, 0), 'feu', 1); Damage.fx(T, new THREE.Vector3(0, (D.R || 2), (D.L || 40) * 0.32), 'feu', 0.9); msg = '🔥🔥 20ᵉ frappe : TRÈS GRAND FEU sur les ailes, les moteurs et le fuselage ! Posez-vous MAINTENANT.'; }
+    } else { Damage.fx(T, wingPt(-1), 'feu', 1); Damage.fx(T, wingPt(1), 'feu', 0.9); for (let k = 0; k < N; k++) Damage.fx(T, eng(k), 'feu', 1); Damage.fx(T, new THREE.Vector3(0, (D.R || 2) * 0.8, 0), 'feu', 1); Damage.fx(T, new THREE.Vector3(0, (D.R || 2), (D.L || 40) * 0.32), 'feu', 0.9); msg = '🔥🔥 20ᵉ frappe : TRÈS GRAND FEU sur les ailes, les moteurs et le fuselage ! Les commandes répondent à peine — maintenez I (palier) et posez-vous MAINTENANT.'; if (isPlayer) { fm.hydLow = true; } }
     // toutes les fumées / feux déjà présents grossissent à chaque frappe
     Damage.grow(T, 25);
     if (isPlayer) { const fires = Math.max(0, Math.min(N, n - (5 + N))); fm.thrustMul = Math.max(0.4, 1 - 0.03 * Math.min(N, Math.max(0, n - 2)) - 0.5 * fires / N - (n >= 20 ? 0.1 : 0)); }
     return msg;
   }
   function lightning(fm) {
+    if ((fm.ltn || 0) >= 20) return; // après la 20ᵉ frappe : plus de nouvelles frappes, place à l'atterrissage forcé
     if (Sound.thunder) Sound.thunder(0.2); CameraRig.addShake(1.5);
     const D = fm.spec.D || { span: 30, R: 2, L: 40, engines: [] }; const hitPt = new THREE.Vector3((Math.random() - 0.5) * (D.span || 30) * 0.8, (D.R || 2), (Math.random() - 0.5) * (D.L || 40) * 0.6).applyQuaternion(fm.q).add(fm.pos);
     Damage.bolt(hitPt);
@@ -6490,7 +6560,7 @@ const Ops = (function () {
   // ---------- Radio (contrôle aérien) FR + EN ----------
   const radioLog = []; let atc = { phase: '', t: 0 };
   function callsign() { const C = COUNTRIES[(ctx.airport() || AIRPORTS[0]).cc]; return C.airline + ' ' + (100 + ((Settings.data.name || 'P').charCodeAt(0) * 7) % 800); }
-  function radio(fr, en, who) {
+  function radio(fr, en, who) { window.RADIO_T = performance.now(); window.RADIO_WHO = who;
     const mode = Settings.data.radioLang || 'both'; who = who || 'Tour';
     radioLog.push({ who, fr, en }); if (radioLog.length > 4) radioLog.shift();
     const el = document.getElementById('radioBox'); if (el) { el.innerHTML = radioLog.map(m => `<div><b>${m.who} :</b> ${mode === 'en' ? m.en : mode === 'fr' ? m.fr : m.fr + '<br><i>' + m.en + '</i>'}</div>`).join(''); el.classList.remove('hidden'); clearTimeout(radio._t); radio._t = setTimeout(() => el.classList.add('hidden'), 14000); }
@@ -6698,7 +6768,9 @@ const Ops = (function () {
     aiT -= dt; if (aiT < 0) { aiT = 3; const n = k => AI.filter(o => o.kind === k && !o.dead).length; if (n('cruise') < 4) spawnAI('cruise', fm); if (ctx.airport() && Math.hypot(ctx.airport().x - fm.pos.x, ctx.airport().z - fm.pos.z) < 40000) { trafficSpawn(fm); if (n('cross') < 1) spawnAI('cross', fm); } }
     for (let i = AI.length - 1; i >= 0; i--) {
       const o = AI[i]; o.t += dt;
-      if (o.dead) { o.vy = (o.vy || 0) - 9.8 * dt; o.pos.y += o.vy * dt; o.pos.addScaledVector(dirOf(o.hdg), o.spd * dt * 0.6); o.obj.rotation.z += dt * 0.8; if (Math.random() < 0.8) Particles.emit(o.pos.x, o.pos.y, o.pos.z, 0, 3, 0, 8, 10, 0.1, 0.1, 0.1, 0.7, 6); if (o.pos.y < Terrain.heightAt(o.pos.x, o.pos.z) + 2) { boom(o.pos, 1.5); remove(i); } else place(o); continue; }
+      if (o.dead) { o.vy = Math.max(-75, (o.vy || 0) - 9.8 * dt); o.pos.y += o.vy * dt; o.pos.addScaledVector(dirOf(o.hdg), (o.spd || 60) * dt * 0.6); o.hdg += (o.spin || 0.5) * 25 * dt; o.pitch = Math.max(-55, (o.pitch || 0) - 12 * dt); o.t += (o.spin || 0.6) * dt;
+        if (Math.random() < 0.8) Particles.emit(o.pos.x, o.pos.y, o.pos.z, 0, 3, 0, 8, 10, 0.1, 0.1, 0.1, 0.7, 6);
+        const gy = Terrain.heightAt(o.pos.x, o.pos.z); if (o.pos.y < gy + 2) { boom(o.pos.clone(), 2); try { const D = acLayout(o.ty); const pseudo = { pos: o.pos.clone(), vel: dirOf(o.hdg).multiplyScalar(30), spec: { D: { L: D.L, R: D.R || 2, span: D.span }, cc: null } }; pseudo.pos.y = gy + 1; Wreck.spawn(pseudo, 30, 18); Wreck.scar(pseudo); } catch (e) { } remove(i); } else place(o); continue; }
       if (o.stuck) { place(o); continue; }
       if (o.kind === 'escort') { escortUpdate(o, dt, fm); place(o); continue; }
       if (o.kind === 'war') { warUpdate(o, dt); place(o); continue; }
@@ -6747,18 +6819,51 @@ const Ops = (function () {
     const i = target ? (L.indexOf(target) + 1) % L.length : 0; target = L[i]; T('🎯 Cible : ' + (target.name || 'avion') + ' — ' + (target.pos.distanceTo(fm.pos) / 1000).toFixed(1) + ' km (F6 pour lâcher)');
   }
   const mslGeo = new THREE.CylinderGeometry(0.2, 0.2, 3.2, 8); mslGeo.rotateX(Math.PI / 2); let mslMat;
-  function fire(kind, fm) {
+  // ---------- MISSILES bien visibles (3 types) et BOMBE ATOMIQUE réaliste ----------
+  const Z_FWD = new THREE.Vector3(0, 0, -1), _dv = new THREE.Vector3();
+  const MSL = { guide: ['Missile guidé', 0xe8e8e8, 0.36, 4.2, 1], long: ['Missile LONGUE PORTÉE (gros explosif)', 0xdadfe4, 0.55, 7.5, 3], furtif: ['Missile FURTIF (insensible aux leurres)', 0x2b2f33, 0.42, 5.2, 1.6] };
+  const mslCache = {};
+  function mslMesh(type) {
+    const T0 = MSL[type] || MSL.guide; if (mslCache[type]) return mslCache[type].clone();
+    const g = new THREE.Group(); const r = T0[2], L = T0[3]; const body = new THREE.MeshStandardMaterial({ color: T0[1], metalness: 0.5, roughness: 0.35 }), dark = new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.4, roughness: 0.5 }), red = new THREE.MeshStandardMaterial({ color: 0xc81e1e, roughness: 0.5 }), yel = new THREE.MeshStandardMaterial({ color: 0xf2c200, roughness: 0.5 });
+    const c = new THREE.Mesh(new THREE.CylinderGeometry(r, r, L, type === 'furtif' ? 6 : 18), body); c.rotation.x = Math.PI / 2; g.add(c);
+    const nose = new THREE.Mesh(new THREE.ConeGeometry(r, r * 3.2, type === 'furtif' ? 6 : 18), type === 'furtif' ? body : dark); nose.rotation.x = -Math.PI / 2; nose.position.z = -L / 2 - r * 1.6; g.add(nose);
+    const band = new THREE.Mesh(new THREE.CylinderGeometry(r * 1.01, r * 1.01, r * 0.5, 18), type === 'long' ? red : yel); band.rotation.x = Math.PI / 2; band.position.z = -L * 0.25; g.add(band);
+    for (let k = 0; k < 4; k++) { const a = k * Math.PI / 2 + Math.PI / 4; const f = new THREE.Mesh(new THREE.BoxGeometry(0.05, r * 2.6, r * 2.2), type === 'furtif' ? body : dark); f.position.set(Math.cos(a) * r * 1.4, Math.sin(a) * r * 1.4, L / 2 - r * 1.1); f.rotation.z = a - Math.PI / 2; g.add(f);
+      const cf = f.clone(); cf.scale.set(1, 0.6, 0.6); cf.position.set(Math.cos(a) * r * 1.1, Math.sin(a) * r * 1.1, -L * 0.15); g.add(cf); }
+    const noz = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.7, r * 0.85, r * 0.6, 14, 1, true), dark); noz.rotation.x = Math.PI / 2; noz.position.z = L / 2 + r * 0.3; g.add(noz);
+    mslCache[type] = g; return g.clone();
+  }
+  let nukeProto = null;
+  function nukeMesh() {
+    if (nukeProto) return nukeProto.clone();
+    // bombe thermonucléaire : long corps de 7 m, ogive arrondie, anneaux, empennage en croix, bandes jaunes et noires + trèfle radioactif ☢
+    const cv = makeCanvas(1024, 256), g = cv.getContext('2d'); g.fillStyle = '#5b6168'; g.fillRect(0, 0, 1024, 256);
+    for (let x = 0; x < 1024; x += 64) { g.fillStyle = (x / 64) % 2 ? '#f2c200' : '#111'; g.fillRect(x, 0, 64, 26); g.fillRect(x, 230, 64, 26); }
+    const tre = (cx, cy, R) => { g.fillStyle = '#f2c200'; g.beginPath(); g.arc(cx, cy, R * 1.25, 0, 7); g.fill(); g.fillStyle = '#111'; for (let k = 0; k < 3; k++) { const a0 = -Math.PI / 2 + k * 2 * Math.PI / 3 - Math.PI / 6; g.beginPath(); g.moveTo(cx, cy); g.arc(cx, cy, R, a0, a0 + Math.PI / 3); g.closePath(); g.fill(); } g.fillStyle = '#f2c200'; g.beginPath(); g.arc(cx, cy, R * 0.28, 0, 7); g.fill(); g.fillStyle = '#111'; g.beginPath(); g.arc(cx, cy, R * 0.18, 0, 7); g.fill(); };
+    for (const x of [180, 520, 860]) { tre(x, 75, 38); tre(x, 180, 38); }
+    g.fillStyle = '#f2c200'; g.font = 'bold 34px Arial'; g.fillText('DANGER  ☢  RADIOACTIF', 300, 140);
+    const tex = canvasTex(cv); const body = new THREE.MeshStandardMaterial({ map: tex, metalness: 0.45, roughness: 0.4 }), steel = new THREE.MeshStandardMaterial({ color: 0x3a3f45, metalness: 0.7, roughness: 0.35 });
+    const grp = new THREE.Group();
+    const pts = [[0.001, -4.6], [0.35, -4.45], [0.7, -4.0], [0.92, -3.2], [0.95, -2.0], [0.95, 2.2], [0.8, 3.0], [0.55, 3.5], [0.5, 3.9]].map(p => new THREE.Vector2(p[0], p[1]));
+    const lg = new THREE.LatheGeometry(pts, 32); lg.rotateX(Math.PI / 2); const m = new THREE.Mesh(lg, body); grp.add(m);
+    for (const z of [-2.0, 0.2, 2.2]) { const ring = new THREE.Mesh(new THREE.TorusGeometry(0.955, 0.04, 8, 32), steel); ring.position.z = z; grp.add(ring); }
+    for (let k = 0; k < 4; k++) { const a = k * Math.PI / 2; const f = new THREE.Mesh(new THREE.BoxGeometry(0.06, 1.3, 1.4), steel); f.position.set(Math.cos(a) * 0.95, Math.sin(a) * 0.95, 3.3); f.rotation.z = a - Math.PI / 2; grp.add(f); }
+    const box = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.5, 0.08), steel); box.position.z = 3.9; grp.add(box);
+    grp.traverse(o => { if (o.isMesh) o.castShadow = true; }); nukeProto = grp; return grp.clone();
+  }
+  function fire(kind, fm, mtype) {
     const fwd = dirOf(0).applyQuaternion(fm.q); fwd.set(0, 0, -1).applyQuaternion(fm.q);
     const D = fm.spec.D; const nose = new THREE.Vector3(0, 0, D ? -D.L / 2 - 2 : -20).applyQuaternion(fm.q).add(fm.pos);
     if (kind === 'gun') { for (let k = 0; k < 2; k++) { const v = fwd.clone().multiplyScalar(950).add(fm.vel); v.x += (Math.random() - 0.5) * 8; v.y += (Math.random() - 0.5) * 8; shots.push({ kind, pos: nose.clone(), vel: v, life: 2.5 }); } return; }
     if (kind === 'msl') {
       if (fm.missiles <= 0) return T('Plus de missiles — réarmez à l\'arrêt sur un aéroport (Maj+E).');
-      fm.missiles--; const m = new THREE.Mesh(mslGeo, mslMat || (mslMat = new THREE.MeshStandardMaterial({ color: 0xe8e8e8, metalness: 0.4, roughness: 0.4 }))); World.add(m);
+      fm.missiles--; mtype = mtype || 'guide'; const m = mslMesh(mtype); World.add(m);
       const side = fm.missiles % 2 ? 1 : -1; const p = new THREE.Vector3(side * (D ? D.b * 0.5 : 8), -2, 0).applyQuaternion(fm.q).add(fm.pos);
-      shots.push({ kind, pos: p, vel: fm.vel.clone().add(fwd.clone().multiplyScalar(30)), life: 25, target, mesh: m, spd: 120 }); T('🚀 Missile tiré' + (target ? ' vers ' + target.name : '') + ' (reste ' + fm.missiles + ')', 1800); return;
+      shots.push({ kind, mtype, pos: p, vel: fm.vel.clone().add(fwd.clone().multiplyScalar(30)), life: mtype === 'long' ? 60 : 25, target, mesh: m, spd: 120, maxSpd: mtype === 'long' ? 900 : mtype === 'furtif' ? 750 : 650 }); T('🚀 ' + MSL[mtype][0] + ' tiré' + (target ? ' vers ' + target.name : '') + ' (reste ' + fm.missiles + ')', 1800); return;
     }
     if (kind === 'bomb') { if (bombs <= 0) return T('Plus de bombes — réarmez au sol (Maj+E).'); bombs--; const m = new THREE.Mesh(new THREE.SphereGeometry(0.6, 10, 8), new THREE.MeshStandardMaterial({ color: 0x3a3f2a })); m.scale.z = 2.2; World.add(m); shots.push({ kind, pos: fm.pos.clone().add(new THREE.Vector3(0, -3, 0)), vel: fm.vel.clone(), life: 60, mesh: m, target }); T('💣 Bombe larguée (reste ' + bombs + ')', 1500); return; }
-    if (kind === 'nuke') { if (nukes <= 0) return T('Plus de bombe atomique pour ce vol (3 par vol).'); nukes--; const m = new THREE.Mesh(new THREE.SphereGeometry(1.2, 12, 8), new THREE.MeshStandardMaterial({ color: 0xd6c21a, metalness: 0.5 })); m.scale.z = 2.4; World.add(m); shots.push({ kind, pos: fm.pos.clone().add(new THREE.Vector3(0, -4, 0)), vel: fm.vel.clone(), life: 90, mesh: m }); T('☢ BOMBE ATOMIQUE larguée ! Éloignez-vous vite (reste ' + nukes + ')', 4000); return; }
+    if (kind === 'nuke') { if (nukes <= 0) return T('Plus de bombe atomique pour ce vol (3 par vol).'); nukes--; const m = nukeMesh(); World.add(m); shots.push({ kind, pos: fm.pos.clone().add(new THREE.Vector3(0, -4, 0)), vel: fm.vel.clone(), life: 90, mesh: m }); T('☢ BOMBE ATOMIQUE larguée ! Éloignez-vous vite (reste ' + nukes + ')', 4000); return; }
   }
   function boom(p, size, nuke) {
     const n = nuke ? 160 : 30 * size;
@@ -6778,6 +6883,10 @@ const Ops = (function () {
     if (o.remote) { // un autre JOUEUR (ou un Rafale de son escadrille) : on lui envoie les dégâts, c'est lui qui les applique
       Net.send({ t: 'hit', to: o.pid, dmg, wk: o.kind === 'remoteWing' ? o.k : -1, w: dmg >= 900 ? 'nuke' : dmg >= 150 ? 'msl' : 'gun' });
       if (dmg >= 100) T('🎯 Touché : ' + o.name + ' !', 1500); return; } o.hp -= dmg; if (o.hp > 0) return; o.dead = true; Ops.kills = (Ops.kills || 0) + 1; T('💥 ' + (o.name || 'Cible') + ' DÉTRUIT !', 2500);
+    if (!o.ground && o.ty) { // un AVION abattu : explosion en vol, aile arrachée, il prend feu et tombe en vrille jusqu'au sol
+      try { boom(o.pos.clone(), 1.4); aiFull(o); const sd = Math.random() < 0.5 ? 1 : -1; Damage.wing(o.obj, sd, 0.35 + Math.random() * 0.3, 'arrache', 0.6, { vel: dirOf(o.hdg).multiplyScalar(o.spd || 60), pos: o.pos.clone() });
+        if (!o.fxT) o.fxT = { pos: () => o.pos, quat: () => o.obj.quaternion, dead: () => !AI.includes(o) }; const D = acLayout(o.ty); Damage.fx(o.fxT, new THREE.Vector3(-sd * D.span * 0.2, 0, 0), 'feu', 0.8); Damage.fx(o.fxT, new THREE.Vector3(0, D.R || 2, 0), 'fumee', 0.9); } catch (e) { }
+      o.vy = (o.vy || 0) + 4; o.spin = (Math.random() < 0.5 ? -1 : 1) * (0.6 + Math.random()); }
     if (o.ground) { boom(o.pos, 1.2); o.obj.traverse(m => { if (m.isMesh) { m.material = m.material.clone(); m.material.color.setHex(0x1a1a1a); } }); o.obj.rotation.z = 0.3; }
     if (target === o) target = null;
   }
@@ -6787,14 +6896,14 @@ const Ops = (function () {
     if (c.Backspace && flares > 0 && now - flareT > 250) { flareT = now; flares--; const p = fm.pos.clone(); for (let k = 0; k < 6; k++) Particles.emit(p.x, p.y - 2, p.z, (Math.random() - 0.5) * 30, -5 - Math.random() * 10, (Math.random() - 0.5) * 30, 3, 2, 3, 2.4, 1.2, 1, 3); for (const m of enemyMissiles) m.decoyed = true; }
     for (let i = shots.length - 1; i >= 0; i--) {
       const s = shots[i]; s.life -= dt; const prev = s.pos.clone();
-      if (s.kind === 'msl') { s.spd = Math.min(650, s.spd + 260 * dt); let dir = s.vel.clone().normalize(); if (s.target && !s.target.dead) { const to = s.target.pos.clone().sub(s.pos).normalize(); dir.lerp(to, Math.min(1, dt * 3)).normalize(); } s.vel.copy(dir.multiplyScalar(s.spd)); if (Math.random() < 0.9) Particles.emit(s.pos.x, s.pos.y, s.pos.z, 0, 1, 0, 2.5, 6, 0.85, 0.85, 0.85, 0.6, 2.5); s.mesh.position.copy(s.pos); s.mesh.lookAt(s.pos.clone().add(s.vel)); }
-      else if (s.kind === 'bomb' || s.kind === 'nuke') { s.vel.y -= 9.8 * dt; s.vel.multiplyScalar(1 - 0.02 * dt); if (s.target && s.kind === 'bomb') { const to = s.target.pos.clone().sub(s.pos); to.y = 0; s.vel.addScaledVector(to.normalize(), 6 * dt); } s.mesh.position.copy(s.pos); s.mesh.lookAt(s.pos.clone().add(s.vel)); }
+      if (s.kind === 'msl') { s.spd = Math.min(s.maxSpd || 650, s.spd + 260 * dt); let dir = s.vel.clone().normalize(); if (s.target && !s.target.dead) { const to = s.target.pos.clone().sub(s.pos).normalize(); dir.lerp(to, Math.min(1, dt * 3)).normalize(); } s.vel.copy(dir.multiplyScalar(s.spd)); if (Math.random() < 0.9) Particles.emit(s.pos.x, s.pos.y, s.pos.z, 0, 1, 0, 2.5, 6, 0.85, 0.85, 0.85, 0.6, 2.5); s.mesh.position.copy(s.pos); if (s.vel.lengthSq() > 1e-4) s.mesh.quaternion.setFromUnitVectors(Z_FWD, _dv.copy(s.vel).normalize()); }
+      else if (s.kind === 'bomb' || s.kind === 'nuke') { s.vel.y -= 9.8 * dt; s.vel.multiplyScalar(1 - 0.02 * dt); if (s.target && s.kind === 'bomb') { const to = s.target.pos.clone().sub(s.pos); to.y = 0; s.vel.addScaledVector(to.normalize(), 6 * dt); } s.mesh.position.copy(s.pos); if (s.vel.lengthSq() > 1e-4) s.mesh.quaternion.setFromUnitVectors(Z_FWD, _dv.copy(s.vel).normalize()); }
       else { Particles.emit(s.pos.x, s.pos.y, s.pos.z, s.vel.x * 0.02, s.vel.y * 0.02, s.vel.z * 0.02, 0.9, 0, 3, 2.2, 0.6, 1, 0.08); }
       s.pos.addScaledVector(s.vel, dt);
       let done = s.life <= 0;
       // touché ?
       const rad = s.kind === 'gun' ? 25 : 30;
-      for (const o of targets()) { if (o === s.owner) continue; if (segDist(prev, s.pos, o.pos) < rad) { if (s.kind === 'gun') hit(o, 12); else { boom(s.pos, s.kind === 'nuke' ? 1 : 1.3, s.kind === 'nuke'); hit(o, 200); } done = true; break; } }
+      for (const o of targets()) { if (o === s.owner) continue; if (segDist(prev, s.pos, o.pos) < rad) { if (s.kind === 'gun') hit(o, 12); else { boom(s.pos, s.kind === 'nuke' ? 1 : s.mtype === 'long' ? 3 : 1.3, s.kind === 'nuke'); hit(o, s.mtype === 'long' ? 500 : 200); } done = true; break; } }
       const gy = Terrain.heightAt(s.pos.x, s.pos.z); if (!done && s.pos.y < gy + 0.5) { done = true; if (s.kind !== 'gun') boom(new THREE.Vector3(s.pos.x, gy + 1, s.pos.z), s.kind === 'bomb' ? 2 : 1.2, s.kind === 'nuke'); else Particles.emit(s.pos.x, gy + 0.5, s.pos.z, 0, 2, 0, 2, 3, 0.6, 0.5, 0.4, 0.6, 1); }
       if (done) { if (s.mesh) World.remove(s.mesh); shots.splice(i, 1); }
     }
@@ -6894,7 +7003,9 @@ const Ops = (function () {
       case 'KeyI': if (!fm.onGround) { pitchHold(fm, 1); return true; } if (AP.taxi) { AP.taxi = null; T('Roulage automatique arrêté'); } else startTaxi(fm, false); return true;
       case 'KeyK': if (!fm.onGround) { pitchHold(fm, -1); return true; } landConfig(fm); return true;
       case 'KeyX': startAutoland(fm); return true;
-      case 'Digit2': case 'F3': case 'Enter': fire('msl', fm); return true;
+      case 'Digit2': case 'F3': fire('msl', fm, 'guide'); return true;
+      case 'Digit7': fire('msl', fm, 'long'); return true;
+      case 'Enter': fire('msl', fm, 'furtif'); return true;
       case 'Digit3': case 'F4': fire('bomb', fm); return true;
       case 'Digit5': fire('nuke', fm); return true;
       case 'Digit1': case 'F2': return true;
@@ -7356,7 +7467,7 @@ const Damage = (function () {
     // foyers
     for (const f of fxs) {
       const T = f.target; if (T.dead && T.dead()) continue; const q = T.quat(), P0 = T.pos(); _v.copy(f.pt).applyQuaternion(q).add(P0);
-      const L = f.lvl; f.acc += dt * (f.kind === 'feu' ? 14 + 40 * L : f.kind === 'kero' ? 10 + 25 * L : 5 + 20 * L);
+      const L = f.lvl; const busy = fxs.length > 8 ? 0.55 : 1; f.acc += dt * (f.kind === 'feu' ? (14 + 40 * L) * busy : f.kind === 'kero' ? 10 + 25 * L : (5 + 20 * L) * busy);
       while (f.acc > 1) { f.acc -= 1; const r = () => (Math.random() - 0.5);
         if (f.kind === 'fumee') Particles.emit(_v.x + r(), _v.y + r(), _v.z + r(), r() * 1.5, 1.5 + L * 2, r() * 1.5, 1.5 + L * 7, 4 + L * 9, 0.13, 0.13, 0.13, 0.35 + L * 0.45, 3 + L * 6);
         else if (f.kind === 'kero') Particles.emit(_v.x + r() * 0.4, _v.y - 0.3, _v.z + r() * 0.4, r() * 0.6, -2.5 - L * 2, r() * 0.6, 0.5 + L * 1.2, 2 + L * 3, 0.82, 0.85, 0.9, 0.35 + L * 0.3, 2 + L * 2);
@@ -7397,7 +7508,7 @@ const Extra = (function () {
     } else {
       const d = Math.hypot(foot.pos.x - fm.pos.x, foot.pos.z - fm.pos.z); const max = 25 + (fm.spec.D ? fm.spec.D.L / 2 : 20);
       if (d > max) { T('Trop loin de l\'avion (' + Math.round(d) + ' m) — retour à votre avion.'); }
-      World.remove(foot.obj); foot.active = false; T('De retour aux commandes.');
+      World.remove(foot.obj); foot.active = false; CROWD.list.forEach(c => World.remove(c.obj)); CROWD.list.length = 0; T('De retour aux commandes.');
     }
   }
   function footUpdate(dt) {
@@ -7411,6 +7522,7 @@ const Extra = (function () {
     const moving = Math.abs(fwd) + Math.abs(str) > 0;
     Rig.animate(foot.obj, { speed: moving ? sp : 0, stance: W6.stance, air: foot.pos.y > gy + 0.05, aim: !!(ctx.codes.Mouse2 || ctx.codes.KeyX), dt });
     foot.obj.position.copy(foot.pos); foot.obj.rotation.y = -h;
+    foot.waveT = (foot.waveT || 0) - dt; if (foot.waveT > 0) wave(foot.obj, foot.waveT * 3); safeCrowd(dt);
   }
   // objet « caméra » qui imite l'avion pour suivre le piéton
   const camProxy = { pos: new THREE.Vector3(), q: new THREE.Quaternion(), vel: new THREE.Vector3(), spec: { scale: 0.09, pts: { mainR: [0.5, -1, 0] }, gearH: 1 }, hyper: false, _fwd: new THREE.Vector3(),
@@ -7422,7 +7534,7 @@ const Extra = (function () {
     if (code === 'Digit0' || code === 'F9' || code === 'KeyE') { const pv = veh.list.find(v => v.pos.distanceTo(foot.pos) < 7); if (pv) { World.remove(foot.obj); foot.active = false; veh.cur = pv; foot.inVeh = true; T('Vous remontez dans : ' + VEH[pv.kind][0]); return true; }
       // N'IMPORTE QUEL avion à côté de moi : je monte dedans et je prends les commandes
       const dOwn = Math.hypot(foot.pos.x - fm.pos.x, foot.pos.z - fm.pos.z) - (fm.spec.D ? fm.spec.D.L / 2 : 20); const other = Ops.nearAircraft(foot.pos);
-      if (other && other.gap < 14 && other.gap < dOwn) { clearSquad(); World.remove(foot.obj); foot.active = false; ctx.board(other); return true; }
+      if (other && other.gap < 14 && other.gap < dOwn) { clearSquad(); World.remove(foot.obj); foot.active = false; CROWD.list.forEach(c => World.remove(c.obj)); CROWD.list.length = 0; ctx.board(other); return true; }
       clearSquad(); footToggle(); return true; }
     if (lot6Key(code)) return true;
     if (code === 'KeyJ') { if (foot.vy === 0) { foot.vy = 4.6; W6.stance = 0; } return true; }
@@ -7438,19 +7550,47 @@ const Extra = (function () {
   const ORDERS = ['SUIVRE', 'ASSAUT', 'TENIR LA POSITION'];
   function soldierMesh(enemy, wi, seed) { const g = Rig.make(enemy ? 'ennemi' : 'soldat', seed || 0); Rig.hold(g, Rig.gun(WEAPONS[wi ?? (enemy ? 5 : 4)][4])); return g; }
   function spawnSquad() {
-    if (W6.squad.length) return; for (let k = 0; k < 5; k++) { const o = { obj: soldierMesh(false, k === 0 ? 6 : k % 2 ? 4 : 5, k), pos: foot.pos.clone().add(new THREE.Vector3((k - 2) * 2.5, 0, 4 + (k % 2) * 2)), hdg: foot.hdg, cd: 1 + k * 0.3, ph: k, wi: k === 0 ? 6 : k % 2 ? 4 : 5 }; World.add(o.obj); W6.squad.push(o); }
+    if (W6.squad.length) return; const kind = Settings.data.squadKind || 'soldat'; const N = Math.max(0, Math.min(60, +(Settings.data.squadN ?? 5)));
+    const WSET = { soldat: [4, 5, 6, 4, 0], agent: [3, 1, 5, 2, 3], intervention: [4, 5, 3, 4, 5] };
+    for (let k = 0; k < N; k++) { const kd = kind === 'mix' ? ['soldat', 'agent', 'intervention'][k % 3] : kind; const wi = (WSET[kd] || WSET.soldat)[k % 5]; const ob = Rig.make(kd, k * 7 + 3); Rig.hold(ob, Rig.gun(WEAPONS[wi][4])); const o = { obj: ob, kd, pos: foot.pos.clone().add(new THREE.Vector3(((k % 6) - 2.5) * 2.2, 0, 4 + Math.floor(k / 6) * 2.5)), hdg: foot.hdg, cd: 1 + k * 0.3, ph: k, wi }; World.add(o.obj); W6.squad.push(o); }
     // patrouille ennemie à 300 m devant
     const h = foot.hdg * DEG; for (let k = 0; k < 6; k++) { const p = foot.pos.clone().add(new THREE.Vector3(Math.sin(h) * (280 + k * 12) + (k - 3) * 8, 0, -Math.cos(h) * (280 + k * 12))); p.y = Terrain.heightAt(p.x, p.z); const o = { obj: soldierMesh(true, 5, k), pos: p.clone().add(new THREE.Vector3(0, 1.2, 0)), hp: 40, name: 'Soldat ennemi', ground: true, kind: 'soldier', cd: 2 + k, ph: k, hdg: foot.hdg + 180 }; World.add(o.obj); Ops.addGround(o); W6.enemies.push(o); }
-    T('Votre escouade de 5 soldats vous suit. Patrouille ennemie à 300 m ! Espace = tirer · 1–7 = armes · Tab = cible · F = ordres · T = prendre un autre soldat.', 8000);
+    T('Votre escouade (' + N + ' ' + ({ soldat: 'militaires', agent: 'hommes en noir', intervention: 'hommes d\'intervention', mix: 'mélangés' }[kind] || '') + ') vous suit. Patrouille ennemie à 300 m ! Espace = tirer · 1–7 = armes · Tab = cible · F = ordres · T = prendre un autre soldat.', 8000);
   }
   function clearSquad() { W6.squad.forEach(o => World.remove(o.obj)); W6.squad.length = 0; W6.enemies.forEach(o => { World.remove(o.obj); o.dead = true; }); W6.enemies.length = 0; }
   function walkAnim(o, moving, dt, fast) { Rig.animate(o.obj, { speed: moving ? (fast ? 6 : 2.4) : 0, stance: 0, aim: !moving, dt }); }
+  // ---------- PASSAGERS ET PERSONNEL DE L'AÉROPORT à pied autour de l'avion : ils marchent, on peut se saluer (B) ----------
+  const CROWD = { list: [], a: null }; function safeCrowd(dt) { try { crowdUpdate(dt); } catch (e) { console.warn(e); } }
+  function wave(obj, t) { const J = obj.userData.rig.J; J.shR.rotation.set(-0.15, 0, 2.5); J.elR.rotation.set(0.35 + Math.sin(t * 10) * 0.35, 0, 0); J.wrR.rotation.set(0, 0, Math.sin(t * 10) * 0.3); }
+  function crowdUpdate(dt) {
+    const a = Airports.nearest(foot.pos.x, foot.pos.z); const near = a && Math.hypot(a.x - foot.pos.x, a.z - foot.pos.z) < 6000;
+    if (!near || !foot.active) { if (CROWD.list.length) { CROWD.list.forEach(c => World.remove(c.obj)); CROWD.list.length = 0; } return; }
+    if (!CROWD.list.length) {
+      const fm = ctx.fm(); const door = new THREE.Vector3(-(fm.spec.D ? fm.spec.D.R * 1.6 + 3 : 6), 0, fm.spec.D ? fm.spec.D.noseZ + 6 : -10).applyQuaternion(fm.q).add(fm.pos);
+      for (let k = 0; k < 10; k++) { const kd = k < 7 ? 'civil' : 'agentpiste'; const o = Rig.make(kd, k * 13 + 5); const p = door.clone().add(new THREE.Vector3((Math.random() - 0.5) * 14, 0, (Math.random() - 0.5) * 14)); p.y = groundH(p.x, p.z); World.add(o);
+        CROWD.list.push({ obj: o, kd, pos: p, hdg: Math.random() * 360, tgt: null, waveT: 0, lookT: 0, wait: Math.random() * 3, t: Math.random() * 9 }); }
+      T('🚶 Les passagers et le personnel de piste sont autour de vous. B = les saluer.', 4000);
+    }
+    for (const c of CROWD.list) {
+      c.t += dt; c.waveT -= dt; c.lookT -= dt; let speed = 0; const dP = Math.hypot(foot.pos.x - c.pos.x, foot.pos.z - c.pos.z);
+      if (dP < 3.2 && c.lookT <= 0 && Math.random() < dt * 0.6) { c.waveT = 1.5; c.lookT = 6; } // il vous dit bonjour en passant
+      if (c.waveT > 0 || c.lookT > 3) { c.hdg = Math.atan2(foot.pos.x - c.pos.x, -(foot.pos.z - c.pos.z)) * RAD; }
+      else if (c.kd === 'civil') {
+        if (!c.tgt || c.pos.distanceTo(c.tgt) < 1 || c.wait > 0) { c.wait -= dt; if (!c.tgt || c.wait <= -0.01) { c.tgt = foot.pos.clone().add(new THREE.Vector3((Math.random() - 0.5) * 60, 0, (Math.random() - 0.5) * 60)); c.wait = Math.random() * 2; } }
+        if (c.wait <= 0 && c.tgt) { const d = c.tgt.clone().sub(c.pos); d.y = 0; if (d.length() > 0.5) { d.normalize(); speed = 1.35; c.pos.addScaledVector(d, speed * dt); c.hdg = Math.atan2(d.x, -d.z) * RAD; } }
+      }
+      if (dP > 120) { c.pos.copy(foot.pos).add(new THREE.Vector3((Math.random() - 0.5) * 40, 0, (Math.random() - 0.5) * 40)); }
+      c.pos.y = groundH(c.pos.x, c.pos.z);
+      Rig.animate(c.obj, { speed, stance: 0, dt }); if (c.waveT > 0) wave(c.obj, c.t);
+      c.obj.position.copy(c.pos); c.obj.rotation.y = -c.hdg * DEG;
+    }
+  }
   function lot6Update(dt) {
     if (!foot.active) return; const fm = ctx.fm(); W6.cd -= dt;
     // tir continu (carabine) en maintenant Espace
     if (ctx.codes.Space && WEAPONS[W6.wi][5] && W6.cd <= 0) shoot();
     W6.squad.forEach((o, k) => {
-      const h = foot.hdg * DEG, row = 1 + (k >> 1), side = k % 2 ? 1 : -1; const want = W6.order === 2 ? o.pos.clone() : foot.pos.clone().add(new THREE.Vector3(-Math.sin(h) * 3 * row + Math.cos(h) * side * 2.5, 0, Math.cos(h) * 3 * row + Math.sin(h) * side * 2.5));
+      const h = foot.hdg * DEG, row = 1 + Math.floor(k / 6), side = (k % 6) - 2.5; const want = W6.order === 2 ? o.pos.clone() : foot.pos.clone().add(new THREE.Vector3(-Math.sin(h) * 2.6 * row + Math.cos(h) * side * 2.2, 0, Math.cos(h) * 2.6 * row + Math.sin(h) * side * 2.2));
       const en = Ops.nearestEnemy(o.pos, W6.order === 1 ? 600 : 350); if (W6.order === 1 && en) want.copy(en.pos).add(new THREE.Vector3(side * 20, 0, 25));
       const d = want.clone().sub(o.pos); d.y = 0; const dist = d.length(); const moving = dist > 1.5; if (moving) { o.pos.addScaledVector(d.normalize(), Math.min(dist, (dist > 15 ? 6 : 2.6) * dt)); o.hdg = Math.atan2(d.x, -d.z) * RAD; }
       o.pos.y = Terrain.heightAt(o.pos.x, o.pos.z); walkAnim(o, moving, dt, dist > 15); if (en) o.hdg = Math.atan2(en.pos.x - o.pos.x, -(en.pos.z - o.pos.z)) * RAD;
@@ -7478,7 +7618,8 @@ const Extra = (function () {
     if (/^Digit[1-7]$/.test(code)) { W6.wi = +code.slice(5) - 1; W6.ammo = WEAPONS[W6.wi][3]; if (foot.obj) Rig.hold(foot.obj, Rig.gun(WEAPONS[W6.wi][4])); T('Arme : ' + WEAPONS[W6.wi][0] + ' (' + W6.ammo + ' coups)', 1500); return true; }
     if (code === 'KeyR') { W6.ammo = WEAPONS[W6.wi][3]; T('Rechargé : ' + W6.ammo + ' coups', 1000); return true; }
     if (code === 'KeyC') { W6.stance = W6.stance === 1 ? 0 : 1; T(W6.stance ? 'Accroupi (moins visible)' : 'Debout', 1000); return true; }
-    if (code === 'KeyP' || code === 'KeyB') { W6.stance = W6.stance === 2 ? 0 : 2; T(W6.stance ? 'À plat ventre / à couvert' : 'Debout', 1000); return true; }
+    if (code === 'KeyB') { foot.waveT = 1.8; let n = 0; for (const c of CROWD.list) if (c.pos.distanceTo(foot.pos) < 12) { c.waveT = 1.6 + Math.random() * 0.5; c.lookT = 3; n++; } T(n ? '👋 Bonjour ! (' + n + ' personne' + (n > 1 ? 's' : '') + ' vous saluent)' : '👋 Vous saluez.', 1500); return true; }
+    if (code === 'KeyP') { W6.stance = W6.stance === 2 ? 0 : 2; T(W6.stance ? 'À plat ventre / à couvert' : 'Debout', 1000); return true; }
     if (code === 'Tab' || code === 'KeyL') { const L = W6.enemies.filter(e => !e.dead).sort((a, b) => a.pos.distanceTo(foot.pos) - b.pos.distanceTo(foot.pos)); if (L.length) { const i = (L.indexOf(Ops.target) + 1) % L.length; Ops.setTarget(L[i]); T('🎯 ' + L[i].name + ' à ' + Math.round(L[i].pos.distanceTo(foot.pos)) + ' m', 1500); } return true; }
     if (code === 'KeyU') { Ops.setTarget(null); T('Cible lâchée', 1000); return true; }
     if (code === 'KeyM') { const e = Ops.nearestEnemy(foot.pos, 3); if (e) { e.hp -= 25; if (e.hp <= 0) { e.dead = true; T('💥 Ennemi neutralisé au corps à corps'); } } else T('Coup de poing dans le vide…', 900); return true; }
