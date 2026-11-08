@@ -119,7 +119,7 @@ body.incockpit.autoclean #pfd,body.incockpit.autoclean #status,body.incockpit.au
 #warHud .wside{min-width:240px}#warHud .wside.me b{color:#7dffa0}#warHud .wbar{height:7px;background:#3b3f46;border-radius:4px;margin:4px 0;overflow:hidden}#warHud .wbar i{display:block;height:100%;background:linear-gradient(90deg,#d23b2c,#f3c843,#3fcf6b)}#warHud span{font-size:12px;opacity:.9}#warHud .wvs{font-size:22px}#warHud .worder{flex-basis:100%;text-align:center;font-size:12px;opacity:.9}
 #cmdBox{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60;width:min(560px,94vw);max-height:90vh;overflow:auto}#cmdBox button{display:flex;gap:10px;align-items:center;width:100%;text-align:left;margin:3px 0;font-size:15px}#cmdBox kbd{min-width:26px;text-align:center}#cmdBox p{opacity:.7;font-size:12px}
 #warBanner{position:fixed;left:50%;top:30%;transform:translate(-50%,-50%);z-index:70;background:linear-gradient(135deg,#3e2a1e,#6b4a33);color:#ffe9a8;font:700 34px Georgia,serif;padding:22px 34px;border-radius:18px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.6)}#warBanner small{display:block;font:500 16px Inter,Arial,sans-serif;color:#fff;margin-top:8px}
-#rankBox .rnote{font-size:12.5px;opacity:.85;margin:0 0 8px}#rankBox{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:65;width:min(1100px,98vw);max-height:88vh;overflow:auto}#rankBox table{width:100%;border-collapse:collapse;font-size:12.5px}#rankBox th,#rankBox td{padding:5px 6px;border-bottom:1px solid rgba(128,128,128,.25);text-align:left}#rankBox tr.hl{background:rgba(243,200,67,.25);font-weight:700}#rankBox tr.me td:nth-child(2)::after{content:' (moi)';color:#3fcf6b}
+#rankBox .rnote{font-size:12.5px;opacity:.85;margin:0 0 8px}#rankBox{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:65;width:min(1100px,98vw);max-height:88vh;overflow:auto}#rankBox table{width:100%;border-collapse:collapse;font-size:12px;white-space:nowrap}#rankBody{overflow-x:auto}#rankBox th,#rankBox td{padding:5px 6px;border-bottom:1px solid rgba(128,128,128,.25);text-align:left}#rankBox tr.hl{background:rgba(243,200,67,.25);font-weight:700}#rankBox tr.me td:nth-child(2)::after{content:' (moi)';color:#3fcf6b}
 </style>
 </head>
 <body>
@@ -260,7 +260,7 @@ body.incockpit.autoclean #pfd,body.incockpit.autoclean #status,body.incockpit.au
     <div class="k"><kbd>Y</kbd><span>Cible suivante</span></div>
     <div class="k"><kbd>F6</kbd><span>Lâcher la cible</span></div>
     <div class="k"><kbd>Retour ←</kbd><span>Leurres (contre les missiles)</span></div>
-    <div class="k"><kbd>Maj+V</kbd><span>Aller sur le porte-avions</span></div>
+    <div class="k"><kbd>Maj+V</kbd><span>Aller sur le porte-avions le plus proche</span></div>
     <div class="k"><kbd>T (sur le pont)</kbd><span>Catapulte du porte-avions</span></div>
     <div class="k"><kbd>Maj+Q</kbd><span>Appeler l'escadrille</span></div>
     <h4>13 · À pied, soldats et véhicules</h4>
@@ -269,7 +269,8 @@ body.incockpit.autoclean #pfd,body.incockpit.autoclean #status,body.incockpit.au
     <div class="k"><kbd>0 près d'un avion</kbd><span>Monter dans N'IMPORTE QUEL avion à côté de toi (garé, en roulage…) et prendre ses commandes</span></div>
     <div class="k"><kbd>0 près d'une voiture</kbd><span>Monter dans N'IMPORTE QUELLE voiture (ville, route, parking de l'aéroport, jeep ou char d'une base) et conduire · 0 = descendre</span></div>
     <div class="k"><kbd>Z Q S D</kbd><span>Marcher : Z = vers où regarde la caméra · S = il fait DEMI-TOUR et repart en avant (il court en se retournant) · Q / D = à gauche / à droite</span></div>
-    <div class="k"><kbd>← → / souris</kbd><span>Tourner la caméra AUTOUR de ton personnage (clic gauche maintenu + bouger la souris) : tu le vois de face, de dos, de côté · molette = zoom · double-clic = recentrer</span></div>
+    <div class="k"><kbd>Souris (comme GTA)</kbd><span>CLIQUE une fois dans le jeu : la souris est « attrapée ». Bouger la souris = tourner la caméra AUTOUR de toi (de face, de dos, de côté) · clic gauche = tirer · clic droit = viser · molette = zoom · Échap = lâcher la souris</span></div>
+    <div class="k"><kbd>Flèches ↑ ↓ ← →</kbd><span>Marcher aussi (comme Z Q S D), dans toutes les directions</span></div>
     <div class="k"><kbd>Maj</kbd><span>COURIR très vite</span></div>
     <div class="k"><kbd>J</kbd><span>Sauter</span></div>
     <div class="k"><kbd>C</kbd><span>S'accroupir</span></div>
@@ -303,6 +304,7 @@ body.incockpit.autoclean #pfd,body.incockpit.autoclean #status,body.incockpit.au
     <div class="k"><kbd>² puis 7</kbd><span>Cessez-le-feu / feu à volonté</span></div>
     <div class="k"><kbd>² puis 8 · 9 · 0</kbd><span>Aller au front à pied · en jeep · bataille aérienne</span></div>
     <div class="k"><kbd>² puis B · E</kbd><span>Visiter MA base · aller voir la base ENNEMIE</span></div>
+    <div class="k"><kbd>² puis V</kbd><span>Aller sur un PORTE-AVIONS de ton pays (chaque pays a les siens en mer, avec ses Rafale sur le pont et son drapeau)</span></div>
     <div class="k"><kbd>² puis R</kbd><span>RAID : les Rafale de ta base (et de tes porte-avions) décollent et frappent l'ennemi</span></div>
     <div class="k"><kbd>² puis X</kbd><span>CAPITULER (drapeau blanc) : tu perds et tu paies un dédommagement</span></div>
     <div class="k"><kbd>Paix (² puis P)</kbd><span>Il y a TOUJOURS un vainqueur : le pays qui a subi le plus de dégâts (hommes, base, économie) perd et DÉDOMMAGE le gagnant. Un pays en position de faiblesse peut aussi capituler tout seul (signal : drapeau blanc)</span></div>
@@ -410,6 +412,7 @@ body.incockpit.autoclean #pfd,body.incockpit.autoclean #status,body.incockpit.au
     <label>Vitesse du temps</label>
     <select id="selTime"><option value="1">Temps réel</option><option value="60">× 60 (1 h par minute)</option><option value="600">× 600</option><option value="0">Arrêté</option></select>
     <label>Météo</label><select id="selWeather"></select>
+    <label>MA tenue quand je sors de l'avion (0)</label><select id="selMyKind"><option value="auto">La même que mon escouade</option><option value="soldat">Militaire de mon pays (camouflage + drapeau)</option><option value="agent">Homme en noir (blouson noir)</option><option value="intervention">Intervention rapide (softshell noir, gilet POLICE)</option><option value="special">Intervention spéciale (multicam)</option><option value="delta">Commando d'élite (noir et blanc tacheté)</option><option value="general">Colonel / général (manteau tacheté)</option><option value="pilote">Pilote (tenue selon l'avion)</option></select>
     <label>Mon escouade quand je sors de l'avion (0)</label><select id="selSquadKind"><option value="soldat">Militaires de mon pays (camouflage + drapeau)</option><option value="agent">Hommes en noir (blouson noir, agents secrets)</option><option value="intervention">Intervention rapide (softshell noir, gilet POLICE)</option><option value="special">Intervention spéciale (multicam)</option><option value="delta">Commandos d'élite (noir et blanc tacheté)</option><option value="general">Colonels et généraux (manteau tacheté)</option><option value="mix">Mélange de tous</option></select>
     <label>Nombre d'hommes : <b id="squadNv">5</b></label><input type="range" id="squadN" min="0" max="60" step="1" value="5">
     <label>Escadrilles de Rafale (Maj+Q ou bouton)</label><select id="selSquad"><option value="1">1 escadrille (4 Rafale)</option><option value="2">2 escadrilles (8 Rafale)</option><option value="3">3 escadrilles (12 Rafale)</option><option value="4">4 escadrilles (16 Rafale)</option></select>
@@ -436,7 +439,7 @@ body.incockpit.autoclean #pfd,body.incockpit.autoclean #status,body.incockpit.au
 <script>
 // ---- 00_util.js ----
 // ===== Outils communs =====
-const VERSION = 'Version 38 · 08/11';
+const VERSION = 'Version 40 · 08/11';
 const DEG = Math.PI / 180, RAD = 180 / Math.PI;
 const KT = 0.514444, FT = 0.3048;
 const clamp = (x, a, b) => x < a ? a : (x > b ? b : x);
@@ -5639,7 +5642,7 @@ const CameraRig = (function () {
     let yaw = (C.yaw + off.yaw) * DEG, el = (C.el + off.el) * DEG;
     let baseYaw = hdg, baseEl = 0;
     if (C.follow) { baseEl = e.x * 0.7; }
-    if (C.orbit) { orbitT += dt * 0.08; baseYaw = orbitT; }
+    if (C.orbit) { if (!fm.isFoot) orbitT += dt * 0.08; baseYaw = fm.isFoot ? hdg : orbitT; } // à pied : pas de rotation automatique (sinon la marche « tourne »)
     if (!init) { curYaw = baseYaw; curEl = baseEl; init = true; }
     const k = C.follow ? 1 - Math.exp(-dt * 3.0) : 1 - Math.exp(-dt * 10);
     curYaw += wrapPi(baseYaw - curYaw) * k; curEl += (baseEl - curEl) * k;
@@ -6120,6 +6123,7 @@ const UI = (function () {
     $('btnFiche').onclick = () => { $('fiche').classList.toggle('hidden'); ficheT = 0; }; $('btnFicheClose').onclick = () => $('fiche').classList.add('hidden');
     document.querySelectorAll('#fiche [data-h]').forEach(b => { const code = b.dataset.k; b.onpointerdown = e => { e.preventDefault(); window.__sim.codes[code] = true; }; const up = () => window.__sim.codes[code] = false; b.onpointerup = up; b.onpointerleave = up; });
     document.querySelectorAll('#fiche [data-k]:not([data-h])').forEach(b => b.onclick = () => { const code = b.dataset.k, sh = !!b.dataset.s; const key = code.startsWith('Key') ? (sh ? code.slice(3) : code.slice(3).toLowerCase()) : code; window.dispatchEvent(new KeyboardEvent('keydown', { key, code, shiftKey: sh })); setTimeout(() => window.dispatchEvent(new KeyboardEvent('keyup', { key, code, shiftKey: sh })), 60); b.blur(); });
+    $('selMyKind').value = Settings.data.myKind || 'auto'; $('selMyKind').onchange = e => { Settings.data.myKind = e.target.value; Settings.save(); e.target.blur(); UI.toast('Ma tenue : ' + e.target.selectedOptions[0].text + ' (au prochain 0)', 3000); };
     $('selSquadKind').value = Settings.data.squadKind || 'soldat'; $('selSquadKind').onchange = e => { Settings.data.squadKind = e.target.value; Settings.save(); e.target.blur(); UI.toast('Escouade : ' + e.target.selectedOptions[0].text + ' (au prochain 0)', 3000); };
     $('squadN').value = Settings.data.squadN ?? 5; $('squadNv').textContent = $('squadN').value; $('squadN').oninput = e => { Settings.data.squadN = +e.target.value; $('squadNv').textContent = e.target.value; Settings.save(); }; $('squadN').onchange = e => e.target.blur();
     $('selSquad').value = String(Settings.data.squad || 2); $('selSquad').onchange = e => { Settings.data.squad = +e.target.value; Settings.save(); e.target.blur(); UI.toast('Escadrilles : ' + e.target.selectedOptions[0].text + ' — Maj+Q pour les lancer', 3000); };
@@ -7102,7 +7106,7 @@ const Ops = (function () {
         else { g.beginPath(); g.arc(x, y, 5, 0, 7); g.fill(); g.stroke(); for (const w of p.wingObjs) { if (w.dead) continue; const [wx, wy] = P(w.pos.x, w.pos.z); if (Math.hypot(wx - cx, wy - cy) < R) { g.fillRect(wx - 1.5, wy - 1.5, 3, 3); } } }
         if (n++ < 25) { g.font = 'bold 9px Consolas'; g.fillStyle = p.color; g.textAlign = out ? (x < cx ? 'left' : 'right') : 'left'; g.fillText(p.name + (out ? ' ' + Math.round(d / 1000) + 'km' : ''), out ? x + (x < cx ? 8 : -8) : x + 7, y + 3); g.textAlign = 'left'; }
       } g.lineWidth = 1; }
-    for (const c of CARRIERS) { const [x, y] = P(c.x, c.z); if (Math.hypot(x - cx, y - cy) > R) continue; g.fillStyle = '#9ad0ff'; g.fillRect(x - 5, y - 2, 10, 4); g.font = '8px Consolas'; g.fillText('PA', x + 6, y + 3); }
+    for (const c of CARRIERS) { if (c.sunk) continue; const [x, y] = P(c.x, c.z); if (Math.hypot(x - cx, y - cy) > R) continue; g.fillStyle = '#9ad0ff'; g.fillRect(x - 5, y - 2, 10, 4); g.font = '8px Consolas'; g.fillText('PA', x + 6, y + 3); }
     if (target && !target.dead) { const [x, y] = P(target.pos.x, target.pos.z); g.strokeStyle = '#ff2020'; g.lineWidth = 2; g.strokeRect(x - 6, y - 6, 12, 12); g.lineWidth = 1; }
     // route vers la destination
     const D = dest(); if (D) {
@@ -7264,11 +7268,21 @@ const Ops = (function () {
   function claimAircraft(b) { if (b.ai) { const i = AI.indexOf(b.ai); if (i >= 0) remove(i); } if (b.park) { Airports.hideParked(b.a, b.park); } }
   function takeNearestAI() { const fm = ctx.fm(); const o = nearestAI(fm); if (!o || o.pos.distanceTo(fm.pos) > 30000) return false; const pos = o.pos.clone(), h = o.hdg, spd = o.spd, ty = o.ty, liv = o.liv; remove(AI.indexOf(o)); return { pos, h, spd, ty, liv }; }
   // ---------- PORTE-AVIONS (4) : pont d'envol, catapulte (T), brins d'arrêt, chasseurs garés ----------
-  const CARRIERS = [{ n: 'Porte-avions Golfe de Guinée', lat: 3.05, lon: 8.35, hdg: 30, f: 40 }, { n: 'Porte-avions Atlantique (Brest)', lat: 47.6, lon: -6.6, hdg: 250, f: 40 }, { n: 'Porte-avions New York', lat: 39.9, lon: -72.2, hdg: 60, f: 30 }, { n: 'Porte-avions Mer de Chine', lat: 30.6, lon: 123.6, hdg: 0, f: 20 }];
+  // PORTE-AVIONS DE CHAQUE PAYS, en mer près de ses côtes (avec ses Rafale aux couleurs du pays sur le pont)
+  const PA_SPOTS = {
+    us: [[39.9, -72.2, 60, 'New York'], [36.6, -74.6, 20, 'Norfolk'], [32.4, -118.2, 300, 'San Diego'], [27.4, -89.6, 90, 'Golfe du Mexique'], [47.4, -125.4, 0, 'Seattle']],
+    ru: [[43.4, 36.2, 110, 'Mer Noire'], [70.2, 34.5, 60, 'Mer de Barents'], [42.4, 132.6, 150, 'Vladivostok'], [52.4, 160.6, 200, 'Kamtchatka'], [59.9, 25.6, 260, 'Mer Baltique']],
+    cn: [[30.6, 123.6, 0, 'Mer de Chine orientale'], [36.4, 122.8, 80, 'Mer Jaune'], [20.4, 113.6, 230, 'Mer de Chine méridionale']],
+    gb: [[50.1, -1.6, 250, 'Manche'], [56.2, 1.2, 10, 'Mer du Nord']], fr: [[47.6, -6.6, 250, 'Atlantique (Brest)']], cm: [[3.05, 8.35, 30, 'Golfe de Guinée']],
+    jp: [[34.4, 140.6, 40, 'Pacifique'], [36.4, 133.2, 230, 'Mer du Japon']], br: [[-23.6, -42.4, 70, 'Rio de Janeiro'], [-8.6, -34.2, 10, 'Recife']], de: [[54.4, 7.4, 300, 'Mer du Nord'], [54.7, 11.6, 80, 'Mer Baltique']],
+    ca: [[44.0, -62.4, 60, 'Halifax'], [48.6, -126.2, 320, 'Vancouver']], ng: [[5.8, 3.4, 270, 'Lagos'], [3.9, 6.6, 120, 'Delta du Niger']], ar: [[-36.2, -55.6, 120, 'Rio de la Plata']], ae: [[25.6, 55.0, 300, 'Golfe']],
+    ma: [[34.0, -8.6, 210, 'Atlantique (Rabat)']], be: [[51.6, 2.5, 230, 'Mer du Nord']], cd: [[-6.2, 11.6, 250, 'Embouchure du Congo']], td: [[13.1, 14.3, 0, 'Lac Tchad']], ci: [[4.7, -4.1, 260, 'Abidjan']], sn: [[14.5, -17.8, 190, 'Dakar']], ga: [[0.2, 8.9, 200, 'Libreville']]
+  };
+  const CARRIERS = []; for (const cc in PA_SPOTS) PA_SPOTS[cc].forEach(([lat, lon, hdg, place]) => CARRIERS.push({ n: 'Porte-avions de ' + (COUNTRIES[cc] ? COUNTRIES[cc].n : cc) + ' — ' + place, cc, lat, lon, hdg, f: cc === 'us' || cc === 'ru' || cc === 'cn' ? 24 : 16 }));
   const DECK_H = 21, DECK_L = 330, DECK_W = 76;
   CARRIERS.forEach(c => { const [x, z] = ll2xz(c.lat, c.lon); c.x = x; c.z = z; c.d = dirOf(c.hdg); c.r = new THREE.Vector3(Math.cos(c.hdg * DEG), 0, Math.sin(c.hdg * DEG)); });
   function carrierLocal(c, x, z) { const dx = x - c.x, dz = z - c.z; return [dx * c.r.x + dz * c.r.z, dx * c.d.x + dz * c.d.z]; } // [latéral, longitudinal]
-  function deckAt(x, z) { for (const c of CARRIERS) { if (Math.abs(x - c.x) > 400 || Math.abs(z - c.z) > 400) continue; const [l, a] = carrierLocal(c, x, z); if (Math.abs(a) < DECK_L / 2 && Math.abs(l) < DECK_W / 2 * (a > DECK_L * 0.3 ? 1 - (a - DECK_L * 0.3) / (DECK_L * 0.35) : 1)) return DECK_H; } return null; }
+  function deckAt(x, z) { for (const c of CARRIERS) { if (c.sunk) continue; if (Math.abs(x - c.x) > 400 || Math.abs(z - c.z) > 400) continue; const [l, a] = carrierLocal(c, x, z); if (Math.abs(a) < DECK_L / 2 && Math.abs(l) < DECK_W / 2 * (a > DECK_L * 0.3 ? 1 - (a - DECK_L * 0.3) / (DECK_L * 0.35) : 1)) return DECK_H; } return null; }
   function carrierBuild(c) {
     if (c.obj) return; const g = new THREE.Group(); const grey = new THREE.MeshStandardMaterial({ color: 0x5d646c, roughness: 0.7, metalness: 0.2 }), dark = new THREE.MeshStandardMaterial({ color: 0x2f3439, roughness: 0.8 });
     const sh = new THREE.Shape(); sh.moveTo(-DECK_W / 2, -DECK_L / 2); sh.lineTo(DECK_W / 2, -DECK_L / 2); sh.lineTo(DECK_W / 2, DECK_L * 0.3); sh.lineTo(0, DECK_L / 2); sh.lineTo(-DECK_W / 2, DECK_L * 0.3); sh.closePath();
@@ -7278,8 +7292,10 @@ const Ops = (function () {
     const rad = new THREE.Mesh(new THREE.BoxGeometry(8, 1.5, 0.4), dark); rad.position.set(DECK_W / 2 - 6, DECK_H + 36, -20); g.add(rad); c.radar = rad;
     for (const [x, z] of [[-DECK_W / 2 + 3, DECK_L * 0.32], [DECK_W / 2 - 3, -DECK_L * 0.45]]) { const ciws = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.8, 4, 10), new THREE.MeshStandardMaterial({ color: 0xdcdcdc })); ciws.position.set(x, DECK_H + 2, z); g.add(ciws); }
     // chasseurs garés le long du pont
-    const list = []; for (let k = 0; k < c.f; k++) { const side = k % 2 ? 1 : -1, row = Math.floor(k / 2); const z = -DECK_L / 2 + 25 + row * (DECK_L * 0.75 / Math.ceil(c.f / 2)); list.push({ key: 'chasseur|gris', m: new THREE.Matrix4().compose(new THREE.Vector3(side * (DECK_W / 2 - 9), DECK_H + 2.05, z), new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), side * 2.1), new THREE.Vector3(1, 1, 1)) }); }
+    const list = []; for (let k = 0; k < c.f; k++) { const side = k % 2 ? 1 : -1, row = Math.floor(k / 2); const z = -DECK_L / 2 + 25 + row * (DECK_L * 0.75 / Math.ceil(c.f / 2)); list.push({ key: 'chasseur|' + (c.cc ? 'nat:' + c.cc : 'gris'), m: new THREE.Matrix4().compose(new THREE.Vector3(side * (DECK_W / 2 - 9), DECK_H + 2.05, z), new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), side * 2.1), new THREE.Vector3(1, 1, 1)) }); }
     g.add(AircraftModel.fleet(list));
+    // grand drapeau du pays sur l'îlot et numéro peint
+    if (c.cc) { const fc = makeCanvas(96, 64); try { drawFlag2D(fc.getContext('2d'), c.cc, 0, 0, 96, 64); } catch (e) { } const fl = new THREE.Mesh(new THREE.PlaneGeometry(12, 8), new THREE.MeshBasicMaterial({ map: canvasTex(fc), side: THREE.DoubleSide })); fl.position.set(DECK_W / 2 - 0.8, DECK_H + 14, -20); fl.rotation.y = Math.PI / 2; g.add(fl); const fl2 = fl.clone(); fl2.position.x = DECK_W / 2 - 11.2; g.add(fl2); }
     // sillage
     const wake = new THREE.Mesh(new THREE.PlaneGeometry(60, 500), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.25, depthWrite: false })); wake.rotation.x = -Math.PI / 2; wake.position.set(0, 0.4, DECK_L / 2 + 250); g.add(wake);
     g.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
@@ -7290,16 +7306,16 @@ const Ops = (function () {
     g.strokeStyle = '#f2f2f2'; g.lineWidth = 4; g.setLineDash([30, 22]); g.beginPath(); g.moveTo(140, 1024); g.lineTo(330, 120); g.stroke(); g.setLineDash([]); g.strokeStyle = '#f2d21b'; g.lineWidth = 3; for (const x of [200, 300]) { g.beginPath(); g.moveTo(x, 640); g.lineTo(x + 20, 80); g.stroke(); }
     g.strokeStyle = '#ddd'; g.lineWidth = 5; for (let k = 0; k < 4; k++) { g.beginPath(); g.moveTo(60, 880 - k * 30); g.lineTo(330, 880 - k * 30); g.stroke(); } g.fillStyle = '#fff'; g.font = 'bold 120px Arial'; g.textAlign = 'center'; g.fillText('77', 300, 980);
     return (_cdeck = canvasTex(c, { aniso: 8 })); }
-  function nearestCarrier(fm) { let b = CARRIERS[0], bd = 1e15; for (const c of CARRIERS) { const d = Math.hypot(c.x - fm.pos.x, c.z - fm.pos.z); if (d < bd) { bd = d; b = c; } } return b; }
-  function gotoCarrier(fm) {
-    const c = nearestCarrier(fm); const x = c.x - c.d.x * (DECK_L / 2 - 30), z = c.z - c.d.z * (DECK_L / 2 - 30);
+  function nearestCarrier(fm, cc) { let b = CARRIERS[0], bd = 1e15; for (const c of CARRIERS) { if (c.sunk || (cc && c.cc !== cc)) continue; const d = Math.hypot(c.x - fm.pos.x, c.z - fm.pos.z); if (d < bd) { bd = d; b = c; } } return b; }
+  function gotoCarrier(fm, cc) {
+    const c = nearestCarrier(fm, cc); const x = c.x - c.d.x * (DECK_L / 2 - 30), z = c.z - c.d.z * (DECK_L / 2 - 30);
     World.update(x, z); Coast.forceReady(c.lat - 0.3, c.lon - 0.4, c.lat + 0.3, c.lon + 0.4); Terrain.update(x, z, 50, 3000); carrierBuild(c);
     fm.reset(x, DECK_H, z, c.hdg); fm.parking = true; ctx.S.lever = 0; if (CameraRig.recenter) CameraRig.recenter(); onDeckMsg = false;
-    T('⚓ ' + c.n + ' — ' + c.f + ' chasseurs. T = CATAPULTE. Pour apponter : arrivez par l\'arrière, train sorti, les brins d\'arrêt vous arrêtent.', 7000);
+    T('⚓ ' + c.n + ' — ' + c.f + ' Rafale sur le pont. T = CATAPULTE. Pour apponter : arrivez par l\'arrière, train sorti, les brins d\'arrêt vous arrêtent.', 7000);
   }
   let catT = 0, onDeckMsg = false;
   function carrierUpdate(dt, fm) {
-    for (const c of CARRIERS) { const d = Math.hypot(c.x - fm.pos.x, c.z - fm.pos.z); if (d < 60000) carrierBuild(c); if (c.radar) c.radar.rotation.y += dt * 2; }
+    for (const c of CARRIERS) { if (c.sunk) { if (c.obj) { World.remove(c.obj); c.obj = null; } continue; } const d = Math.hypot(c.x - fm.pos.x, c.z - fm.pos.z); if (d < 60000) carrierBuild(c); else if (d > 90000 && c.obj) { World.remove(c.obj); c.obj = null; c.radar = null; } if (c.radar) c.radar.rotation.y += dt * 2; }
     catT -= dt; const deck = deckAt(fm.pos.x, fm.pos.z) !== null;
     if (deck && fm.onGround && catT < 0 && fm.groundSpeed > 14) { const k = Math.exp(-dt * 1.4); fm.vel.x *= k; fm.vel.z *= k; if (!onDeckMsg) { onDeckMsg = true; T('Brin d\'arrêt accroché ! Appontage réussi.', 4000); radio('appontage réussi, brin numéro 3.', 'trap, wire number 3.', 'Officier d\'appontage'); } }
     if (!fm.onGround) onDeckMsg = false;
@@ -7410,7 +7426,7 @@ const Ops = (function () {
     else { const v = tg.pos.clone().add(new THREE.Vector3((Math.random() - 0.5) * 3, Math.random() * 2, (Math.random() - 0.5) * 3)).sub(from).normalize().multiplyScalar(700); shots.push({ kind: 'gun', pos: from.clone(), vel: v, life: 2 }); } }
   function nearestEnemy(pos, range) { let b = null, bd = range; for (const o of ground) { if (o.dead) continue; const d = o.pos.distanceTo(pos); if (d < bd) { bd = d; b = o; } } return b; }
   function fireDir(from, dir, kind) { shots.push({ kind: 'gun', pos: from.clone(), vel: dir.clone().normalize().multiplyScalar(kind === 'sniper' ? 1100 : 750), life: 2 }); }
-  return { hurtPlane, hitAI: (o, d) => hit(o, d), boom, get war() { return war; }, nearAircraft, claimAircraft, get target() { return target; }, netHit, myWing, get hp() { return hp; }, cloudsChanged, strike: () => lightning(ctx.fm()), hitAI: (f) => { const o = AI.find(o => o.kind === 'tfc' && o.role === 'dep'); if (o) { aiFull(o); Damage.hit(o.obj, new THREE.Vector3(f * 15, 0, 0), 30, { motion: { vel: new THREE.Vector3(), pos: o.pos.clone() } }); o.stuck = true; return o.pos; } }, get traffic() { return AI.filter(o => o.kind === 'tfc').map(o => o.G.R.name + o.role[0] + ':' + o.phase + ':' + Math.round(o.along ?? o.al)).join(' '); }, repair: () => repair(ctx.fm()), randomFailure, addGround(o) { ground.push(o); }, shootAt, nearestEnemy, fireDir, setTarget(o) { target = o; }, pip, deckAt, declareWar, gotoBattle, peace, init, key, control, update, radar, AP, radio, syncDest, takeNearestAI, resetFlight() { gh.h = null; gh.user = false; repair(ctx.fm()); nukes = 3; hp = 100; AP.on = false; AP.full = false; AP.taxi = null; AP.land = false; AP.appr = false; atc.phase = ''; }, get target() { return target; } };
+  return { carriers: CARRIERS, gotoCarrier, hurtPlane, hitAI: (o, d) => hit(o, d), boom, get war() { return war; }, nearAircraft, claimAircraft, get target() { return target; }, netHit, myWing, get hp() { return hp; }, cloudsChanged, strike: () => lightning(ctx.fm()), hitAI: (f) => { const o = AI.find(o => o.kind === 'tfc' && o.role === 'dep'); if (o) { aiFull(o); Damage.hit(o.obj, new THREE.Vector3(f * 15, 0, 0), 30, { motion: { vel: new THREE.Vector3(), pos: o.pos.clone() } }); o.stuck = true; return o.pos; } }, get traffic() { return AI.filter(o => o.kind === 'tfc').map(o => o.G.R.name + o.role[0] + ':' + o.phase + ':' + Math.round(o.along ?? o.al)).join(' '); }, repair: () => repair(ctx.fm()), randomFailure, addGround(o) { ground.push(o); }, shootAt, nearestEnemy, fireDir, setTarget(o) { target = o; }, pip, deckAt, declareWar, gotoBattle, peace, init, key, control, update, radar, AP, radio, syncDest, takeNearestAI, resetFlight() { gh.h = null; gh.user = false; repair(ctx.fm()); nukes = 3; hp = 100; AP.on = false; AP.full = false; AP.taxi = null; AP.land = false; AP.appr = false; atc.phase = ''; }, get target() { return target; } };
 })();
 
 // ---- 14b_wreck.js ----
@@ -7641,28 +7657,30 @@ const Extra = (function () {
   const foot = { active: false, obj: null, pos: new THREE.Vector3(), hdg: 0, vy: 0, phase: 0, proxy: null };
   // le pilote qui sort de l'avion : tenue selon l'avion (commandant de bord, pilote de chasse, pilote militaire)
   function pilotKind() { const ty = Settings.data.type || 'A320'; const sid = (AC_TYPES[ty] && AC_TYPES[ty].shapeOf) || ty; return ['chasseur', 'aurore', 'foudre', 'spectre'].includes(sid) ? 'chasse' : ['militaire', 'forteresse', 'dragon', 'goliath'].includes(sid) ? 'militaire' : 'pilote'; }
-  function humanMesh() { const g = Rig.make(pilotKind(), 1); g.userData.kindFor = pilotKind(); Rig.hold(g, Rig.gun(WEAPONS[W6.wi][4])); return g; }
+  // MA tenue : celle choisie dans le panneau H (par défaut la même que mon escouade, aux couleurs de mon pays)
+  function myKind() { const k = Settings.data.myKind || 'auto'; if (k === 'pilote') return pilotKind(); if (k !== 'auto') return k; const s = Settings.data.squadKind || 'soldat'; return s === 'mix' ? 'soldat' : s; }
+  function humanMesh() { const g = Rig.make(myKind(), 1, { cc: myCC() }); g.userData.kindFor = myKind() + myCC(); Rig.hold(g, Rig.gun(WEAPONS[W6.wi][4])); return g; }
   function footToggle() {
     const fm = ctx.fm();
     if (!foot.active) {
       if (!fm.onGround && fm.agl > 3) return T('On ne peut pas sortir en vol ! Posez-vous d\'abord.');
-      if (!foot.obj || foot.obj.userData.kindFor !== pilotKind()) { foot.obj = humanMesh(); }
+      if (!foot.obj || foot.obj.userData.kindFor !== myKind() + myCC()) { foot.obj = humanMesh(); }
       const side = new THREE.Vector3(-(fm.spec.D ? fm.spec.D.R * 1.6 + 3 : 6), 0, fm.spec.D ? fm.spec.D.noseZ + 6 : -10).applyQuaternion(fm.q).add(fm.pos);
       foot.pos.set(side.x, Terrain.surfaceAt ? Terrain.surfaceAt(side.x, side.z) : Terrain.heightAt(side.x, side.z), side.z); foot.hdg = ((-fm.euler().y * RAD) + 360) % 360;
-      foot.camYaw = foot.hdg; World.add(foot.obj); foot.active = true; fm.parking = true; fm.throttle = 0; ctx.S.lever = 0; W6.won = false; setTimeout(spawnSquad, 50);
+      foot.camYaw = foot.hdg; CameraRig.setById('poursuite'); World.add(foot.obj); foot.active = true; fm.parking = true; fm.throttle = 0; ctx.S.lever = 0; W6.won = false; setTimeout(spawnSquad, 50);
       T('À PIED : Z/Q/S/D = marcher · souris ou ← → = tourner · Maj = COURIR vite · J = sauter · C = accroupi · P = à couvert (à plat ventre) · Espace = tirer · clic droit maintenu = viser · 1 à 7 = armes · R = recharger · I = mécanicien · 0 près de N\'IMPORTE QUEL avion = monter dedans.', 9000);
     } else {
       const d = Math.hypot(foot.pos.x - fm.pos.x, foot.pos.z - fm.pos.z); const max = 25 + (fm.spec.D ? fm.spec.D.L / 2 : 20);
       if (d > max) { T('Trop loin de l\'avion (' + Math.round(d) + ' m) — retour à votre avion.'); }
-      World.remove(foot.obj); foot.active = false; CROWD.list.forEach(c => World.remove(c.obj)); CROWD.list.length = 0; T('De retour aux commandes.');
+      World.remove(foot.obj); foot.active = false; CROWD.list.forEach(c => World.remove(c.obj)); CROWD.list.length = 0; try { if (document.pointerLockElement) document.exitPointerLock(); } catch (e) { } T('De retour aux commandes.');
     }
   }
-  const surf = (x, z) => { const d = Ops.deckAt(x, z); let m = Terrain.meshHeightAt(x, z); if (Airports.surfaceType(x, z)) m = Math.max(m, Terrain.heightAt(x, z)); const w = Terrain.waterLevelAt(x, z); return Math.max(m, d ?? -1e9, w ?? -1e9); };
+  const surf = (x, z) => { const d = Ops.deckAt(x, z); let m = Terrain.meshHeightAt(x, z); { const pv = { piste: 0.32, taxiway: 0.26, tarmac: 0.2, route: 0.2 }[Airports.surfaceType(x, z)]; if (pv) m = Math.max(m, Terrain.heightAt(x, z)) + pv; } /* revêtement de l'aéroport, un peu au-dessus du sol */ const w = Terrain.waterLevelAt(x, z); return Math.max(m, d ?? -1e9, w ?? -1e9); };
   // DÉPLACEMENT À PIED façon jeu à la 3ᵉ personne : la caméra tourne AUTOUR du personnage (souris ou ← →),
   // Z avance dans la direction où regarde la caméra, S fait faire DEMI-TOUR au personnage qui repart en avant (en courant pendant qu'il se retourne), Q/D de côté.
   function footUpdate(dt) {
-    const c = ctx.codes; const fwd = (c.KeyZ || c.KeyW || c.ArrowUp ? 1 : 0) - (c.KeyS || c.ArrowDown ? 1 : 0); const str = (c.KeyD ? 1 : 0) - (c.KeyQ || c.KeyA ? 1 : 0);
-    const turn = (c.ArrowRight ? 1 : 0) - (c.ArrowLeft ? 1 : 0); const run = c.ShiftLeft || c.ShiftRight; const aim = !!(c.Mouse2 || c.KeyX);
+    const c = ctx.codes; const fwd = (c.KeyZ || c.KeyW || c.ArrowUp ? 1 : 0) - (c.KeyS || c.ArrowDown ? 1 : 0); const str = (c.KeyD || c.ArrowRight ? 1 : 0) - (c.KeyQ || c.KeyA || c.ArrowLeft ? 1 : 0);
+    const turn = 0; /* comme GTA : on tourne la caméra SEULEMENT avec la souris ; toutes les flèches font marcher */ const run = c.ShiftLeft || c.ShiftRight; const aim = !!(c.Mouse2 || c.KeyX);
     if (foot.camYaw === undefined) foot.camYaw = foot.hdg; foot.camYaw = (foot.camYaw + turn * 120 * dt + 360) % 360;
     // direction réelle de la caméra (tient compte de la souris)
     let camH = foot.camYaw; const cam = CameraRig.cam; if (cam) { const d = cam.getWorldDirection(new THREE.Vector3()); if (Math.hypot(d.x, d.z) > 0.05) camH = Math.atan2(d.x, -d.z) * RAD; }
@@ -7678,14 +7696,13 @@ const Extra = (function () {
     const gy = surf(foot.pos.x, foot.pos.z);
     foot.vy -= 9.8 * dt; foot.pos.y += foot.vy * dt; if (foot.pos.y < gy) { foot.pos.y = gy; foot.vy = 0; }
     // la caméra revient doucement derrière le personnage quand il marche (on peut toujours tourner autour avec la souris)
-    if (moving && !aim && !turn && fwd > 0) foot.camYaw += (((foot.hdg - foot.camYaw + 540) % 360) - 180) * Math.min(1, dt * 1.2);
     foot.moving = sp > 0.3; foot.aiming = aim; foot.obj.position.copy(foot.pos); foot.obj.rotation.set(0, -foot.hdg * DEG, 0);
     Rig.animate(foot.obj, { speed: sp, stance: W6.stance, air: foot.pos.y > gy + 0.05, aim, rest: !aim && !W6.tgtShow, dt });
     foot.waveT = (foot.waveT || 0) - dt; if (foot.waveT > 0) wave(foot.obj, foot.waveT * 3); safeCrowd(dt);
   }
   // objet « caméra » qui imite l'avion pour suivre le piéton
-  const camProxy = { pos: new THREE.Vector3(), q: new THREE.Quaternion(), vel: new THREE.Vector3(), spec: { scale: 0.09, pts: { mainR: [0.5, -1, 0] }, gearH: 1 }, hyper: false, _fwd: new THREE.Vector3(),
-    euler() { return new THREE.Euler(0, -(foot.active && !veh.cur && foot.camYaw !== undefined ? foot.camYaw : foot.hdg) * DEG, 0, 'YXZ'); }, axes() { this._fwd.set(Math.sin(foot.hdg * DEG), 0, -Math.cos(foot.hdg * DEG)); } };
+  const camProxy = { isFoot: true, pos: new THREE.Vector3(), q: new THREE.Quaternion(), vel: new THREE.Vector3(), spec: { scale: 0.09, pts: { mainR: [0.5, -1, 0] }, gearH: 1 }, hyper: false, _fwd: new THREE.Vector3(),
+    euler() { return new THREE.Euler(0, -(foot.active && !veh.cur && foot.camYaw !== undefined ? foot.camYaw : foot.hdg) * DEG, 0, 'YXZ'); }, axes() { const h = (foot.active && !veh.cur && foot.camYaw !== undefined ? foot.camYaw : foot.hdg) * DEG; this._fwd.set(Math.sin(h), 0, -Math.cos(h)); this._right = this._right || new THREE.Vector3(); this._right.set(Math.cos(h), 0, Math.sin(h)); } };
   function camTarget(fm) { if (veh.cur) { const v = veh.cur; camProxy.pos.copy(v.pos); camProxy.pos.y += v.kind === 'camion' ? 2.5 : 1.4; foot.hdg = v.hdg; camProxy.spec.scale = v.kind === 'camion' ? 0.25 : 0.12; camProxy.q.setFromEuler(new THREE.Euler(0, -v.hdg * DEG, 0, 'YXZ')); return camProxy; }
     camProxy.spec.scale = foot.aiming ? 0.06 : 0.09; if (!foot.active) return fm; camProxy.pos.copy(foot.pos); camProxy.pos.y += W6.stance === 2 ? 0.6 : W6.stance ? 1.1 : 1.5; if (foot.aiming) camProxy.pos.add(rightOf(foot.camYaw ?? foot.hdg).multiplyScalar(0.45)); camProxy.q.setFromEuler(new THREE.Euler(0, -(foot.camYaw ?? foot.hdg) * DEG, 0, 'YXZ')); return camProxy; }
   function footKey(code, sh) {
@@ -7777,7 +7794,7 @@ const Extra = (function () {
   }
   function lot6Update(dt) {
     if (!foot.active) return; const fm = ctx.fm(); W6.cd -= dt;
-    if (ctx.codes.Space && WEAPONS[W6.wi][5] && W6.cd <= 0) shoot(); // rafale (armes automatiques) en maintenant Espace
+    if ((ctx.codes.Space || ctx.codes.Mouse0) && WEAPONS[W6.wi][5] && W6.cd <= 0) shoot(); // rafale (armes automatiques) en maintenant Espace
     const alive = W6.squad.filter(o => !o.dead); const n = alive.length;
     alive.forEach((o, k) => {
       const S = slotOf(k, n); const d = S.p.clone().sub(o.pos); d.y = 0; const dist = d.length(); let sp = 0;
@@ -8037,8 +8054,17 @@ const Extra = (function () {
   function update(dt) {
     const fm = ctx.fm(); if (!fm.onGround && fm.agl > 30) foot.flew = true; try { padUpdate(); } catch (e) { padBlocked = true; } try { Combat.update(dt); } catch (e) { console.error(e); } if (foot.active) { footUpdate(dt); lot6Update(dt); } vehUpdate(dt); record(dt, fm); missionUpdate(dt, fm);
   }
+  // SOURIS façon GTA : un clic dans le jeu « attrape » la souris ; bouger la souris = tourner la caméra autour de soi,
+  // clic gauche = tirer, clic droit = viser. Échap = lâcher la souris.
+  function mouseSetup() {
+    const cv = document.querySelector('canvas'); if (!cv) return;
+    cv.addEventListener('click', () => { if ((foot.active) && document.pointerLockElement !== cv && cv.requestPointerLock) { try { cv.requestPointerLock(); T('🖱 Souris attrapée : bouge la souris pour tourner la caméra autour de toi · clic gauche = tirer · clic droit = viser · Échap = lâcher la souris.', 5000); } catch (e) { } } });
+    document.addEventListener('mousemove', e => { if (!foot.active || document.pointerLockElement !== cv) return; const k = 0.16 * (Settings.data.sens || 1); CameraRig.off.yaw -= e.movementX * k; CameraRig.off.el = clamp(CameraRig.off.el + e.movementY * k * 0.7, -40, 70); });
+    document.addEventListener('mousedown', e => { if (!foot.active || document.pointerLockElement !== cv) return; if (e.button === 0) { ctx.codes.Mouse0 = true; shoot(); } });
+    document.addEventListener('mouseup', e => { if (e.button === 0) ctx.codes.Mouse0 = false; });
+  }
   function init(c) {
-    ctx = c; buildQuick();
+    ctx = c; buildQuick(); setTimeout(mouseSetup, 500);
     const q = id => document.getElementById(id);
     const sel = q('selMission'); MISSIONS.forEach((m, i) => { const o = document.createElement('option'); o.value = i; o.textContent = m.n; sel.appendChild(o); });
     q('btnMission').onclick = () => missionStart(+sel.value); q('btnMissions').onclick = () => UI.show('missions', true); q('btnMissionsClose').onclick = () => UI.show('missions', false);
@@ -8248,7 +8274,7 @@ const Combat = (function () {
 // ===== GUERRE ENTRE PAYS : bases militaires, armées, missiles au sol, ordre de FEU, alliés, front au sol, vainqueur et CLASSEMENT des puissances =====
 const War = (function () {
   let ctx = null; const T = (m, d) => UI.toast(m, d || 4000);
-  const gH = (x, z) => { const d = Ops.deckAt(x, z); let m = Terrain.meshHeightAt(x, z); if (Airports.surfaceType(x, z)) m = Math.max(m, Terrain.heightAt(x, z)); const w = Terrain.waterLevelAt(x, z); return Math.max(m, d ?? -1e9, w ?? -1e9); };
+  const gH = (x, z) => { const d = Ops.deckAt(x, z); let m = Terrain.meshHeightAt(x, z); { const pv = { piste: 0.32, taxiway: 0.26, tarmac: 0.2, route: 0.2 }[Airports.surfaceType(x, z)]; if (pv) m = Math.max(m, Terrain.heightAt(x, z)) + pv; } /* revêtement de l'aéroport, un peu au-dessus du sol */ const w = Terrain.waterLevelAt(x, z); return Math.max(m, d ?? -1e9, w ?? -1e9); };
   // ---------- classement de départ (inspiré des classements réels de puissance militaire) + effectifs réels approximatifs ----------
   const ORDER = ['us', 'cn', 'ru', 'gb', 'fr', 'jp', 'br', 'de', 'ca', 'ng', 'ar', 'ae', 'ma', 'be', 'cd', 'cm', 'td', 'ci', 'sn', 'ga'];
   const TROOPS = { us: 1330000, cn: 2035000, ru: 1320000, gb: 141000, fr: 203000, jp: 247000, br: 366000, de: 181000, ca: 68000, ng: 143000, ar: 72000, ae: 63000, ma: 195000, be: 25000, cd: 134000, cm: 40000, td: 33000, ci: 27000, sn: 18000, ga: 5000 };
@@ -8266,8 +8292,12 @@ const War = (function () {
   const RU = cc => cc === 'ru' ? 1.4 : 1; // petit avantage à la Russie (missiles, contre-missiles, combat)
   function fresh() { const o = {}; ORDER.forEach((cc, i) => { const sc = Math.round(1000 * Math.pow(0.84, i)); o[cc] = { score: sc, troops: TROOPS[cc], troops0: TROOPS[cc], tanks: tanks0(cc), rafale: Math.max(4, Math.round(sc * 0.12)), superso: Math.max(6, Math.round(sc * 0.3)), msl: Math.round(Math.max(24, sc * 0.45) * RU(cc)), bombs: Math.max(10, Math.round(sc * 0.3)), ogives: Math.max(2, Math.round(sc * 0.06 * RU(cc))), cmsl: Math.max(4, Math.round(sc * 0.2 * RU(cc) * RU(cc))), nukes: NUKES[cc] || 0, carriers: carriers0(cc), econ: econ0(cc, sc), econ0: econ0(cc, sc), wins: 0, losses: 0 }; }); return o; }
   function load() { const F0 = fresh(); try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s && s.us) { for (const cc in F0) if (s[cc]) F0[cc] = Object.assign(F0[cc], s[cc]); } } catch (e) { } P = F0; }
-  function save() { try { localStorage.setItem(KEY, JSON.stringify(P)); } catch (e) { } }
-  function ranking() { return Object.keys(P).filter(cc => COUNTRIES[cc]).sort((a, b) => P[b].score - P[a].score); }
+  function save() { syncCarriers(); try { localStorage.setItem(KEY, JSON.stringify(P)); } catch (e) { } }
+  // PUISSANCE TOTALE : rang de base + porte-avions + chars + Rafale + supersoniques (les porte-avions comptent beaucoup)
+  const total = cc => Math.round(P[cc].score + (P[cc].carriers || 0) * 30 + (P[cc].tanks || 0) * 3 + (P[cc].rafale || 0) * 0.5 + (P[cc].superso || 0) * 0.2);
+  function ranking() { return Object.keys(P).filter(cc => COUNTRIES[cc]).sort((a, b) => total(b) - total(a)); }
+  // les porte-avions visibles en mer suivent le nombre de chaque pays (un porte-avions coulé disparaît)
+  function syncCarriers() { try { const by = {}; for (const c of Ops.carriers) { by[c.cc] = (by[c.cc] || 0) + 1; c.sunk = by[c.cc] > (P[c.cc] ? P[c.cc].carriers : 0); } } catch (e) { } }
   const fmt = n => Math.round(n).toLocaleString('fr-FR');
   const name = cc => COUNTRIES[cc] ? COUNTRIES[cc].n : cc;
 
@@ -8275,7 +8305,7 @@ const War = (function () {
   const W = { on: false, a: null, b: null, me: 'cm', ally: '', mySide: -1, t: 0, order: 'tenir', fireAuto: false, enemyT: 50, start: {}, baseHp: {}, log: [] };
   function sideOf(cc) { if (cc === W.a) return 0; if (cc === W.b) return 1; if (cc === W.me && W.ally) return W.ally === W.a ? 0 : W.ally === W.b ? 1 : -1; return -1; }
   function sideCountries(sd) { const L = [sd === 0 ? W.a : W.b]; if (W.ally && W.me !== W.a && W.me !== W.b && sideOf(W.me) === sd) L.push(W.me); return L; }
-  const powerOf = sd => sideCountries(sd).reduce((s, cc) => s + P[cc].score * (cc === 'ru' ? 1.25 : 1) * (0.25 + 0.75 * P[cc].troops / P[cc].troops0) * (1 + (P[cc].tanks || 0) / 200), 0);
+  const powerOf = sd => sideCountries(sd).reduce((s, cc) => s + P[cc].score * (1 + (P[cc].carriers || 0) * 0.04) * (cc === 'ru' ? 1.25 : 1) * (0.25 + 0.75 * P[cc].troops / P[cc].troops0) * (1 + (P[cc].tanks || 0) / 200), 0);
 
   // ---------- emplacement de la base de chaque pays (près de son aéroport principal, sur la terre ferme) ----------
   const baseLoc = {};
@@ -8479,6 +8509,7 @@ const War = (function () {
   function impact(f, visible) {
     const big = f.kind === 'nuke'; const n = f.kind === 'salve' ? 6 : f.kind === 'ogive' ? 4 : f.kind === 'bombe' ? 3 : 1; const D = P[f.to];
     const lossT = D.troops * (big ? 0.22 : 0.012 * n) * (0.6 + Math.random() * 0.8); const lossM = Math.min(D.msl, Math.round(D.msl * (big ? 0.35 : 0.03 * n)));
+    if (D.carriers > 0 && Math.random() < (big ? 0.5 : 0.05 * n)) { D.carriers--; syncCarriers(); T('⚓💥 Un PORTE-AVIONS de ' + name(f.to) + ' a été COULÉ ! Il lui en reste ' + D.carriers + '.', 5000); }
     D.troops = Math.max(0, D.troops - lossT); D.msl -= lossM; D.econ = Math.max(0, D.econ - D.econ0 * (big ? 0.08 : 0.004 * n)); // l'économie s'effondre W.baseHp[f.to] = Math.max(0, (W.baseHp[f.to] ?? 100) - (big ? 45 : 4 * n));
     if (visible && f.hit) { try { Ops.boom(f.hit, big ? 1 : 2.4, big); } catch (e) { } const S = built[f.to]; if (S) { for (const s of S.soldiers) if (!s.dead && s.o.position.distanceTo(f.hit) < (big ? 400 : 35)) { s.dead = true; } } }
     T((big ? '☢💥 ' : '💥 ') + 'Impact sur la base de ' + name(f.to) + ' : −' + fmt(lossT) + ' militaires, −' + lossM + ' missiles. Base à ' + Math.round(W.baseHp[f.to]) + ' %.', 5000);
@@ -8592,6 +8623,7 @@ const War = (function () {
   function cmd(c) {
     if (c === 'classement') return showRanking();
     if (c === 'base') return gotoBase(W.me);
+    if (c === 'pa') { if (!P[W.me].carriers) return T(name(W.me) + ' n\'a plus de porte-avions.'); Extra.leaveAll(); return Ops.gotoCarrier(ctx.fm(), W.me); }
     if (!W.on) return T('Il n\'y a pas de guerre en cours. Panneau H → « Guerre entre pays » → Déclarer la guerre.');
     if (c === 'basee') return gotoBase(enemyCC() || W.b);
     if (W.mySide < 0 && ['feu', 'salve', 'nuke', 'bombe', 'ogive', 'defense', 'raid', 'capituler', 'assaut', 'tenir', 'repli', 'cessez'].includes(c)) return T('Vous êtes observateur : choisissez « allié de » un des deux pays pour donner des ordres.');
@@ -8623,11 +8655,11 @@ const War = (function () {
   }
   function showRanking(hl) {
     const box = document.getElementById('rankBox'), body = document.getElementById('rankBody'); if (!box || !body) return; const R = ranking();
-    body.innerHTML = '<p class="rnote">Classement de DÉPART fait d\'après la puissance militaire réelle (États-Unis, Chine, Russie…). Il CHANGE avec vos victoires : un pays qui gagne monte. Victoire = +10 chars de guerre, ou le TIERS des chars du perdant si c\'était une grande puissance (le perdant garde les siens). Le perdant (le plus de dégâts, ou celui qui capitule) DÉDOMMAGE le vainqueur en argent.</p><table><tr><th>#</th><th>Pays</th><th>Puissance</th><th>Militaires</th><th>Chars</th><th>Rafale</th><th>Supersoniques</th><th>Missiles</th><th>Bombes</th><th>Ogives</th><th>Contre-missiles</th><th>Porte-avions</th><th>☢</th><th>Économie</th><th>V / D</th></tr>' + R.map((cc, i) => `<tr class="${cc === hl ? 'hl' : ''}${cc === W.me ? ' me' : ''}"><td>${i + 1}</td><td>${name(cc)}</td><td>${fmt(P[cc].score)}</td><td>${fmt(P[cc].troops)}</td><td>${P[cc].tanks}</td><td>${P[cc].rafale}</td><td>${P[cc].superso}</td><td>${P[cc].msl}</td><td>${P[cc].bombs}</td><td>${P[cc].ogives}</td><td>${P[cc].cmsl}</td><td>${P[cc].carriers}</td><td>${P[cc].nukes}</td><td>${money(P[cc].econ)}</td><td>${P[cc].wins} / ${P[cc].losses}</td></tr>`).join('') + '</table>';
+    body.innerHTML = '<p class="rnote">Classement de DÉPART fait d\'après la puissance militaire réelle (États-Unis, Chine, Russie…). Il CHANGE avec vos victoires : un pays qui gagne monte. La PUISSANCE compte le rang de départ + les porte-avions (30 points chacun) + les chars + les Rafale + les supersoniques. Victoire = +10 chars de guerre, ou le TIERS des chars du perdant si c\'était une grande puissance (le perdant garde les siens). Le perdant (le plus de dégâts, ou celui qui capitule) DÉDOMMAGE le vainqueur en argent.</p><table><tr><th>#</th><th>Pays</th><th>Puissance</th><th>Militaires</th><th>Chars</th><th>Rafale</th><th>Supersoniques</th><th>Missiles</th><th>Bombes</th><th>Ogives</th><th>Contre-missiles</th><th>Porte-avions</th><th>☢</th><th>Économie</th><th>V / D</th></tr>' + R.map((cc, i) => `<tr class="${cc === hl ? 'hl' : ''}${cc === W.me ? ' me' : ''}"><td>${i + 1}</td><td>${name(cc)}</td><td>${fmt(total(cc))}</td><td>${fmt(P[cc].troops)}</td><td>${P[cc].tanks}</td><td>${P[cc].rafale}</td><td>${P[cc].superso}</td><td>${P[cc].msl}</td><td>${P[cc].bombs}</td><td>${P[cc].ogives}</td><td>${P[cc].cmsl}</td><td>${P[cc].carriers}</td><td>${P[cc].nukes}</td><td>${money(P[cc].econ)}</td><td>${P[cc].wins} / ${P[cc].losses}</td></tr>`).join('') + '</table>';
     box.classList.remove('hidden');
   }
   // ---------- poste de commandement (touche ²) ----------
-  const CMDS = [['1', 'feu', '🚀 FEU : 1 missile sur la base ennemie'], ['2', 'salve', '🚀🚀 Salve de 6 missiles'], ['3', 'nuke', '☢ Bombe atomique à distance'], ['4', 'assaut', '⚔ Armée : À L\'ASSAUT'], ['5', 'tenir', '🛡 Armée : TENIR la ligne'], ['6', 'repli', '↩ Armée : REPLI'], ['7', 'cessez', '✋ Cessez-le-feu / 🔥 feu à volonté'], ['8', 'front', '🪖 Aller AU FRONT à pied avec mes soldats'], ['9', 'jeep', '🚙 Aller au front en JEEP'], ['0', 'air', '✈ Bataille aérienne'], ['B', 'base', '🏠 Visiter MA base militaire'], ['E', 'basee', '🎯 Aller voir la base ENNEMIE'], ['G', 'bombe', '💣 Bombardement (4 bombes lourdes)'], ['O', 'ogive', '🚀 Missile à 4 OGIVES'], ['D', 'defense', '🛡 Contre-missiles (défense) marche/arrêt'], ['R', 'raid', '✈ RAID de Rafale (base + porte-avions)'], ['X', 'capituler', '🏳 CAPITULER (drapeau blanc)'], ['A', 'auto', '🔁 Missiles automatiques marche/arrêt'], ['C', 'classement', '🏆 Classement des puissances'], ['P', 'paix', '🕊 Signer la paix']];
+  const CMDS = [['1', 'feu', '🚀 FEU : 1 missile sur la base ennemie'], ['2', 'salve', '🚀🚀 Salve de 6 missiles'], ['3', 'nuke', '☢ Bombe atomique à distance'], ['4', 'assaut', '⚔ Armée : À L\'ASSAUT'], ['5', 'tenir', '🛡 Armée : TENIR la ligne'], ['6', 'repli', '↩ Armée : REPLI'], ['7', 'cessez', '✋ Cessez-le-feu / 🔥 feu à volonté'], ['8', 'front', '🪖 Aller AU FRONT à pied avec mes soldats'], ['9', 'jeep', '🚙 Aller au front en JEEP'], ['0', 'air', '✈ Bataille aérienne'], ['B', 'base', '🏠 Visiter MA base militaire'], ['V', 'pa', '⚓ Aller sur un PORTE-AVIONS de mon pays'], ['E', 'basee', '🎯 Aller voir la base ENNEMIE'], ['G', 'bombe', '💣 Bombardement (4 bombes lourdes)'], ['O', 'ogive', '🚀 Missile à 4 OGIVES'], ['D', 'defense', '🛡 Contre-missiles (défense) marche/arrêt'], ['R', 'raid', '✈ RAID de Rafale (base + porte-avions)'], ['X', 'capituler', '🏳 CAPITULER (drapeau blanc)'], ['A', 'auto', '🔁 Missiles automatiques marche/arrêt'], ['C', 'classement', '🏆 Classement des puissances'], ['P', 'paix', '🕊 Signer la paix']];
   let cmdOpen = false;
   function toggleCmd(v) { cmdOpen = v ?? !cmdOpen; const el = document.getElementById('cmdBox'); if (el) el.classList.toggle('hidden', !cmdOpen); }
   function key(code, sh) {
@@ -8638,7 +8670,7 @@ const War = (function () {
   }
   function update(dt, camAbs) { try { baseTick(dt, camAbs); } catch (e) { if (!W.e1) { W.e1 = 1; console.error('WAR base', e.message, e.stack); } } try { flightTick(dt, camAbs); } catch (e) { if (!W.e2) { W.e2 = 1; console.error('WAR flight', e.message, e.stack); } } try { frontTick(dt, camAbs); } catch (e) { if (!W.e3) { W.e3 = 1; console.error('WAR front', e.message, e.stack); } } tick(dt); }
   function init(c) {
-    ctx = c; load(); const $ = id => document.getElementById(id);
+    ctx = c; load(); syncCarriers(); const $ = id => document.getElementById(id);
     const box = $('cmdBox'); if (box) box.innerHTML = '<h3>🎖 Poste de commandement</h3>' + CMDS.map(x => `<button data-c="${x[1]}"><kbd>${x[0]}</kbd>${x[2]}</button>`).join('') + '<p>Échap ou ² = fermer</p>'; if (box) box.onclick = e => { const b = e.target.closest('button'); if (b) { toggleCmd(false); cmd(b.dataset.c); } };
     const me = $('warMe'), al = $('warAlly'); if (me) { for (const cc of ranking()) { const o = document.createElement('option'); o.value = cc; o.textContent = name(cc); me.appendChild(o); } me.value = 'cm'; }
     if ($('btnWar')) $('btnWar').onclick = () => { declare($('warA').value, $('warB').value, me ? me.value : 'cm', al ? (al.value === 'A' ? $('warA').value : al.value === 'B' ? $('warB').value : '') : ''); UI.show('panel', false); };
