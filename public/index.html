@@ -115,6 +115,11 @@ body.incockpit.autoclean #pfd,body.incockpit.autoclean #status,body.incockpit.au
 #tripToggle{background:rgba(14,26,42,.88);border:1px solid rgba(120,200,255,.28);color:#cfe6ff;border-radius:10px;width:30px;height:30px;cursor:pointer;font-size:14px;padding:0}
 #tripBar.mini #tripToggle:after{content:' Voyage';font-size:11px}#tripBar.mini #tripToggle{width:auto;padding:0 10px}
 @media (max-width:900px){.tb-trip{width:52vw}}
+#warHud{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);display:flex;flex-wrap:wrap;align-items:center;gap:10px;background:rgba(18,20,24,.82);color:#fff;padding:8px 14px;border-radius:12px;font:13px Inter,Arial,sans-serif;z-index:30;max-width:760px;pointer-events:none}
+#warHud .wside{min-width:240px}#warHud .wside.me b{color:#7dffa0}#warHud .wbar{height:7px;background:#3b3f46;border-radius:4px;margin:4px 0;overflow:hidden}#warHud .wbar i{display:block;height:100%;background:linear-gradient(90deg,#d23b2c,#f3c843,#3fcf6b)}#warHud span{font-size:12px;opacity:.9}#warHud .wvs{font-size:22px}#warHud .worder{flex-basis:100%;text-align:center;font-size:12px;opacity:.9}
+#cmdBox{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60;width:min(560px,94vw);max-height:90vh;overflow:auto}#cmdBox button{display:flex;gap:10px;align-items:center;width:100%;text-align:left;margin:3px 0;font-size:15px}#cmdBox kbd{min-width:26px;text-align:center}#cmdBox p{opacity:.7;font-size:12px}
+#warBanner{position:fixed;left:50%;top:30%;transform:translate(-50%,-50%);z-index:70;background:linear-gradient(135deg,#3e2a1e,#6b4a33);color:#ffe9a8;font:700 34px Georgia,serif;padding:22px 34px;border-radius:18px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.6)}#warBanner small{display:block;font:500 16px Inter,Arial,sans-serif;color:#fff;margin-top:8px}
+#rankBox{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:65;width:min(720px,96vw);max-height:88vh;overflow:auto}#rankBox table{width:100%;border-collapse:collapse;font-size:14px}#rankBox th,#rankBox td{padding:5px 6px;border-bottom:1px solid rgba(128,128,128,.25);text-align:left}#rankBox tr.hl{background:rgba(243,200,67,.25);font-weight:700}#rankBox tr.me td:nth-child(2)::after{content:' (moi)';color:#3fcf6b}
 </style>
 </head>
 <body>
@@ -262,8 +267,9 @@ body.incockpit.autoclean #pfd,body.incockpit.autoclean #status,body.incockpit.au
     <div class="k"><kbd>0 ou F9</kbd><span>Sortir de l'avion (tenue selon l'avion) — ton escouade descend avec toi. Choisis son TYPE et son NOMBRE (0 à 60) dans le panneau H : soldats, hommes en noir / agents secrets, intervention rapide (tout en noir, gilet pare-balles, bottes), ou mélange</span></div>
     <div class="k"><kbd>B</kbd><span>Saluer (les passagers et les agents de l'aéroport te saluent quand tu passes près d'eux)</span></div>
     <div class="k"><kbd>0 près d'un avion</kbd><span>Monter dans N'IMPORTE QUEL avion à côté de toi (garé, en roulage…) et prendre ses commandes</span></div>
-    <div class="k"><kbd>Z Q S D</kbd><span>Marcher dans tous les sens (avant, arrière, de côté)</span></div>
-    <div class="k"><kbd>← → / souris</kbd><span>Tourner</span></div>
+    <div class="k"><kbd>0 près d'une voiture</kbd><span>Monter dans N'IMPORTE QUELLE voiture (ville, route, parking de l'aéroport, jeep ou char d'une base) et conduire · 0 = descendre</span></div>
+    <div class="k"><kbd>Z Q S D</kbd><span>Marcher : Z = vers où regarde la caméra · S = il fait DEMI-TOUR et repart en avant (il court en se retournant) · Q / D = à gauche / à droite</span></div>
+    <div class="k"><kbd>← → / souris</kbd><span>Tourner la caméra AUTOUR de ton personnage (clic gauche maintenu + bouger la souris) : tu le vois de face, de dos, de côté · molette = zoom · double-clic = recentrer</span></div>
     <div class="k"><kbd>Maj</kbd><span>COURIR très vite</span></div>
     <div class="k"><kbd>J</kbd><span>Sauter</span></div>
     <div class="k"><kbd>C</kbd><span>S'accroupir</span></div>
@@ -280,6 +286,19 @@ body.incockpit.autoclean #pfd,body.incockpit.autoclean #status,body.incockpit.au
     <div class="k"><kbd>I (à pied)</kbd><span>Le mécanicien répare l'avion</span></div>
     <div class="k"><kbd>O / K</kbd><span>Vue 360° / vue de face</span></div>
     <div class="k"><kbd>Véhicules</kbd><span>Z/S ou ↑ ↓ avancer / reculer · Q/D ou ← → tourner · A tir automatique · Entrée missile · Y cible · 0 descendre</span></div>
+    <h4>13 bis · GUERRE (panneau H → « Guerre entre pays »)</h4>
+    <div class="k"><kbd>Panneau H</kbd><span>Choisis MON PAYS, le pays A et le pays B, et « allié de » si tu n'es ni A ni B · Déclarer la guerre · Aller au front (à pied ou en jeep) · Visiter ma base · Classement</span></div>
+    <div class="k"><kbd>² (en haut à gauche du clavier)</kbd><span>Ouvrir le POSTE DE COMMANDEMENT, puis :</span></div>
+    <div class="k"><kbd>² puis 1</kbd><span>FEU : 1 missile sur la base ennemie</span></div>
+    <div class="k"><kbd>² puis 2</kbd><span>Salve de 6 missiles</span></div>
+    <div class="k"><kbd>² puis 3</kbd><span>Bombe atomique à distance (si ton pays en a)</span></div>
+    <div class="k"><kbd>² puis 4 · 5 · 6</kbd><span>Ordre à toute l'armée : ASSAUT · TENIR la ligne · REPLI</span></div>
+    <div class="k"><kbd>² puis 7</kbd><span>Cessez-le-feu / feu à volonté</span></div>
+    <div class="k"><kbd>² puis 8 · 9 · 0</kbd><span>Aller au front à pied · en jeep · bataille aérienne</span></div>
+    <div class="k"><kbd>² puis B · E</kbd><span>Visiter MA base · aller voir la base ENNEMIE</span></div>
+    <div class="k"><kbd>² puis A · C · P</kbd><span>Missiles automatiques · Classement des puissances · Signer la paix</span></div>
+    <div class="k"><kbd>F10</kbd><span>FEU direct (1 missile) · Maj+F10 = bombe atomique</span></div>
+    <div class="k"><kbd>Fin de la guerre</kbd><span>Quand une armée tombe sous 12 % de ses hommes ou que sa base est détruite : VICTOIRE annoncée, le vainqueur monte au classement</span></div>
     <h4>14 · Multijoueur</h4>
     <div class="k"><kbd>Menu</kbd><span>Bouton « Multijoueur » : même nom de salon = même ciel. Chacun part de l'aéroport qu'il choisit</span></div>
     <div class="k"><kbd>Repérage</kbd><span>Chaque joueur a SA couleur : grande bande au-dessus de lui (nom, distance, altitude), flèche au bord de l'écran s'il est loin, point de couleur sur le radar</span></div>
@@ -301,6 +320,10 @@ body.incockpit.autoclean #pfd,body.incockpit.autoclean #status,body.incockpit.au
 </div></div>
 
 <div id="gameui" class="hidden">
+  <div id="warHud" class="hidden"></div>
+  <div id="cmdBox" class="hidden card"></div>
+  <div id="warBanner" class="hidden"></div>
+  <div id="rankBox" class="hidden card"><button class="closeX" id="rankClose">✕</button><h3>🏆 Classement des puissances militaires</h3><div id="rankBody"></div><button id="rankReset" style="margin-top:10px">Remettre le classement du départ</button></div>
   <canvas id="hud"></canvas>
   <canvas id="pfd" width="440" height="300"></canvas>
   <canvas id="radar" width="260" height="260"></canvas>
@@ -349,7 +372,12 @@ body.incockpit.autoclean #pfd,body.incockpit.autoclean #status,body.incockpit.au
     <h3>🚗 Véhicules (prendre les commandes)</h3>
     <div class="grid2"><button onclick="Extra.takeVehicle('camion')">🚚 Camion lance-missiles</button><button onclick="Extra.takeVehicle('jeep')">🚙 Jeep de guerre</button><button onclick="Extra.takeVehicle('moto')">🏍 Moto de guerre</button><button onclick="Extra.takeVehicle('motogp')">🏍 MotoGP (340 km/h)</button></div>
     <h3>Guerre entre pays</h3>
-    <div class="grid2"><select id="warA"></select><select id="warB"></select><button id="btnWar">⚔ Déclarer la guerre</button><button id="btnBattle">✈ Aller à la bataille</button><button id="btnPeace">🕊 Paix</button><button id="btnCarrier">⚓ Porte-avions [Maj+V]</button><button id="btnSquad" style="grid-column:span 2">✈ Escadrille du porte-avions [Maj+Q]</button></div>
+    <label>Mon pays (c'est MOI qui commande ce pays)</label><select id="warMe"></select>
+    <label>La guerre : pays A contre pays B</label>
+    <div class="grid2"><select id="warA"></select><select id="warB"></select></div>
+    <label>Si je ne suis ni A ni B : je suis allié de…</label><select id="warAlly"><option value="">Personne (je regarde)</option><option value="A">Allié du pays A (j'envoie mes troupes)</option><option value="B">Allié du pays B (j'envoie mes troupes)</option></select>
+    <label>Soldats qui avancent avec moi au front : <b id="frontNLbl">12</b></label><input type="range" id="frontN" min="0" max="60" step="1" value="12">
+    <div class="grid2"><button id="btnWar">⚔ Déclarer la guerre</button><button id="btnBattle">✈ Aller à la bataille (avion)</button><button id="btnFront">🪖 Aller au front à pied</button><button id="btnFrontJeep">🚙 Aller au front en jeep</button><button id="btnMyBase">🏠 Visiter ma base militaire</button><button id="btnCmd">🎖 Poste de commandement [²]</button><button id="btnRank">🏆 Classement des puissances</button><button id="btnPeace">🕊 Paix</button><button id="btnCarrier">⚓ Porte-avions [Maj+V]</button><button id="btnSquad" style="grid-column:span 2">✈ Escadrille du porte-avions [Maj+Q]</button></div>
     <h3>Voyage</h3>
     <label>Destination (ligne rose sur le radar, Maj+N / Maj+A / X pour y aller seul)</label>
     <select id="selDest"></select>
@@ -371,7 +399,7 @@ body.incockpit.autoclean #pfd,body.incockpit.autoclean #status,body.incockpit.au
     <label>Vitesse du temps</label>
     <select id="selTime"><option value="1">Temps réel</option><option value="60">× 60 (1 h par minute)</option><option value="600">× 600</option><option value="0">Arrêté</option></select>
     <label>Météo</label><select id="selWeather"></select>
-    <label>Mon escouade quand je sors de l'avion (0)</label><select id="selSquadKind"><option value="soldat">Militaires (treillis, casque)</option><option value="agent">Hommes en noir (agents secrets)</option><option value="intervention">Intervention rapide (tout en noir, gilets pare-balles)</option><option value="mix">Mélange des trois</option></select>
+    <label>Mon escouade quand je sors de l'avion (0)</label><select id="selSquadKind"><option value="soldat">Militaires de mon pays (camouflage + drapeau)</option><option value="agent">Hommes en noir (blouson noir, agents secrets)</option><option value="intervention">Intervention rapide (softshell noir, gilet POLICE)</option><option value="special">Intervention spéciale (multicam)</option><option value="delta">Commandos d'élite (noir et blanc tacheté)</option><option value="general">Colonels et généraux (manteau tacheté)</option><option value="mix">Mélange de tous</option></select>
     <label>Nombre d'hommes : <b id="squadNv">5</b></label><input type="range" id="squadN" min="0" max="60" step="1" value="5">
     <label>Escadrilles de Rafale (Maj+Q ou bouton)</label><select id="selSquad"><option value="1">1 escadrille (4 Rafale)</option><option value="2">2 escadrilles (8 Rafale)</option><option value="3">3 escadrilles (12 Rafale)</option><option value="4">4 escadrilles (16 Rafale)</option></select>
     <select id="selSquadLiv"><option value="">Couleurs de mon pays</option><option value="gris">Rafale gris</option><option value="desert">Rafale désert</option></select>
@@ -397,7 +425,7 @@ body.incockpit.autoclean #pfd,body.incockpit.autoclean #status,body.incockpit.au
 <script>
 // ---- 00_util.js ----
 // ===== Outils communs =====
-const VERSION = 'Version 36 · 08/11';
+const VERSION = 'Version 37 · 08/11';
 const DEG = Math.PI / 180, RAD = 180 / Math.PI;
 const KT = 0.514444, FT = 0.3048;
 const clamp = (x, a, b) => x < a ? a : (x > b ? b : x);
@@ -1233,7 +1261,7 @@ const Terrain = (function () {
     for (let t = 0; t < maxN * 2 && total < maxN; t++) {
       const fx = rnd() * d.n, fz = rnd() * d.n; const i = Math.floor(fx), j = Math.floor(fz); const k = j * (d.n + 1) + i;
       if (rnd() > d.dens[k]) continue; const h = sampleData(d, fx, fz); if (h < 2) continue;
-      const x = d.x0 + fx * d.st, z = d.z0 + fz * d.st; if (Felled.has(x, z)) continue;
+      const x = d.x0 + fx * d.st, z = d.z0 + fz * d.st; if (Felled.has(x, z) || Clear.has(x, z)) continue;
       const kind = d.kind[k]; let type;
       if (kind === 3) type = rnd() < 0.85 ? 'conifere' : 'tempere';
       else if (kind === 2) type = rnd() < 0.75 ? 'tempere' : 'conifere';
@@ -1258,6 +1286,10 @@ const Terrain = (function () {
     return group;
   }
   // arbres couchés par un avion : ils disparaissent et ne repoussent pas
+  // zones dégagées (bases militaires, front) : aucun arbre dedans
+  const Clear = { zones: [], has(x, z) { for (const c of this.zones) if (Math.abs(x - c.x) < c.r && Math.abs(z - c.z) < c.r && Math.hypot(x - c.x, z - c.z) < c.r) return true; return false; } };
+  function clearZone(x, z, r) { if (Clear.zones.some(c => Math.hypot(c.x - x, c.z - z) < 5 && c.r >= r)) return; Clear.zones.push({ x, z, r });
+    for (const ch of chunks.values()) { if (!ch.trees || !ch.data) continue; const x0 = ch.data.x0, z0 = ch.data.z0; if (x + r < x0 || x - r > x0 + CH || z + r < z0 || z - r > z0 + CH) continue; World.remove(ch.trees); ch.trees = buildTrees(ch); World.add(ch.trees); } }
   const Felled = { set: new Set(), key(x, z) { return Math.round(x / 6) + ',' + Math.round(z / 6); }, has(x, z) { return this.set.size > 0 && this.set.has(this.key(x, z)); }, add(x, z) { this.set.add(this.key(x, z)); } };
 
   // ---------- Interrogation de la hauteur (physique) ----------
@@ -1280,6 +1312,8 @@ const Terrain = (function () {
     const r = riverQuery(x, z); if (r && r.d < r.w / 2 && h < r.y) return r.y;
     return null;
   }
+  // hauteur EXACTE du sol affiché (le maillage) : pour poser les pieds pile sur l'herbe
+  function meshHeightAt(x, z) { const ch = chunks.get(Math.floor(x / CH) + ',' + Math.floor(z / CH)); if (!ch || !ch.data) return heightAt(x, z); const d = ch.data; try { const v = sampleData(d, (x - d.x0) / d.st, (z - d.z0) / d.st); return isFinite(v) ? v : heightAt(x, z); } catch (e) { return heightAt(x, z); } }
   function surfaceAt(x, z) { const h = heightAt(x, z); const w = waterLevelAt(x, z); return w !== null ? Math.max(h, w) : Math.max(h, 0); }
   function forestAt(x, z) { const o = {}; rawHeight(x, z, o); return o.dens; }
 
@@ -1406,7 +1440,7 @@ const Terrain = (function () {
   function onShift() { lastCX = 1e9; }
   function invalidate(x0, z0, x1, z1) { for (const [k, ch] of chunks) { const cx = ch.cx * CH, cz = ch.cz * CH; if (cx + CH > x0 && cx < x1 && cz + CH > z0 && cz < z1) ch.seg = -1; } lastCX = 1e9; }
   return {
-    init, initAround, update, heightAt, surfaceAt, waterLevelAt, rawHeight, forestAt, setRiverMaterial, rebuildAll, invalidate, updateLabels, setQuality, lakeLevel, onShift, Felled, climate, plateau,
+    meshHeightAt, clearZone, init, initAround, update, heightAt, surfaceAt, waterLevelAt, rawHeight, forestAt, setRiverMaterial, rebuildAll, invalidate, updateLabels, setQuality, lakeLevel, onShift, Felled, climate, plateau,
     setRelief(v) { relief = v; }, get relief() { return relief; }, get farCenter() { return farCenter; }, CH, peaks: peaksXZ, get pendingCount() { return buildQueue.length; }, get farMat() { return farMat; }
   };
 })();
@@ -2297,7 +2331,7 @@ const Vehicles = (function () {
   const vmat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.45, metalness: 0.3 });
   function geo(k) { return G[k] || (G[k] = defs[k]()); }
   // une flotte instanciée d'un type de véhicule
-  function fleet(type, n) { const m = new THREE.InstancedMesh(geo(type), vmat, n); m.castShadow = true; m.receiveShadow = false; m.frustumCulled = false; const w = new THREE.Color(1, 1, 1); for (let i = 0; i < n; i++) m.setColorAt(i, w); m.instanceColor.needsUpdate = true; return m; }
+  function fleet(type, n) { const m = new THREE.InstancedMesh(geo(type), vmat, n); m.castShadow = true; m.receiveShadow = false; m.frustumCulled = false; const w = new THREE.Color(1, 1, 1); for (let i = 0; i < n; i++) m.setColorAt(i, w); m.instanceColor.needsUpdate = true; if (type === 'car') { m.userData.carFleet = true; m.userData.taken = new Set(); } return m; }
   const CAR_COLORS = ['#c0c4c8', '#1e1e1e', '#f2f2f2', '#8b0000', '#1f3c88', '#5a5f66', '#2e5e3a', '#b8860b', '#e0e0e0', '#3a3a3a', '#7a1f1f', '#c9a227'];
   return { geo, fleet, vmat, CAR_COLORS };
 })();
@@ -2457,16 +2491,35 @@ const Rig = (function () {
   function mat(key, c, r, m) { return M[key] || (M[key] = std(c, r, m)); }
   // ---------- textures de tissu ----------
   const TX = {};
+  // camouflages réalistes (comme les photos) : numérique, taches, points (flecktarn), écailles (kryptek)
+  const PAL = {
+    foret: ['blob', '#5a6b3c', '#3f4c2a', '#7a7a4e', '#2b2f1f'], desert: ['blob', '#c9b58c', '#9b6c48', '#b8a070', '#dccaa2'], urbain: ['blob', '#7d8086', '#5b5e63', '#a5a8ad', '#3e4044'],
+    acu: ['digital', '#8e9180', '#a9ab98', '#6f7366', '#c3c2b2'], nwu: ['digital', '#2b3550', '#1a2033', '#3f4b6e', '#0c0e15'], terre: ['blob', '#6e5a38', '#4d5a2e', '#8f744a', '#2f2a1e'],
+    multicam: ['blob', '#8a8462', '#5f5b3e', '#a99f78', '#4b3f2c', '#c9bd96'], flora: ['blob', '#6f7a55', '#48583a', '#93906a', '#3b3a2c'], digvert: ['digital', '#55613f', '#3d4a2c', '#7a7f58', '#2a2e20'],
+    fleck: ['dots', '#6b7255', '#3d4a2c', '#8a6f45', '#1f2018', '#9aa07a'], krypB: ['scales', '#2c2e33', '#141518', '#6e727a', '#0a0a0b'], krypW: ['scales', '#3d4046', '#141518', '#d4d6d9', '#7f838a'],
+    parka: ['blob', '#6a705a', '#2c3024', '#d5d7cc', '#8c917a'], noir: ['flat', '#16171a', '#101113', '#1d1e22', '#0b0b0c']
+  };
   function camoTex(kind) {
-    if (TX[kind]) return TX[kind];
-    const pal = kind === 'desert' ? ['#c2a878', '#a38a5c', '#d8c39a', '#7e6a45'] : kind === 'urbain' ? ['#7d8086', '#5b5e63', '#a5a8ad', '#3e4044'] : ['#5a6b3c', '#3f4c2a', '#7a7a4e', '#2b2f1f'];
+    if (TX[kind]) return TX[kind]; const P = PAL[kind] || PAL.foret; const [type, ...pal] = P;
     const c = makeCanvas(256, 256), g = c.getContext('2d'); g.fillStyle = pal[0]; g.fillRect(0, 0, 256, 256);
-    let s = kind.length * 977; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
-    for (let k = 1; k < 4; k++) for (let i = 0; i < 26; i++) { g.fillStyle = pal[k]; g.beginPath(); const x = r() * 256, y = r() * 256; g.moveTo(x, y); for (let a = 0; a < 7; a++) { const ang = a / 7 * 6.283, rr = 8 + r() * 22; g.lineTo(x + Math.cos(ang) * rr * 1.5, y + Math.sin(ang) * rr); } g.closePath(); g.fill(); }
-    // trame du tissu
-    g.globalAlpha = 0.08; g.fillStyle = '#000'; for (let y = 0; y < 256; y += 2) g.fillRect(0, y, 256, 1); g.globalAlpha = 1;
+    let sd = kind.length * 977 + kind.charCodeAt(0) * 31; const r = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+    if (type === 'blob') for (let k = 1; k < pal.length; k++) for (let i = 0; i < 22; i++) { g.fillStyle = pal[k]; g.beginPath(); const x = r() * 256, y = r() * 256; const n = 9; for (let a = 0; a < n; a++) { const ang = a / n * 6.283, rr = (7 + r() * 20) * (k === pal.length - 1 ? 0.5 : 1); g.lineTo(x + Math.cos(ang) * rr * 1.6, y + Math.sin(ang) * rr); } g.closePath(); g.fill(); }
+    if (type === 'digital') for (let k = 1; k < pal.length; k++) for (let i = 0; i < 70; i++) { g.fillStyle = pal[k]; let x = Math.floor(r() * 64) * 4, y = Math.floor(r() * 64) * 4; for (let j = 0; j < 9; j++) { g.fillRect(x, y, 4, 4); x += (Math.floor(r() * 3) - 1) * 4; y += (Math.floor(r() * 3) - 1) * 4; } }
+    if (type === 'dots') for (let k = 1; k < pal.length; k++) for (let i = 0; i < 160; i++) { g.fillStyle = pal[k]; g.beginPath(); g.arc(r() * 256, r() * 256, 2 + r() * 4, 0, 7); g.fill(); }
+    if (type === 'scales') { for (let i = 0; i < 46; i++) { const x = r() * 256, y = r() * 256, R = 8 + r() * 16; g.fillStyle = pal[1 + (i % 3)]; g.strokeStyle = pal[1]; g.lineWidth = 2; g.beginPath(); for (let a = 0; a < 6; a++) { const ang = a / 6 * 6.283 + 0.5; g.lineTo(x + Math.cos(ang) * R, y + Math.sin(ang) * R * 0.85); } g.closePath(); g.fill(); g.stroke(); g.fillStyle = pal[0]; g.beginPath(); g.arc(x, y, R * 0.35, 0, 7); g.fill(); } }
+    g.globalAlpha = 0.07; g.fillStyle = '#000'; for (let y = 0; y < 256; y += 2) g.fillRect(0, y, 256, 1); g.globalAlpha = 1; // trame du tissu
     const t = canvasTex(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(2, 2); return (TX[kind] = t);
   }
+  // tenue de chaque pays (camouflage + couleur des bottes)
+  const NAT_CAMO = { us: 'nwu', cm: 'terre', fr: 'foret', gb: 'multicam', ru: 'flora', cn: 'digvert', de: 'fleck', ca: 'digvert', br: 'foret', jp: 'foret', ae: 'desert', ar: 'foret', ma: 'desert', td: 'desert', sn: 'terre', ci: 'terre', ng: 'foret', ga: 'foret', cd: 'foret', be: 'foret' };
+  // forme arrondie « carré + ellipse » (gilets, poches) : boîte aux coins arrondis
+  const RB = {};
+  function rbox(w, h, d, rr) { const k = [w, h, d, rr].map(v => v.toFixed(3)).join(); if (RB[k]) return RB[k]; rr = Math.min(rr, w / 2 - 0.001, h / 2 - 0.001, d / 2 - 0.001); const g = new THREE.BoxGeometry(w, h, d, 4, 4, 4); const P = g.attributes.position; const v = new THREE.Vector3(), inn = new THREE.Vector3(); const hx = w / 2 - rr, hy = h / 2 - rr, hz = d / 2 - rr;
+    for (let i = 0; i < P.count; i++) { v.fromBufferAttribute(P, i); inn.set(clamp(v.x, -hx, hx), clamp(v.y, -hy, hy), clamp(v.z, -hz, hz)); v.sub(inn); if (v.lengthSq() > 1e-12) v.setLength(rr); v.add(inn); P.setXYZ(i, v.x, v.y, v.z); } g.computeVertexNormals(); return (RB[k] = g); }
+  // enveloppe du torse en super-ellipse (gilet pare-balles qui épouse le corps, ni carré ni rond)
+  function wrapGeo(rx, rz, h, n, taper) { const g = new THREE.CylinderGeometry(1, 1, h, 36, 4, false); const P = g.attributes.position;
+    for (let i = 0; i < P.count; i++) { const x = P.getX(i), y = P.getY(i), z = P.getZ(i); const rad = Math.hypot(x, z); if (rad < 1e-6) continue; const a = Math.atan2(z, x), c = Math.cos(a), sn = Math.sin(a); const k = 1 + (taper || 0) * (y / h);
+      P.setXYZ(i, Math.sign(c) * Math.pow(Math.abs(c), 2 / n) * rx * k, y, Math.sign(sn) * Math.pow(Math.abs(sn), 2 / n) * rz * k); } g.computeVertexNormals(); return g; }
   function fabric(key, col, tex) { if (M[key]) return M[key]; const m = std(col, 0.92); if (tex) { m.map = camoTex(tex); m.color.set(0xffffff); } return (M[key] = m); }
   // ---------- formes ----------
   // membre galbé : profil de rayon le long de l'os (y = 0 en haut, -len en bas)
@@ -2520,14 +2573,16 @@ const Rig = (function () {
     return g;
   }
   // ---------- botte / chaussure ----------
-  function boot(m, sole, high) {
+  function boot(m, sole, high, cuffM) {
     const g = new THREE.Group();
-    if (high) g.add(mesh(limbGeo(0.17, [0.058, 0.056, 0.054], 14), m, 0, 0.1, 0));
+    if (high) { g.add(mesh(limbGeo(0.19, [0.064, 0.061, 0.058], 16), m, 0, 0.12, 0)); if (cuffM) g.add(mesh(sph(0.07, 16, 10), cuffM, 0, 0.13, 0, 1, 0.55, 1)); } // tige haute + pantalon rentré dans la botte
     g.add(mesh(sph(0.06, 16, 12), m, 0, -0.035, -0.06, 0.85, 0.65, 1.75)); // dessus du pied
     g.add(mesh(sph(0.055, 14, 10), m, 0, -0.04, 0.02, 0.95, 0.85, 1.0)); // talon
     const s = mesh(new THREE.BoxGeometry(0.105, 0.025, 0.29), sole, 0, -0.085, -0.055); g.add(s);
     const toe = mesh(new THREE.CylinderGeometry(0.0525, 0.0525, 0.025, 16, 1, false, 0, Math.PI), sole, 0, -0.085, -0.2); toe.rotation.y = Math.PI / 2; g.add(toe);
-    if (high) for (let k = 0; k < 5; k++) g.add(mesh(new THREE.BoxGeometry(0.05, 0.004, 0.006), mat('lace', '#1a1a1a', 0.6), 0, 0.02 + k * 0.03, -0.055));
+    if (high) for (let k = 0; k < 6; k++) g.add(mesh(new THREE.BoxGeometry(0.052, 0.005, 0.006), mat('lace', '#1a1a1a', 0.6), 0, 0.0 + k * 0.03, -0.062));
+    // repères sous la semelle (talon, pointe) : servent à poser les pieds exactement sur le sol
+    const heel = new THREE.Object3D(); heel.position.set(0, -0.0975, 0.085); const toeP = new THREE.Object3D(); toeP.position.set(0, -0.0975, -0.22); g.add(heel, toeP); g.userData.soles = [heel, toeP];
     return g;
   }
 
@@ -2542,17 +2597,23 @@ const Rig = (function () {
     const lightSkin = ['#c58c66', '#e0ac87', '#f1c9a5'].includes(skin); const hairC = lightSkin ? ['#3b2716', '#7a5a35', '#c9a35a', '#1c140e', '#8a8a8a'][(seed >> 1) % 5] : '#0e0a08';
     const O = { kind };
     // tenue
+    const cc = opts.cc || (kind === 'soldat' ? 'cm' : null); const camo = kind === 'ennemi' ? 'desert' : kind === 'special' ? 'multicam' : kind === 'delta' ? 'krypW' : kind === 'general' ? (NAT_CAMO[cc] || 'foret') : (NAT_CAMO[cc] || 'foret');
+    const tanBoot = mat('bootTan', '#a88d63', 0.75), blkBoot = mat('bootB', '#141414', 0.45);
     const T = {
       pilote: { top: fabric('shirtW', '#f2f2ee'), legs: fabric('navy', '#141c2e'), boot: mat('shoe', '#0b0b0b', 0.25, 0.1), glove: null },
-      chasse: { top: fabric('flight', '#4a5240'), legs: fabric('flight', '#4a5240'), boot: mat('bootB', '#141414', 0.45), glove: mat('gloveT', '#6b5a45', 0.75) },
-      militaire: { top: fabric('flight2', '#5e6a4c'), legs: fabric('flight2', '#5e6a4c'), boot: mat('bootB', '#141414', 0.45), glove: null },
-      soldat: { top: fabric('camoF', '#ffffff', 'foret'), legs: fabric('camoF', '#ffffff', 'foret'), boot: mat('bootB', '#141414', 0.45), glove: mat('gloveB', '#22241f', 0.7) },
-      ennemi: { top: fabric('camoD', '#ffffff', 'desert'), legs: fabric('camoD', '#ffffff', 'desert'), boot: mat('bootD', '#5a4630', 0.6), glove: mat('gloveB', '#22241f', 0.7) },
-      agent: { top: fabric('suitB', '#121315'), legs: fabric('suitB', '#121315'), boot: mat('shoe', '#0b0b0b', 0.25, 0.1), glove: null },
-      intervention: { top: fabric('tacB', '#1a1b1d'), legs: fabric('tacB', '#1a1b1d'), boot: mat('bootB', '#141414', 0.45), glove: mat('gloveB', '#22241f', 0.7) },
+      chasse: { top: fabric('flight', '#4a5240'), legs: fabric('flight', '#4a5240'), boot: blkBoot, glove: mat('gloveT', '#6b5a45', 0.75) },
+      militaire: { top: fabric('flight2', '#5e6a4c'), legs: fabric('flight2', '#5e6a4c'), boot: blkBoot, glove: null },
+      soldat: { top: fabric('camo_' + camo, '#fff', camo), legs: fabric('camo_' + camo, '#fff', camo), boot: ['nwu', 'flora', 'digvert', 'fleck', 'foret', 'terre'].includes(camo) ? blkBoot : tanBoot, glove: mat('gloveB', '#1c1d1a', 0.7) },
+      ennemi: { top: fabric('camo_desert', '#fff', 'desert'), legs: fabric('camo_desert', '#fff', 'desert'), boot: tanBoot, glove: mat('gloveB', '#1c1d1a', 0.7) },
+      agent: { top: fabric('bomber', '#141518'), legs: fabric('pantN', '#121315'), boot: blkBoot, glove: null },
+      intervention: { top: fabric('softN', '#16171a'), legs: fabric('pantN', '#121315'), boot: blkBoot, glove: mat('gloveB', '#1c1d1a', 0.7) },
+      special: { top: fabric('camo_multicam', '#fff', 'multicam'), legs: fabric('camo_multicam', '#fff', 'multicam'), boot: blkBoot, glove: mat('gloveB', '#1c1d1a', 0.7) },
+      delta: { top: fabric('camo_krypW', '#fff', 'krypW'), legs: fabric('camo_krypW', '#fff', 'krypW'), boot: blkBoot, glove: mat('gloveB', '#1c1d1a', 0.7) },
+      general: { top: fabric('camo_' + camo, '#fff', camo), legs: fabric('camo_' + camo, '#fff', camo), boot: blkBoot, glove: mat('gloveB', '#1c1d1a', 0.7) },
       civil: { top: fabric('civT' + (seed % 6), ['#c0392b', '#2980b9', '#27ae60', '#f39c12', '#ecf0f1', '#8e44ad'][seed % 6]), legs: fabric('civL' + (seed % 4), ['#1c2433', '#3b3f46', '#4a3a2a', '#1f3a5f'][seed % 4]), boot: mat('shoeC', '#2a1f18', 0.5), glove: null },
-      agentpiste: { top: fabric('vestY', '#f2c200'), legs: fabric('navy', '#141c2e'), boot: mat('bootB', '#141414', 0.45), glove: null }
+      agentpiste: { top: fabric('vestY', '#f2c200'), legs: fabric('navy', '#141c2e'), boot: blkBoot, glove: null }
     }[kind] || {};
+    const MIL = ['soldat', 'ennemi', 'special', 'delta', 'general', 'intervention'].includes(kind);
     const skinM = mat('skin' + skin, skin, 0.55); const sole = mat('sole', '#0a0a0a', 0.9);
     const root = new THREE.Group(); const J = {};
     const pelvis = new THREE.Group(); pelvis.position.y = 0.96; root.add(pelvis); J.pelvis = pelvis;
@@ -2565,7 +2626,7 @@ const Rig = (function () {
     for (const sx of [-1, 1]) chest.add(mesh(sph(0.062, 16, 12), T.top, sx * 0.19, 0.225, 0, 1, 0.8, 0.95)); // deltoïdes
     // cou + tête
     const neck = new THREE.Group(); neck.position.y = 0.27; chest.add(neck); J.neck = neck; neck.add(mesh(limbGeo(0.09, [0.048, 0.05, 0.056], 14), skinM, 0, 0.09, 0));
-    const hd = new THREE.Group(); hd.position.y = 0.17; neck.add(hd); J.head = hd; const HD = head({ skin, hair: hairC, beard: kind !== 'pilote' || seed % 2 === 0, noHair: ['chasse', 'soldat', 'ennemi', 'intervention'].includes(kind) }); hd.add(HD); J.lips = HD.userData.lips; J.mouth = HD.userData.mouth;
+    const hd = new THREE.Group(); hd.position.y = 0.17; neck.add(hd); J.head = hd; const HD = head({ skin, hair: hairC, beard: kind !== 'pilote' || seed % 2 === 0, noHair: ['chasse', 'soldat', 'ennemi', 'intervention', 'special', 'delta'].includes(kind) }); hd.add(HD); J.lips = HD.userData.lips; J.mouth = HD.userData.mouth;
     // bras
     const arm = sd => {
       const sh = new THREE.Group(); sh.position.set(sd * 0.215, 0.215, 0); chest.add(sh);
@@ -2579,13 +2640,14 @@ const Rig = (function () {
     };
     const AL = arm(-1), AR = arm(1); J.shL = AL.sh; J.elL = AL.el; J.wrL = AL.wr; J.shR = AR.sh; J.elR = AR.el; J.wrR = AR.wr; J.hands = { L: [AL.hOpen, AL.hGrip], R: [AR.hOpen, AR.hGrip] };
     // jambes
+    const soles = [];
     const leg = sd => {
       const hp = new THREE.Group(); hp.position.set(sd * 0.095, -0.05, 0); pelvis.add(hp);
       hp.add(mesh(limbGeo(0.44, [0.085, 0.09, 0.08, 0.066, 0.058], 18), T.legs));
       hp.add(mesh(sph(0.06), T.legs, 0, -0.44, 0));
       const kn = new THREE.Group(); kn.position.y = -0.44; hp.add(kn);
       kn.add(mesh(limbGeo(0.42, [0.058, 0.062, 0.052, 0.042, 0.04], 16), T.legs));
-      const an = new THREE.Group(); an.position.y = -0.42; kn.add(an); an.add(boot(T.boot, sole, kind !== 'pilote'));
+      const an = new THREE.Group(); an.position.y = -0.42; kn.add(an); const bt = boot(T.boot, sole, kind !== 'pilote' && kind !== 'civil', kind === 'pilote' || kind === 'civil' ? null : T.legs); an.add(bt); soles.push(...bt.userData.soles);
       return { hp, kn, an };
     };
     const LL = leg(-1), LR = leg(1); J.hpL = LL.hp; J.knL = LL.kn; J.anL = LL.an; J.hpR = LR.hp; J.knR = LR.kn; J.anR = LR.an;
@@ -2621,46 +2683,75 @@ const Rig = (function () {
         hd.add(mesh(new THREE.CircleGeometry(0.014, 12), gold, -0.05, 0.06, -0.095));
       }
     }
-    if (kind === 'agent') { // homme en noir : costume, chemise blanche, cravate noire, lunettes noires, oreillette
-      chest.add(mesh(new THREE.BoxGeometry(0.1, 0.2, 0.01), mat('shirtW2', '#f4f4f2', 0.6), 0, 0.17, -0.14)); chest.add(mesh(new THREE.BoxGeometry(0.035, 0.22, 0.012), mat('tieB', '#050505', 0.4), 0, 0.15, -0.148));
-      for (const sx of [-1, 1]) { const lap = mesh(new THREE.BoxGeometry(0.06, 0.2, 0.012), fabric('suitB', '#121315'), sx * 0.06, 0.17, -0.145); lap.rotation.z = sx * 0.35; chest.add(lap); }
-      const gl = new THREE.Group(); gl.position.set(0, 0.018, -0.095); hd.add(gl); for (const sx of [-1, 1]) gl.add(mesh(new THREE.BoxGeometry(0.034, 0.02, 0.006), mat('glass', '#050505', 0.05, 0.6), sx * 0.033, 0, 0)); gl.add(mesh(new THREE.BoxGeometry(0.03, 0.004, 0.004), mat('glass', '#050505', 0.05, 0.6), 0, 0.006, 0));
+    if (kind === 'agent') { // homme en noir : blouson noir à poches (comme la photo), col montant, bords côtelés, lunettes noires, oreillette
+      const bm = mat('bomberD', '#0f1012', 0.8);
+      chest.add(mesh(wrapGeo(0.222, 0.15, 0.05, 3.2), bm, 0, 0.3, 0)); // col montant
+      spine.add(mesh(wrapGeo(0.175, 0.125, 0.06, 3), bm, 0, 0.05, 0)); // bas côtelé
+      chest.add(mesh(new THREE.BoxGeometry(0.008, 0.36, 0.006), mat('zip', '#3a3b3e', 0.3, 0.8), 0, 0.12, -0.14));
+      for (const sx of [-1, 1]) { chest.add(mesh(rbox(0.08, 0.08, 0.03, 0.01), bm, sx * 0.09, 0.17, -0.135)); chest.add(mesh(rbox(0.085, 0.012, 0.035, 0.005), mat('flap', '#1d1e22', 0.7), sx * 0.09, 0.215, -0.14)); spine.add(mesh(rbox(0.085, 0.09, 0.03, 0.01), bm, sx * 0.1, 0.15, -0.115)); }
+      for (const A of [AL, AR]) { A.sh.add(mesh(rbox(0.05, 0.07, 0.03, 0.01), bm, A === AL ? -0.045 : 0.045, -0.12, 0)); A.el.add(mesh(new THREE.CylinderGeometry(0.036, 0.036, 0.04, 14), bm, 0, -0.23, 0)); }
+      const gl = new THREE.Group(); gl.position.set(0, 0.018, -0.095); hd.add(gl); for (const sx of [-1, 1]) gl.add(mesh(rbox(0.036, 0.022, 0.006, 0.0025), mat('glass', '#050505', 0.05, 0.6), sx * 0.033, 0, 0)); gl.add(mesh(new THREE.BoxGeometry(0.03, 0.004, 0.004), mat('glass', '#050505', 0.05, 0.6), 0, 0.006, 0));
       hd.add(mesh(new THREE.CylinderGeometry(0.002, 0.002, 0.1, 6), mat('wire', '#d8d8d8', 0.4), 0.092, -0.05, 0.02));
     }
     if (kind === 'agentpiste') { // agent de piste : gilet jaune fluo à bandes, casque antibruit, casquette
       for (const yy of [0.05, 0.16]) chest.add(mesh(new THREE.CylinderGeometry(0.205, 0.2, 0.025, 20), mat('refl', '#d9dde2', 0.25, 0.6), 0, yy, 0, 1, 1, 0.7));
       const cap = mesh(new THREE.SphereGeometry(0.108, 20, 10, 0, Math.PI * 2, 0, Math.PI * 0.45), mat('capY', '#f2c200', 0.7), 0, 0.03, 0.005, 0.95, 0.8, 1.05); hd.add(cap); hd.add(mesh(new THREE.BoxGeometry(0.12, 0.008, 0.07), mat('capY', '#f2c200', 0.7), 0, 0.025, -0.11));
     }
-    if (kind === 'intervention') { // bataillon d'intervention rapide : tout en noir, gilet pare-balles lourd, cagoule, casque balistique
-      const vm = mat('vestN', '#0e0f10', 0.75); chest.add(mesh(new THREE.BoxGeometry(0.38, 0.36, 0.085), vm, 0, 0.1, -0.12)); chest.add(mesh(new THREE.BoxGeometry(0.38, 0.36, 0.07), vm, 0, 0.1, 0.125));
-      for (let k = 0; k < 4; k++) chest.add(mesh(new THREE.BoxGeometry(0.07, 0.11, 0.05), vm, (k - 1.5) * 0.085, 0.0, -0.18));
-      const pl = makeCanvas(128, 32), pg = pl.getContext('2d'); pg.fillStyle = '#0e0f10'; pg.fillRect(0, 0, 128, 32); pg.fillStyle = '#e8e8e8'; pg.font = 'bold 22px Arial'; pg.textAlign = 'center'; pg.fillText('POLICE', 64, 24);
-      const tag = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 0.05), new THREE.MeshBasicMaterial({ map: canvasTex(pl) })); tag.position.set(0, 0.2, 0.162); chest.add(tag);
-      hd.add(mesh(sph(0.106, 24, 16), mat('bala', '#0b0b0b', 0.9), 0, -0.01, 0.004, 0.88, 1.2, 1.0)); // cagoule (visage caché sauf les yeux)
-      const hm = mesh(new THREE.SphereGeometry(0.132, 26, 14, 0, Math.PI * 2, 0, Math.PI * 0.52), mat('helmN', '#151617', 0.5), 0, 0.022, 0.008, 1, 0.95, 1.05); hd.add(hm);
-      hd.add(mesh(new THREE.BoxGeometry(0.15, 0.04, 0.03), mat('gog', '#111111', 0.2, 0.4), 0, 0.075, -0.112));
-      for (const L of [LL, LR]) L.kn.add(mesh(sph(0.05, 12, 8), mat('pad', '#1e211a', 0.6), 0, -0.02, -0.04, 1, 1, 0.6));
-      pelvis.add(rot(mesh(new THREE.TorusGeometry(0.165, 0.022, 6, 30), mat('belt2', '#2a2a22', 0.7), 0, 0.03, 0, 1, 1, 0.72), 'x', Math.PI / 2));
-    }
-    if (kind === 'soldat' || kind === 'ennemi') {
-      // gilet porte-plaques + poches à chargeurs, ceinturon, genouillères, sac à dos, casque avec couvre-casque et lunettes
-      const vestM = mat(kind === 'soldat' ? 'vestF' : 'vestD', kind === 'soldat' ? '#3a4228' : '#8a7550', 0.85);
-      chest.add(mesh(new THREE.BoxGeometry(0.36, 0.32, 0.075), vestM, 0, 0.1, -0.115)); chest.add(mesh(new THREE.BoxGeometry(0.36, 0.32, 0.06), vestM, 0, 0.1, 0.12));
-      for (let k = 0; k < 3; k++) chest.add(mesh(new THREE.BoxGeometry(0.075, 0.1, 0.045), vestM, (k - 1) * 0.09, 0.0, -0.165));
-      for (const sx of [-1, 1]) chest.add(mesh(new THREE.BoxGeometry(0.06, 0.05, 0.25), vestM, sx * 0.13, 0.27, 0));
-      pelvis.add(rot(mesh(new THREE.TorusGeometry(0.165, 0.022, 6, 30), mat('belt2', '#2a2a22', 0.7), 0, 0.03, 0, 1, 1, 0.72), 'x', Math.PI / 2));
-      chest.add(mesh(new THREE.BoxGeometry(0.3, 0.36, 0.14), mat('pack', kind === 'soldat' ? '#4b5531' : '#9a845a', 0.9), 0, 0.12, 0.21));
-      for (const L of [LL, LR]) L.kn.add(mesh(sph(0.05, 12, 8), mat('pad', '#1e211a', 0.6), 0, -0.02, -0.04, 1, 1, 0.6));
-      const hm = new THREE.Group(); hd.add(hm);
-      hm.add(mesh(new THREE.SphereGeometry(0.13, 26, 14, 0, Math.PI * 2, 0, Math.PI * 0.55), fabric(kind === 'soldat' ? 'camoF' : 'camoD', '#fff', kind === 'soldat' ? 'foret' : 'desert'), 0, 0.02, 0.008, 1, 0.95, 1.05));
-      hm.add(rot(mesh(new THREE.TorusGeometry(0.128, 0.008, 6, 28), mat('rim', '#2a2c22', 0.7), 0, 0.012, 0.008, 1, 1, 1.05), 'x', Math.PI / 2));
-      const gog = mesh(new THREE.BoxGeometry(0.14, 0.035, 0.03), mat('gog', '#111111', 0.2, 0.4), 0, 0.07, -0.11); hm.add(gog);
-      hm.add(mesh(new THREE.BoxGeometry(0.008, 0.06, 0.008), mat('strap', '#2b2a24', 0.6), -0.1, -0.04, -0.02)); hm.add(mesh(new THREE.BoxGeometry(0.008, 0.06, 0.008), mat('strap', '#2b2a24', 0.6), 0.1, -0.04, -0.02));
-      if (kind === 'ennemi') { AL.sh.add(mesh(new THREE.CylinderGeometry(0.063, 0.063, 0.06, 14), mat('band', '#c81e1e', 0.7), 0, -0.1, 0)); }
-      else { const fl = makeCanvas(48, 32); try { drawFlag2D(fl.getContext('2d'), 'cm', 0, 0, 48, 32); } catch (e) { } const pt = new THREE.Mesh(new THREE.PlaneGeometry(0.07, 0.045), new THREE.MeshBasicMaterial({ map: canvasTex(fl) })); pt.position.set(-0.061, -0.08, 0); pt.rotation.y = -Math.PI / 2; AL.sh.add(pt); }
+    if (MIL) {
+      // ===== tenue militaire / intervention (comme les photos) =====
+      const dark = kind === 'intervention' || kind === 'delta';
+      const vestC = { soldat: { nwu: '#1f2638', terre: '#5a4a30', desert: '#b49c72', multicam: '#7d7658', flora: '#4f5a3c', digvert: '#4a5638', fleck: '#4f5a3c', foret: '#454f30' }[camo] || '#454f30', ennemi: '#a38c62', special: '#7d7658', delta: '#1a1b1e', general: '#3b4030', intervention: '#0e0f10' }[kind];
+      const vm = mat('vest' + vestC, vestC, 0.85); const pm = kind === 'special' || kind === 'delta' ? fabric('camo_' + (kind === 'special' ? 'multicam' : 'krypW'), '#fff', kind === 'special' ? 'multicam' : 'krypW') : vm;
+      // col de la veste, poches de poitrine, poches de bras, poches cargo sur les cuisses (comme les photos)
+      chest.add(mesh(wrapGeo(0.215, 0.148, 0.045, 3), T.top, 0, 0.3, 0));
+      for (const A of [AL, AR]) A.sh.add(mesh(rbox(0.055, 0.075, 0.035, 0.012), T.top, A === AL ? -0.05 : 0.05, -0.13, 0));
+      for (const L of [LL, LR]) { L.hp.add(mesh(rbox(0.05, 0.13, 0.12, 0.018), T.legs, L === LL ? -0.075 : 0.075, -0.26, 0.0)); L.hp.add(mesh(rbox(0.054, 0.02, 0.124, 0.006), T.legs, L === LL ? -0.077 : 0.077, -0.19, 0.0)); }
+      if (kind !== 'general') {
+        // gilet porte-plaques ARRONDI (super-ellipse) + ceinture, porte-chargeurs, radio, poches
+        chest.add(mesh(wrapGeo(0.238, 0.168, 0.33, 3.2, -0.06), vm, 0, 0.1, 0));
+        spine.add(mesh(wrapGeo(0.2, 0.145, 0.1, 3), vm, 0, 0.14, 0)); // ceinture du gilet (ventre)
+        for (const sx of [-1, 1]) chest.add(mesh(rbox(0.07, 0.045, 0.24, 0.018), vm, sx * 0.13, 0.27, 0)); // épaulières
+        for (let k = 0; k < 3; k++) chest.add(mesh(rbox(0.07, 0.1, 0.045, 0.014), pm, (k - 1) * 0.078, 0.0, -0.178)); // chargeurs
+        chest.add(mesh(rbox(0.09, 0.07, 0.04, 0.012), pm, -0.07, 0.15, -0.17)); chest.add(mesh(rbox(0.06, 0.07, 0.04, 0.012), pm, 0.08, 0.15, -0.17));
+        chest.add(mesh(rbox(0.05, 0.12, 0.04, 0.012), vm, 0.17, 0.05, -0.06)); chest.add(mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.12, 6), mat('ant', '#111', 0.5), 0.17, 0.16, -0.06)); // radio + antenne
+        chest.add(mesh(rbox(0.3, 0.34, 0.12, 0.04), mat('pack' + vestC, vestC, 0.9), 0, 0.1, 0.22)); // sac / plaque dorsale
+        pelvis.add(mesh(wrapGeo(0.178, 0.128, 0.05, 3), mat('belt2', '#2a2a22', 0.7), 0, 0.03, 0));
+        LR.hp.add(mesh(rbox(0.05, 0.13, 0.07, 0.015), mat('holster', '#141414', 0.6), 0.09, -0.1, 0.0)); // holster de cuisse
+        for (const L of [LL, LR]) L.kn.add(mesh(sph(0.055, 14, 10), mat('pad', '#22251d', 0.6), 0, -0.02, -0.045, 1, 1, 0.6)); // genouillères
+      }
+      if (kind === 'intervention') { // bataillon d'intervention : softshell noir à capuche, gilet noir POLICE, cagoule, casque balistique
+        chest.add(mesh(new THREE.SphereGeometry(0.11, 18, 10, 0, Math.PI * 2, 0, Math.PI / 2), T.top, 0, 0.3, 0.07, 1.1, 0.5, 0.8)); // capuche rabattue
+        const pl = makeCanvas(128, 32), pg = pl.getContext('2d'); pg.fillStyle = '#0e0f10'; pg.fillRect(0, 0, 128, 32); pg.fillStyle = '#e8e8e8'; pg.font = 'bold 22px Arial'; pg.textAlign = 'center'; pg.fillText('POLICE', 64, 24);
+        const tag = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 0.05), new THREE.MeshBasicMaterial({ map: canvasTex(pl) })); tag.position.set(0, 0.2, 0.285); chest.add(tag);
+        const tagF = tag.clone(); tagF.scale.setScalar(0.6); tagF.position.set(0, 0.22, -0.172); tagF.rotation.y = Math.PI; chest.add(tagF);
+      }
+      // tête : casque (couvre-casque camouflé), lunettes sur le casque, jugulaire, support de vision nocturne ; cagoule pour les forces spéciales
+      if (kind === 'general') {
+        // colonel / général : MANTEAU long tacheté à capuche (comme la photo), casquette d'officier à étoiles
+        const coat = new THREE.LatheGeometry([new THREE.Vector2(0.2, 0.36), new THREE.Vector2(0.215, 0.2), new THREE.Vector2(0.225, 0.0), new THREE.Vector2(0.245, -0.3), new THREE.Vector2(0.27, -0.56)], 30);
+        pelvis.add(mesh(coat, T.top, 0, 0, 0, 1, 1, 0.74));
+        chest.add(mesh(new THREE.SphereGeometry(0.12, 18, 10, 0, Math.PI * 2, 0, Math.PI / 2), T.top, 0, 0.29, 0.075, 1.1, 0.6, 0.85)); // capuche
+        for (let k = 0; k < 4; k++) chest.add(mesh(sph(0.009, 8, 6), gold, 0, 0.22 - k * 0.07, -0.15)); // boutons
+        for (const sx of [-1, 1]) for (let k = 0; k < 3; k++) chest.add(mesh(new THREE.OctahedronGeometry(0.012), gold, sx * 0.14 + (k - 1) * 0.022 * sx, 0.29, -0.02)); // étoiles
+        const cap = new THREE.Group(); cap.position.set(0, 0.075, 0.005); hd.add(cap); const capM = mat('capG', '#2e3426', 0.7);
+        cap.add(mesh(new THREE.CylinderGeometry(0.125, 0.105, 0.075, 28), capM, 0, 0.02, 0)); cap.add(mesh(new THREE.CylinderGeometry(0.107, 0.107, 0.022, 28), gold, 0, -0.012, 0));
+        const vis = mesh(new THREE.CylinderGeometry(0.11, 0.11, 0.008, 28, 1, false, Math.PI * 0.6, Math.PI * 0.8), mat('visor', '#050505', 0.15, 0.3), 0, -0.025, -0.02); vis.rotation.x = -0.25; cap.add(vis); cap.add(mesh(sph(0.018, 10, 8), gold, 0, 0.02, -0.12, 1, 1, 0.4));
+      } else {
+        const hm = new THREE.Group(); hd.add(hm); const hcov = kind === 'intervention' ? mat('helmN', '#151617', 0.5) : kind === 'delta' ? mat('helmD', '#1d1e21', 0.55) : fabric('camo_' + camo, '#fff', camo);
+        if (kind === 'intervention' || kind === 'delta' || kind === 'special') hd.add(mesh(sph(0.106, 24, 16), mat('bala', '#0b0b0b', 0.9), 0, -0.01, 0.004, 0.88, 1.2, 1.0)); // cagoule
+        hm.add(mesh(new THREE.SphereGeometry(0.132, 28, 16, 0, Math.PI * 2, 0, Math.PI * 0.54), hcov, 0, 0.022, 0.008, 1, 0.92, 1.06));
+        hm.add(rot(mesh(new THREE.TorusGeometry(0.13, 0.007, 6, 30), mat('rim', '#2a2c22', 0.7), 0, 0.014, 0.008, 1, 1, 1.06), 'x', Math.PI / 2));
+        hm.add(mesh(rbox(0.15, 0.04, 0.035, 0.012), mat('gog', '#141414', 0.25, 0.4), 0, 0.085, -0.11)); // lunettes posées sur le casque
+        hm.add(mesh(rbox(0.035, 0.03, 0.02, 0.006), mat('nvg', '#222', 0.4, 0.5), 0, 0.12, -0.125)); // support vision nocturne
+        for (const sx of [-1, 1]) hm.add(mesh(new THREE.BoxGeometry(0.008, 0.085, 0.01), mat('strap', '#2b2a24', 0.6), sx * 0.1, -0.05, -0.03)); hm.add(mesh(new THREE.BoxGeometry(0.11, 0.008, 0.012), mat('strap', '#2b2a24', 0.6), 0, -0.13, -0.06)); // jugulaire
+        if (kind === 'soldat' || kind === 'ennemi') hd.add(mesh(rbox(0.07, 0.022, 0.012, 0.005), mat('glass', '#050505', 0.05, 0.6), 0, 0.018, -0.1)); // lunettes de protection
+      }
+      // écusson du pays sur l'épaule (drapeau), brassard rouge pour l'ennemi
+      if (kind === 'ennemi') AL.sh.add(mesh(new THREE.CylinderGeometry(0.064, 0.064, 0.06, 14), mat('band', '#c81e1e', 0.7), 0, -0.1, 0));
+      else if (cc && kind !== 'intervention') { const fl = makeCanvas(48, 32); try { drawFlag2D(fl.getContext('2d'), cc, 0, 0, 48, 32); } catch (e) { } for (const A of [AL, AR]) { const pt = new THREE.Mesh(new THREE.PlaneGeometry(0.075, 0.05), new THREE.MeshBasicMaterial({ map: canvasTex(fl) })); pt.position.set(A === AL ? -0.064 : 0.064, -0.075, 0); pt.rotation.y = A === AL ? -Math.PI / 2 : Math.PI / 2; A.sh.add(pt); } }
     }
     root.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
-    root.userData.rig = { J, kind, ph: Math.random() * 6, t: 0, gun: null, stance: 0, air: 0 };
+    root.userData.rig = { J, kind, cc, soles, ph: Math.random() * 6, t: 0, gun: null, stance: 0, air: 0 };
     return root;
   }
   // ---------- tenir une arme ----------
@@ -2702,6 +2793,14 @@ const Rig = (function () {
       const up = st.aim ? 1.5 : 1.05; J.shR.rotation.set(up, 0, R.twoHands ? -0.12 : 0.02); J.elR.rotation.set(R.twoHands ? 0.25 : 0.05, 0, 0); J.wrR.rotation.set(0, 0, 0);
       if (R.twoHands || st.aim) { J.shL.rotation.set(up - 0.05, 0, 0.55); J.elL.rotation.set(R.twoHands ? 1.0 : 0.6, 0, 0); J.chest.rotation.y = R.twoHands ? 0.25 : 0; J.head.rotation.y = R.twoHands ? -0.2 : 0; }
     }
+    if (st.stance !== 2 && !st.air) plant(root);
+  }
+  // PIEDS AU SOL : on mesure où sont les semelles et on descend/monte le bassin pour que le pied d'appui touche EXACTEMENT le sol
+  const _v = new THREE.Vector3(), _m = new THREE.Matrix4();
+  function plant(root) {
+    const R = root.userData.rig; if (!R.soles || !R.soles.length) return; const sv = root.matrixAutoUpdate; root.updateMatrix(); root.updateMatrixWorld(true); _m.copy(root.matrixWorld).invert(); let mn = 1e9;
+    for (const o of R.soles) { o.getWorldPosition(_v); _v.applyMatrix4(_m); if (_v.y < mn) mn = _v.y; }
+    if (mn < 1e8) R.J.pelvis.position.y -= mn / (root.scale.y || 1);
   }
 
   // ================= ARMES DÉTAILLÉES =================
@@ -2813,7 +2912,7 @@ const Rig = (function () {
     const talk = window.RADIO_T && performance.now() - window.RADIO_T < 2600 && ((window.RADIO_WHO === 'Équipage' || window.RADIO_WHO === 'Pilote') ? sd < 0 : sd > 0);
     if (J.mouth) J.mouth.scale.y = talk ? 0.25 + Math.abs(Math.sin(t * 13 + sd)) * 0.75 : 0.05; if (J.lips) J.lips.scale.y = talk ? 0.42 + Math.abs(Math.sin(t * 13 + sd)) * 0.3 : 0.42;
   }
-  return { fly, make, animate, hold, sit, gun: make_gun, camoTex };
+  return { fly, make, animate, hold, sit, gun: make_gun, camoTex, natCamo: cc => NAT_CAMO[cc] || 'foret', rbox, wrapGeo };
 })();
 
 // ---- 06_airports.js ----
@@ -3481,7 +3580,7 @@ const Cities = (function () {
       U.walkers.forEach((w, i) => { if (w.ax === 'z') { w.z += w.dir * w.sp * dt; if (Math.abs(w.z) > c.L) w.dir *= -1; } else { w.x += w.dir * w.sp * dt; if (Math.abs(w.x) > c.X) w.dir *= -1; }
         const x = w.ax === 'z' ? w.x : w.x, z = w.z; U.crowd.set(i, x, 0.5, z, w.ax === 'z' ? (w.dir > 0 ? 0 : Math.PI) : (w.dir > 0 ? Math.PI / 2 : -Math.PI / 2), 0.8, 0); });
       U.crowd.commit();
-      U.carSt.forEach((v, i) => { v.z += v.dir * v.sp * dt; if (v.z > c.L) v.z -= 2 * c.L; if (v.z < -c.L) v.z += 2 * c.L; tp.set(v.onB ? v.x : v.line + (v.dir > 0 ? 3 : -3), 0.4, v.z); tq.setFromAxisAngle(Yax, v.dir > 0 ? Math.PI : 0); tm.compose(tp, tq, ts); U.cars.setMatrixAt(i, tm); });
+      U.carSt.forEach((v, i) => { v.z += v.dir * v.sp * dt; if (v.z > c.L) v.z -= 2 * c.L; if (v.z < -c.L) v.z += 2 * c.L; tp.set(v.onB ? v.x : v.line + (v.dir > 0 ? 3 : -3), 0.4, v.z); tq.setFromAxisAngle(Yax, v.dir > 0 ? Math.PI : 0); tm.compose(tp, tq, ts); if (U.cars.userData.taken && U.cars.userData.taken.has(i)) tm.makeScale(0, 0, 0); U.cars.setMatrixAt(i, tm); });
       U.cars.instanceMatrix.needsUpdate = true;
     }
   }
@@ -3748,7 +3847,7 @@ const Roads = (function () {
       c.s += c.dir * c.sp * dt / r.len; c.s = (c.s + 1) % 1; const f = c.s * (r.dense.length - 1); const k = Math.floor(f), t = f - k; const a = r.dense[k], b = r.dense[Math.min(k + 1, r.dense.length - 1)];
       const L = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1; const nx = -(b[1] - a[1]) / L, nz = (b[0] - a[0]) / L; const lane = c.dir * (r.wide ? (i % 4 < 2 ? 4 : 10) : 3.5);
       tp.set(a[0] + (b[0] - a[0]) * t + nx * lane, lerp(r.ys[k], r.ys[Math.min(k + 1, r.ys.length - 1)], t) + 0.3, a[1] + (b[1] - a[1]) * t + nz * lane);
-      tq.setFromAxisAngle(Y, Math.atan2(b[0] - a[0], b[1] - a[1]) + (c.dir > 0 ? Math.PI : 0)); tm.compose(tp, tq, ts); traffic.mesh.setMatrixAt(i, tm);
+      tq.setFromAxisAngle(Y, Math.atan2(b[0] - a[0], b[1] - a[1]) + (c.dir > 0 ? Math.PI : 0)); tm.compose(tp, tq, ts); if (traffic.mesh.userData.taken.has(i)) tm.makeScale(0, 0, 0); traffic.mesh.setMatrixAt(i, tm);
     });
     traffic.mesh.instanceMatrix.needsUpdate = true;
   }
@@ -5521,7 +5620,7 @@ const CameraRig = (function () {
     return false;
   }
   function setById(id) { const i = CAMERAS.findIndex(c => c.id === id); if (i >= 0) set(i); }
-  return { attach, update, set, setById, next, recenter, off, get index() { return idx; }, get current() { return CAMERAS[idx]; }, addShake(v) { shake = Math.max(shake, v); } };
+  return { get cam() { return cam; }, attach, update, set, setById, next, recenter, off, get index() { return idx; }, get current() { return CAMERAS[idx]; }, addShake(v) { shake = Math.max(shake, v); } };
 })();
 
 // ---- 10_audio.js ----
@@ -6075,6 +6174,7 @@ const Game = (function () {
       Ops.claimAircraft(b); setAircraft(b.ty, b.liv); Settings.data.type = b.ty; Settings.data.livery = b.liv; Settings.save();
       fm.reset(b.x, groundH(b.x, b.z), b.z, b.hdg || 0); Ops.resetFlight(); fm.missiles = (model.userData.parts.missiles || []).length * 3; CameraRig.setById('poursuite'); CameraRig.recenter();
       UI.toast('✈ Vous êtes monté dans : ' + acName(b.ty) + ' — vous avez les commandes !', 5000); } });
+    War.init({ fm: () => fm, S });
     setupKeys();
     document.getElementById('loading').classList.add('hidden');
     UI.show('menu', true);
@@ -6161,9 +6261,10 @@ const Game = (function () {
     window.addEventListener('keydown', e => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
       const k = e.key.length === 1 ? e.key.toLowerCase() : e.key; const sh = e.shiftKey; const code = normCode(e);
-      if (['Insert', 'PageUp', 'PageDown', 'Home', 'End', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'Tab', 'Backspace', 'F2', 'F3', 'F4', 'F6', 'F7', 'F8', 'F9'].includes(e.key)) e.preventDefault();
+      if (['Insert', 'PageUp', 'PageDown', 'Home', 'End', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'Tab', 'Backspace', 'F2', 'F3', 'F4', 'F6', 'F7', 'F8', 'F9', 'F10'].includes(e.key) || e.code === 'Backquote') e.preventDefault();
       if (codes[code]) return; codes[code] = true; keys[k] = true;
       if (!started) return;
+      if (War.key(code, sh)) return;
       if (Extra.key(code, sh)) return;
       if (Ops.key(code, sh)) return;
       const T = UI.toast;
@@ -6370,7 +6471,7 @@ const Game = (function () {
       safe('commandes', () => readInput(dt)); safe('extra', () => Extra.update(dt));
       const mul = S.timeMul, sub = 4 * mul; const env = { wind: Weather.state.wind };
       for (let i = 0; i < sub; i++) fm.step(dt / 4, input, env);
-      safe('événements', () => { handleEvents(); effects(dt); callouts(); trackAirport(dt); }); safe('opérations', () => Ops.update(dt, camera)); safe('épaves', () => Wreck.update(dt)); safe('dégâts', () => Damage.update(dt));
+      safe('événements', () => { handleEvents(); effects(dt); callouts(); trackAirport(dt); }); safe('opérations', () => Ops.update(dt, camera)); safe('guerre', () => War.update(dt, camAbs.position)); safe('épaves', () => Wreck.update(dt)); safe('dégâts', () => Damage.update(dt));
       if (S.timeMul > 1) Sky.state.hour = (Sky.state.hour + dt * (S.timeMul - 1) / 3600 + 24) % 24;
     }
     if (CameraRig.current.id === 'cabine' && model) safe('cabine', () => { AircraftModel.ensureCabin(model, fm.spec.D); fm.cabinEye = model.userData.parts.cabinEye; });
@@ -7196,7 +7297,7 @@ const Ops = (function () {
   }
   function warTick(dt, fm) {
     if (!war.on) return; war.t += dt; if (war.t > 75) { war.t = 0; const atk = Math.random() < 0.5 ? war.a : war.b, def = atk === war.a ? war.b : war.a; if (NUCLEAR.includes(atk)) { const ap = AIRPORTS.find(x => x.cc === def); const ang = (ap.hdg + 90) * DEG; const p = new THREE.Vector3(ap.x + Math.sin(ang) * 20000, 0, ap.z - Math.cos(ang) * 20000); p.y = Terrain.heightAt(p.x, p.z); if (p.distanceTo(fm.pos) > 6000) { boom(p, 1, true); T('☢ ' + COUNTRIES[atk].n + ' a frappé ' + COUNTRIES[def].n + ' avec une arme nucléaire !', 6000); } } }
-    const alive = s => AI.filter(o => o.kind === 'war' && o.side === s && !o.dead).length; if (alive(0) === 0 || alive(1) === 0) { const win = alive(0) ? war.a : war.b; T('🏆 Victoire de ' + COUNTRIES[win].n + ' !', 6000); peace(true); }
+    // (la victoire est décidée par le module Guerre : armées, bases, missiles)
   }
 
   // ---------- OISEAUX près des aéroports (impact possible au décollage / atterrissage) ----------
@@ -7264,7 +7365,7 @@ const Ops = (function () {
     else { const v = tg.pos.clone().add(new THREE.Vector3((Math.random() - 0.5) * 3, Math.random() * 2, (Math.random() - 0.5) * 3)).sub(from).normalize().multiplyScalar(700); shots.push({ kind: 'gun', pos: from.clone(), vel: v, life: 2 }); } }
   function nearestEnemy(pos, range) { let b = null, bd = range; for (const o of ground) { if (o.dead) continue; const d = o.pos.distanceTo(pos); if (d < bd) { bd = d; b = o; } } return b; }
   function fireDir(from, dir, kind) { shots.push({ kind: 'gun', pos: from.clone(), vel: dir.clone().normalize().multiplyScalar(kind === 'sniper' ? 1100 : 750), life: 2 }); }
-  return { nearAircraft, claimAircraft, get target() { return target; }, netHit, myWing, get hp() { return hp; }, cloudsChanged, strike: () => lightning(ctx.fm()), hitAI: (f) => { const o = AI.find(o => o.kind === 'tfc' && o.role === 'dep'); if (o) { aiFull(o); Damage.hit(o.obj, new THREE.Vector3(f * 15, 0, 0), 30, { motion: { vel: new THREE.Vector3(), pos: o.pos.clone() } }); o.stuck = true; return o.pos; } }, get traffic() { return AI.filter(o => o.kind === 'tfc').map(o => o.G.R.name + o.role[0] + ':' + o.phase + ':' + Math.round(o.along ?? o.al)).join(' '); }, repair: () => repair(ctx.fm()), randomFailure, addGround(o) { ground.push(o); }, shootAt, nearestEnemy, fireDir, setTarget(o) { target = o; }, pip, deckAt, declareWar, gotoBattle, peace, init, key, control, update, radar, AP, radio, syncDest, takeNearestAI, resetFlight() { gh.h = null; gh.user = false; repair(ctx.fm()); nukes = 3; hp = 100; AP.on = false; AP.full = false; AP.taxi = null; AP.land = false; AP.appr = false; atc.phase = ''; }, get target() { return target; } };
+  return { boom, get war() { return war; }, nearAircraft, claimAircraft, get target() { return target; }, netHit, myWing, get hp() { return hp; }, cloudsChanged, strike: () => lightning(ctx.fm()), hitAI: (f) => { const o = AI.find(o => o.kind === 'tfc' && o.role === 'dep'); if (o) { aiFull(o); Damage.hit(o.obj, new THREE.Vector3(f * 15, 0, 0), 30, { motion: { vel: new THREE.Vector3(), pos: o.pos.clone() } }); o.stuck = true; return o.pos; } }, get traffic() { return AI.filter(o => o.kind === 'tfc').map(o => o.G.R.name + o.role[0] + ':' + o.phase + ':' + Math.round(o.along ?? o.al)).join(' '); }, repair: () => repair(ctx.fm()), randomFailure, addGround(o) { ground.push(o); }, shootAt, nearestEnemy, fireDir, setTarget(o) { target = o; }, pip, deckAt, declareWar, gotoBattle, peace, init, key, control, update, radar, AP, radio, syncDest, takeNearestAI, resetFlight() { gh.h = null; gh.user = false; repair(ctx.fm()); nukes = 3; hp = 100; AP.on = false; AP.full = false; AP.taxi = null; AP.land = false; AP.appr = false; atc.phase = ''; }, get target() { return target; } };
 })();
 
 // ---- 14b_wreck.js ----
@@ -7503,7 +7604,7 @@ const Extra = (function () {
       if (!foot.obj || foot.obj.userData.kindFor !== pilotKind()) { foot.obj = humanMesh(); }
       const side = new THREE.Vector3(-(fm.spec.D ? fm.spec.D.R * 1.6 + 3 : 6), 0, fm.spec.D ? fm.spec.D.noseZ + 6 : -10).applyQuaternion(fm.q).add(fm.pos);
       foot.pos.set(side.x, Terrain.surfaceAt ? Terrain.surfaceAt(side.x, side.z) : Terrain.heightAt(side.x, side.z), side.z); foot.hdg = ((-fm.euler().y * RAD) + 360) % 360;
-      World.add(foot.obj); foot.active = true; fm.parking = true; fm.throttle = 0; ctx.S.lever = 0; W6.won = false; setTimeout(spawnSquad, 50);
+      foot.camYaw = foot.hdg; World.add(foot.obj); foot.active = true; fm.parking = true; fm.throttle = 0; ctx.S.lever = 0; W6.won = false; setTimeout(spawnSquad, 50);
       T('À PIED : Z/Q/S/D = marcher · souris ou ← → = tourner · Maj = COURIR vite · J = sauter · C = accroupi · P = à couvert (à plat ventre) · Espace = tirer · clic droit maintenu = viser · 1 à 7 = armes · R = recharger · I = mécanicien · 0 près de N\'IMPORTE QUEL avion = monter dedans.', 9000);
     } else {
       const d = Math.hypot(foot.pos.x - fm.pos.x, foot.pos.z - fm.pos.z); const max = 25 + (fm.spec.D ? fm.spec.D.L / 2 : 20);
@@ -7511,27 +7612,41 @@ const Extra = (function () {
       World.remove(foot.obj); foot.active = false; CROWD.list.forEach(c => World.remove(c.obj)); CROWD.list.length = 0; T('De retour aux commandes.');
     }
   }
+  const surf = (x, z) => { const d = Ops.deckAt(x, z); let m = Terrain.meshHeightAt(x, z); if (Airports.surfaceType(x, z)) m = Math.max(m, Terrain.heightAt(x, z)); const w = Terrain.waterLevelAt(x, z); return Math.max(m, d ?? -1e9, w ?? -1e9); };
+  // DÉPLACEMENT À PIED façon jeu à la 3ᵉ personne : la caméra tourne AUTOUR du personnage (souris ou ← →),
+  // Z avance dans la direction où regarde la caméra, S fait faire DEMI-TOUR au personnage qui repart en avant (en courant pendant qu'il se retourne), Q/D de côté.
   function footUpdate(dt) {
     const c = ctx.codes; const fwd = (c.KeyZ || c.KeyW || c.ArrowUp ? 1 : 0) - (c.KeyS || c.ArrowDown ? 1 : 0); const str = (c.KeyD ? 1 : 0) - (c.KeyQ || c.KeyA ? 1 : 0);
-    const turn = (c.ArrowRight ? 1 : 0) - (c.ArrowLeft ? 1 : 0); const run = c.ShiftLeft || c.ShiftRight;
-    foot.hdg += turn * 110 * dt; const sp = W6.stance === 2 ? 0.8 : W6.stance === 1 ? (run ? 3 : 1.4) : (run ? 7.5 : 2.2); const h = foot.hdg * DEG;
-    const vx = (Math.sin(h) * fwd + Math.cos(h) * str) * sp, vz = (-Math.cos(h) * fwd + Math.sin(h) * str) * sp;
-    foot.pos.x += vx * dt; foot.pos.z += vz * dt;
-    const gy = Terrain.surfaceAt ? Terrain.surfaceAt(foot.pos.x, foot.pos.z) : Terrain.heightAt(foot.pos.x, foot.pos.z);
+    const turn = (c.ArrowRight ? 1 : 0) - (c.ArrowLeft ? 1 : 0); const run = c.ShiftLeft || c.ShiftRight; const aim = !!(c.Mouse2 || c.KeyX);
+    if (foot.camYaw === undefined) foot.camYaw = foot.hdg; foot.camYaw = (foot.camYaw + turn * 120 * dt + 360) % 360;
+    // direction réelle de la caméra (tient compte de la souris)
+    let camH = foot.camYaw; const cam = CameraRig.cam; if (cam) { const d = cam.getWorldDirection(new THREE.Vector3()); if (Math.hypot(d.x, d.z) > 0.05) camH = Math.atan2(d.x, -d.z) * RAD; }
+    const moving = fwd !== 0 || str !== 0; let sp = 0;
+    if (moving) {
+      const want = (camH + Math.atan2(str, fwd) * RAD + 360) % 360;
+      if (aim) { foot.hdg = camH; } // en visant : on reste face à la cible et on se déplace de côté / à reculons
+      else { const diff = ((want - foot.hdg + 540) % 360) - 180; if (Math.abs(diff) > 100) foot.turnRun = 0.6; foot.hdg = (foot.hdg + clamp(diff, -620 * dt, 620 * dt) + 360) % 360; }
+      foot.turnRun = Math.max(0, (foot.turnRun || 0) - dt);
+      sp = W6.stance === 2 ? 0.8 : W6.stance === 1 ? (run ? 3 : 1.4) : (run || foot.turnRun > 0 ? 7.5 : 2.4); if (aim && W6.stance === 0) sp = Math.min(sp, 2.2);
+      const h = want * DEG; foot.pos.x += Math.sin(h) * sp * dt; foot.pos.z += -Math.cos(h) * sp * dt;
+    } else if (aim) foot.hdg = camH;
+    const gy = surf(foot.pos.x, foot.pos.z);
     foot.vy -= 9.8 * dt; foot.pos.y += foot.vy * dt; if (foot.pos.y < gy) { foot.pos.y = gy; foot.vy = 0; }
-    const moving = Math.abs(fwd) + Math.abs(str) > 0;
-    Rig.animate(foot.obj, { speed: moving ? sp : 0, stance: W6.stance, air: foot.pos.y > gy + 0.05, aim: !!(ctx.codes.Mouse2 || ctx.codes.KeyX), dt });
-    foot.obj.position.copy(foot.pos); foot.obj.rotation.y = -h;
+    // la caméra revient doucement derrière le personnage quand il marche (on peut toujours tourner autour avec la souris)
+    if (moving && !aim && !turn && fwd > 0) foot.camYaw += (((foot.hdg - foot.camYaw + 540) % 360) - 180) * Math.min(1, dt * 1.2);
+    foot.obj.position.copy(foot.pos); foot.obj.rotation.set(0, -foot.hdg * DEG, 0);
+    Rig.animate(foot.obj, { speed: sp, stance: W6.stance, air: foot.pos.y > gy + 0.05, aim, dt });
     foot.waveT = (foot.waveT || 0) - dt; if (foot.waveT > 0) wave(foot.obj, foot.waveT * 3); safeCrowd(dt);
   }
   // objet « caméra » qui imite l'avion pour suivre le piéton
   const camProxy = { pos: new THREE.Vector3(), q: new THREE.Quaternion(), vel: new THREE.Vector3(), spec: { scale: 0.09, pts: { mainR: [0.5, -1, 0] }, gearH: 1 }, hyper: false, _fwd: new THREE.Vector3(),
-    euler() { return new THREE.Euler(0, -foot.hdg * DEG, 0, 'YXZ'); }, axes() { this._fwd.set(Math.sin(foot.hdg * DEG), 0, -Math.cos(foot.hdg * DEG)); } };
+    euler() { return new THREE.Euler(0, -(foot.active && !veh.cur && foot.camYaw !== undefined ? foot.camYaw : foot.hdg) * DEG, 0, 'YXZ'); }, axes() { this._fwd.set(Math.sin(foot.hdg * DEG), 0, -Math.cos(foot.hdg * DEG)); } };
   function camTarget(fm) { if (veh.cur) { const v = veh.cur; camProxy.pos.copy(v.pos); camProxy.pos.y += v.kind === 'camion' ? 2.5 : 1.4; foot.hdg = v.hdg; camProxy.spec.scale = v.kind === 'camion' ? 0.25 : 0.12; camProxy.q.setFromEuler(new THREE.Euler(0, -v.hdg * DEG, 0, 'YXZ')); return camProxy; }
-    camProxy.spec.scale = 0.09; if (!foot.active) return fm; camProxy.pos.copy(foot.pos); camProxy.pos.y += 1.6; camProxy.q.setFromEuler(new THREE.Euler(0, -foot.hdg * DEG, 0, 'YXZ')); return camProxy; }
+    camProxy.spec.scale = 0.09; if (!foot.active) return fm; camProxy.pos.copy(foot.pos); camProxy.pos.y += 1.5; camProxy.q.setFromEuler(new THREE.Euler(0, -(foot.camYaw ?? foot.hdg) * DEG, 0, 'YXZ')); return camProxy; }
   function footKey(code, sh) {
     if (!foot.active) return false; const fm = ctx.fm();
-    if (code === 'Digit0' || code === 'F9' || code === 'KeyE') { const pv = veh.list.find(v => v.pos.distanceTo(foot.pos) < 7); if (pv) { World.remove(foot.obj); foot.active = false; veh.cur = pv; foot.inVeh = true; T('Vous remontez dans : ' + VEH[pv.kind][0]); return true; }
+    if (code === 'Digit0' || code === 'F9' || code === 'KeyE') { const pv = veh.list.find(v => v.pos.distanceTo(foot.pos) < 7); if (pv) { World.remove(foot.obj); foot.active = false; clearSquad(); veh.cur = pv; foot.inVeh = true; T('Vous montez dans : ' + VEH[pv.kind][0]); return true; }
+      const car = nearestCar(foot.pos, 7); if (car) { enterCar(car); return true; }
       // N'IMPORTE QUEL avion à côté de moi : je monte dedans et je prends les commandes
       const dOwn = Math.hypot(foot.pos.x - fm.pos.x, foot.pos.z - fm.pos.z) - (fm.spec.D ? fm.spec.D.L / 2 : 20); const other = Ops.nearAircraft(foot.pos);
       if (other && other.gap < 14 && other.gap < dOwn) { clearSquad(); World.remove(foot.obj); foot.active = false; CROWD.list.forEach(c => World.remove(c.obj)); CROWD.list.length = 0; ctx.board(other); return true; }
@@ -7548,14 +7663,15 @@ const Extra = (function () {
   const WEAPONS = [['Revolver', 0.5, 30, 6, 'revolver'], ['Magnum .44', 0.7, 55, 6, 'magnum'], ['Colt de cow-boy', 0.6, 40, 6, 'cowboy'], ['Pistolet', 0.28, 18, 15, 'pistolet'], ['Carabine d\'assaut', 0.1, 24, 30, 'carabine', 1], ['Mitraillette', 0.07, 16, 32, 'mitraillette', 1], ['Lance-roquettes', 2.2, 220, 1, 'lance-roquettes']];
   const W6 = { wi: 4, ammo: 30, cd: 0, squad: [], enemies: [], stance: 0, hp: 100, order: 0, view: 0 };
   const ORDERS = ['SUIVRE', 'ASSAUT', 'TENIR LA POSITION'];
-  function soldierMesh(enemy, wi, seed) { const g = Rig.make(enemy ? 'ennemi' : 'soldat', seed || 0); Rig.hold(g, Rig.gun(WEAPONS[wi ?? (enemy ? 5 : 4)][4])); return g; }
+  function myCC() { return (typeof War !== 'undefined' && War.me) || (AC_TYPES[Settings.data.type] && AC_TYPES[Settings.data.type].cc) || (ctx && ctx.airport && ctx.airport() && ctx.airport().cc) || 'cm'; }
+  function soldierMesh(enemy, wi, seed) { const g = Rig.make(enemy ? 'ennemi' : 'soldat', seed || 0, { cc: myCC() }); Rig.hold(g, Rig.gun(WEAPONS[wi ?? (enemy ? 5 : 4)][4])); return g; }
   function spawnSquad() {
     if (W6.squad.length) return; const kind = Settings.data.squadKind || 'soldat'; const N = Math.max(0, Math.min(60, +(Settings.data.squadN ?? 5)));
-    const WSET = { soldat: [4, 5, 6, 4, 0], agent: [3, 1, 5, 2, 3], intervention: [4, 5, 3, 4, 5] };
-    for (let k = 0; k < N; k++) { const kd = kind === 'mix' ? ['soldat', 'agent', 'intervention'][k % 3] : kind; const wi = (WSET[kd] || WSET.soldat)[k % 5]; const ob = Rig.make(kd, k * 7 + 3); Rig.hold(ob, Rig.gun(WEAPONS[wi][4])); const o = { obj: ob, kd, pos: foot.pos.clone().add(new THREE.Vector3(((k % 6) - 2.5) * 2.2, 0, 4 + Math.floor(k / 6) * 2.5)), hdg: foot.hdg, cd: 1 + k * 0.3, ph: k, wi }; World.add(o.obj); W6.squad.push(o); }
-    // patrouille ennemie à 300 m devant
-    const h = foot.hdg * DEG; for (let k = 0; k < 6; k++) { const p = foot.pos.clone().add(new THREE.Vector3(Math.sin(h) * (280 + k * 12) + (k - 3) * 8, 0, -Math.cos(h) * (280 + k * 12))); p.y = Terrain.heightAt(p.x, p.z); const o = { obj: soldierMesh(true, 5, k), pos: p.clone().add(new THREE.Vector3(0, 1.2, 0)), hp: 40, name: 'Soldat ennemi', ground: true, kind: 'soldier', cd: 2 + k, ph: k, hdg: foot.hdg + 180 }; World.add(o.obj); Ops.addGround(o); W6.enemies.push(o); }
-    T('Votre escouade (' + N + ' ' + ({ soldat: 'militaires', agent: 'hommes en noir', intervention: 'hommes d\'intervention', mix: 'mélangés' }[kind] || '') + ') vous suit. Patrouille ennemie à 300 m ! Espace = tirer · 1–7 = armes · Tab = cible · F = ordres · T = prendre un autre soldat.', 8000);
+    const WSET = { soldat: [4, 5, 6, 4, 0], agent: [3, 1, 5, 2, 3], intervention: [4, 5, 3, 4, 5], special: [4, 4, 5, 6, 4], delta: [4, 5, 4, 6, 5], general: [3, 1, 3, 3, 1] };
+    for (let k = 0; k < N; k++) { const kd = kind === 'mix' ? ['soldat', 'agent', 'intervention', 'special', 'delta', 'general'][k % 6] : kind; const wi = (WSET[kd] || WSET.soldat)[k % 5]; const ob = Rig.make(kd, k * 7 + 3, { cc: myCC() }); Rig.hold(ob, Rig.gun(WEAPONS[wi][4])); const o = { obj: ob, kd, pos: foot.pos.clone().add(new THREE.Vector3(((k % 6) - 2.5) * 2.2, 0, 4 + Math.floor(k / 6) * 2.5)), hdg: foot.hdg, cd: 1 + k * 0.3, ph: k, wi }; World.add(o.obj); W6.squad.push(o); }
+    // patrouille ennemie à 300 m devant (pas au front : là-bas l'ennemi, c'est l'armée adverse)
+    const h = foot.hdg * DEG; if (!Extra.noPatrol) for (let k = 0; k < 6; k++) { const p = foot.pos.clone().add(new THREE.Vector3(Math.sin(h) * (280 + k * 12) + (k - 3) * 8, 0, -Math.cos(h) * (280 + k * 12))); p.y = Terrain.heightAt(p.x, p.z); const o = { obj: soldierMesh(true, 5, k), pos: p.clone().add(new THREE.Vector3(0, 1.2, 0)), hp: 40, name: 'Soldat ennemi', ground: true, kind: 'soldier', cd: 2 + k, ph: k, hdg: foot.hdg + 180 }; World.add(o.obj); Ops.addGround(o); W6.enemies.push(o); }
+    if (!Extra.noPatrol) T('Votre escouade (' + N + ' ' + ({ soldat: 'militaires', agent: 'hommes en noir', intervention: 'hommes d\'intervention', mix: 'mélangés', special: 'forces spéciales', delta: 'commandos d\'élite', general: 'officiers' }[kind] || '') + ') vous suit. Patrouille ennemie à 300 m ! Espace = tirer · 1–7 = armes · Tab = cible · F = ordres · T = prendre un autre soldat.', 8000);
   }
   function clearSquad() { W6.squad.forEach(o => World.remove(o.obj)); W6.squad.length = 0; W6.enemies.forEach(o => { World.remove(o.obj); o.dead = true; }); W6.enemies.length = 0; }
   function walkAnim(o, moving, dt, fast) { Rig.animate(o.obj, { speed: moving ? (fast ? 6 : 2.4) : 0, stance: 0, aim: !moving, dt }); }
@@ -7580,9 +7696,8 @@ const Extra = (function () {
         if (c.wait <= 0 && c.tgt) { const d = c.tgt.clone().sub(c.pos); d.y = 0; if (d.length() > 0.5) { d.normalize(); speed = 1.35; c.pos.addScaledVector(d, speed * dt); c.hdg = Math.atan2(d.x, -d.z) * RAD; } }
       }
       if (dP > 120) { c.pos.copy(foot.pos).add(new THREE.Vector3((Math.random() - 0.5) * 40, 0, (Math.random() - 0.5) * 40)); }
-      c.pos.y = groundH(c.pos.x, c.pos.z);
-      Rig.animate(c.obj, { speed, stance: 0, dt }); if (c.waveT > 0) wave(c.obj, c.t);
-      c.obj.position.copy(c.pos); c.obj.rotation.y = -c.hdg * DEG;
+      c.pos.y = surf(c.pos.x, c.pos.z);
+      c.obj.position.copy(c.pos); c.obj.rotation.y = -c.hdg * DEG; Rig.animate(c.obj, { speed, stance: 0, dt }); if (c.waveT > 0) wave(c.obj, c.t);
     }
   }
   function lot6Update(dt) {
@@ -7593,14 +7708,14 @@ const Extra = (function () {
       const h = foot.hdg * DEG, row = 1 + Math.floor(k / 6), side = (k % 6) - 2.5; const want = W6.order === 2 ? o.pos.clone() : foot.pos.clone().add(new THREE.Vector3(-Math.sin(h) * 2.6 * row + Math.cos(h) * side * 2.2, 0, Math.cos(h) * 2.6 * row + Math.sin(h) * side * 2.2));
       const en = Ops.nearestEnemy(o.pos, W6.order === 1 ? 600 : 350); if (W6.order === 1 && en) want.copy(en.pos).add(new THREE.Vector3(side * 20, 0, 25));
       const d = want.clone().sub(o.pos); d.y = 0; const dist = d.length(); const moving = dist > 1.5; if (moving) { o.pos.addScaledVector(d.normalize(), Math.min(dist, (dist > 15 ? 6 : 2.6) * dt)); o.hdg = Math.atan2(d.x, -d.z) * RAD; }
-      o.pos.y = Terrain.heightAt(o.pos.x, o.pos.z); walkAnim(o, moving, dt, dist > 15); if (en) o.hdg = Math.atan2(en.pos.x - o.pos.x, -(en.pos.z - o.pos.z)) * RAD;
+      o.pos.y = surf(o.pos.x, o.pos.z); walkAnim(o, moving, dt, dist > 15); if (en) o.hdg = Math.atan2(en.pos.x - o.pos.x, -(en.pos.z - o.pos.z)) * RAD;
       o.obj.position.copy(o.pos); o.obj.rotation.set(0, -o.hdg * DEG, 0);
       o.cd -= dt; if (en && o.cd < 0) { o.cd = 0.9 + Math.random() * 0.6; Ops.shootAt(o.pos.clone().add(new THREE.Vector3(0, 1.4, 0)), en, 'gun'); }
     });
     for (const e of W6.enemies) {
       if (e.dead) { e.obj.rotation.x = Math.min(Math.PI / 2, e.obj.rotation.x + dt * 3); continue; }
       const d = foot.pos.clone().sub(e.pos); d.y = 0; const dist = d.length(); const moving = dist > 120; if (moving) e.pos.addScaledVector(d.normalize(), 2.2 * dt);
-      e.pos.y = Terrain.heightAt(e.pos.x, e.pos.z) + 1.2; walkAnim(e, moving, dt); e.hdg = Math.atan2(foot.pos.x - e.pos.x, -(foot.pos.z - e.pos.z)) * RAD; e.obj.position.set(e.pos.x, e.pos.y - 1.2, e.pos.z); e.obj.rotation.set(0, -e.hdg * DEG, 0);
+      const gy = surf(e.pos.x, e.pos.z); e.pos.y = gy + 1.2; e.hdg = Math.atan2(foot.pos.x - e.pos.x, -(foot.pos.z - e.pos.z)) * RAD; e.obj.position.set(e.pos.x, gy, e.pos.z); e.obj.rotation.set(0, -e.hdg * DEG, 0); walkAnim(e, moving, dt);
       e.cd -= dt; if (dist < 450 && e.cd < 0) { e.cd = 2.5 + Math.random() * 3; Ops.fireDir(e.pos.clone().add(new THREE.Vector3(0, 0.3, 0)), foot.pos.clone().add(new THREE.Vector3((Math.random() - 0.5) * 4, 1.4, (Math.random() - 0.5) * 4)).sub(e.pos)); if (Math.random() < (W6.stance ? 0.06 : 0.14)) { W6.hp -= 10; T('Vous êtes touché ! Santé ' + Math.max(0, W6.hp) + ' % — mettez-vous à couvert (C ou P).', 2000); if (W6.hp <= 0) { W6.hp = 100; foot.pos.copy(fm.pos).add(new THREE.Vector3(8, 0, 8)); T('Vous avez été évacué près de votre avion. Santé 100 %.', 4000); } } }
     }
     if (W6.enemies.length && W6.enemies.every(e => e.dead) && !W6.won) { W6.won = true; T('🏆 Patrouille ennemie neutralisée !', 5000); }
@@ -7632,7 +7747,24 @@ const Extra = (function () {
   }
 
   // ---------- Véhicules pilotables : camion lance-missiles, jeep, moto, MotoGP ----------
-  const VEH = { camion: ['Camion lance-missiles', 16], jeep: ['Jeep de guerre', 34], moto: ['Moto de guerre', 38], motogp: ['MotoGP', 95] };
+  const VEH = { camion: ['Camion lance-missiles', 16], jeep: ['Jeep de guerre', 34], moto: ['Moto de guerre', 38], motogp: ['MotoGP', 95], voiture: ['Voiture', 50], char: ['Char d\'assaut', 18] };
+  // ---------- MONTER DANS N'IMPORTE QUELLE VOITURE (ville, route, parking de l'aéroport) ----------
+  const _m4 = new THREE.Matrix4(), _vp = new THREE.Vector3(), _q = new THREE.Quaternion(), _sc = new THREE.Vector3();
+  function nearestCar(pos, maxD) {
+    let best = null, bd = maxD;
+    World.root.traverse(o => { if (!o.isInstancedMesh || !o.userData.carFleet || !o.visible) return; o.updateWorldMatrix(true, false);
+      for (let i = 0; i < o.count; i++) { if (o.userData.taken.has(i)) continue; o.getMatrixAt(i, _m4); _m4.premultiply(o.matrixWorld); _vp.setFromMatrixPosition(_m4); const x = _vp.x + World.ox, z = _vp.z + World.oz; const d = Math.hypot(x - pos.x, z - pos.z);
+        if (d < bd) { bd = d; _m4.decompose(_vp, _q, _sc); const e = new THREE.Euler().setFromQuaternion(_q, 'YXZ'); const col = new THREE.Color(1, 1, 1); if (o.instanceColor) o.getColorAt(i, col); best = { o, i, x, z, d, hdg: ((-e.y * RAD) % 360 + 360) % 360, col: col.clone() }; } } });
+    return best;
+  }
+  function carMesh(col) { const g = new THREE.Group(); const body = new THREE.Mesh(Vehicles.geo('car'), new THREE.MeshStandardMaterial({ vertexColors: true, color: col, roughness: 0.38, metalness: 0.45 })); body.castShadow = true; g.add(body); g.userData.wheels = []; return g; }
+  function enterCar(c) {
+    c.o.userData.taken.add(c.i); _m4.makeScale(0, 0, 0); c.o.setMatrixAt(c.i, _m4); c.o.instanceMatrix.needsUpdate = true; // la voiture « instanciée » disparaît : c'est maintenant la mienne
+    const v = { kind: 'voiture', obj: carMesh(c.col), pos: new THREE.Vector3(c.x, 0, c.z), hdg: c.hdg, spd: 0, lean: 0, cd: 0 }; v.pos.y = surf(v.pos.x, v.pos.z); World.add(v.obj); veh.list.push(v);
+    if (foot.active) { World.remove(foot.obj); foot.active = false; clearSquad(); CROWD.list.forEach(c => World.remove(c.obj)); CROWD.list.length = 0; } veh.cur = v; foot.inVeh = true;
+    T('🚗 Vous êtes au volant ! Z/S ou ↑ ↓ = avancer / freiner-reculer · Q/D ou ← → = tourner · 0 = descendre (la voiture reste garée).', 6000);
+  }
+  function addVehicle(v) { veh.list.push(v); }
   const veh = { cur: null, list: [] };
   function vehMesh(kind) {
     const g = new THREE.Group(); const m = (c, r, me) => new THREE.MeshStandardMaterial({ color: c, roughness: r ?? 0.7, metalness: me ?? 0.1 });
@@ -7643,12 +7775,12 @@ const Extra = (function () {
     if (kind === 'jeep') { box(1.8, 0.7, 3.6, 0, 0.9, 0, olive); box(1.75, 0.35, 1.2, 0, 1.3, -1.1, olive); const ws = box(1.6, 0.6, 0.05, 0, 1.6, -0.45, glass); ws.rotation.x = -0.35; for (const x of [-0.8, 0.8]) for (const z of [-1.2, 1.25]) wheels.push(wheel(0.42, 0.32, x, 0.42, z));
       const bar = box(1.7, 0.08, 0.08, 0, 2.05, 0.4, dark); for (const x of [-0.82, 0.82]) box(0.08, 0.9, 0.08, x, 1.6, 0.4, dark); const lr = box(0.9, 0.35, 1.1, 0, 2.3, 0.4, olive); for (const x of [-0.25, 0.25]) { const t = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 1.2, 10), dark); t.rotation.x = Math.PI / 2; t.position.set(x, 2.3, 0.3); g.add(t); }
       const sp = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.3, 16), tireM); sp.rotation.x = Math.PI / 2; sp.position.set(0, 1.1, 1.95); g.add(sp); const star = box(0.5, 0.02, 0.5, 0, 1.49, -1.3, m(0xffffff)); star.rotation.y = 0.78;
-      for (const x of [-0.4, 0.4]) { const s = soldierMesh(false); s.scale.setScalar(0.95); s.position.set(x, 0.55, 0.3); s.userData.legs.forEach(l => l.rotation.x = -1.4); g.add(s); } }
+      for (const x of [-0.4, 0.4]) { const s = Rig.sit(soldierMesh(false)); s.scale.setScalar(0.95); s.position.set(x, 0.75, 0.3); g.add(s); } }
     else if (kind === 'camion') { box(2.5, 1.6, 2.2, 0, 1.6, -2.6, olive); box(2.4, 0.4, 6.5, 0, 1.0, 0.8, dark); const lr = box(2.0, 0.9, 4.5, 0, 2.2, 1.2, olive); lr.rotation.x = -0.35; for (let k = 0; k < 6; k++) { const t = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 4.4, 10), dark); t.rotation.x = Math.PI / 2 - 0.35; t.position.set(-0.75 + (k % 3) * 0.75, 2.5 + Math.floor(k / 3) * 0.35, 1.1); g.add(t); }
       box(2.2, 0.6, 0.05, 0, 2.0, -3.71, glass); for (const x of [-1.15, 1.15]) for (const z of [-2.6, 0.4, 2.2]) wheels.push(wheel(0.55, 0.45, x, 0.55, z)); }
     else { const gp = kind === 'motogp'; box(0.35, 0.45, 1.5, 0, 0.75, 0, gp ? red : olive); if (gp) { const f = box(0.5, 0.55, 0.9, 0, 0.95, -0.55, red); const bub = box(0.4, 0.25, 0.05, 0, 1.3, -0.95, glass); bub.rotation.x = -0.6; const n = box(0.02, 0.3, 0.3, 0.26, 0.95, -0.4, m(0xffffff)); const tx = Build.textTex ? null : null; }
       for (const z of [-0.75, 0.75]) wheels.push(wheel(gp ? 0.3 : 0.33, gp ? 0.2 : 0.14, 0, gp ? 0.3 : 0.33, z)); const disc = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.24, 16), chrome); disc.rotation.z = Math.PI / 2; disc.position.set(0, 0.3, -0.75); g.add(disc);
-      const rider = soldierMesh(false); if (gp) rider.traverse(o => { if (o.isMesh && o.material.color && o.material.color.getHex() === 0x4b5320) o.material = red; }); rider.position.set(0, gp ? 0.35 : 0.45, 0.15); rider.rotation.x = gp ? -0.75 : -0.25; rider.userData.legs.forEach(l => l.rotation.x = -1.2); g.add(rider);
+      const rider = soldierMesh(false); if (gp) rider.traverse(o => { if (o.isMesh && o.material.color && o.material.color.getHex() === 0x4b5320) o.material = red; }); Rig.sit(rider); rider.position.set(0, gp ? 0.75 : 0.85, 0.25); rider.rotation.x = gp ? -0.55 : -0.2; g.add(rider);
       box(0.6, 0.04, 0.04, 0, 1.15, -0.62, chrome); }
     g.traverse(o => { if (o.isMesh) o.castShadow = true; }); g.userData.wheels = wheels; return g;
   }
@@ -7668,11 +7800,11 @@ const Extra = (function () {
     const turn = st * (moto ? 1.6 : 1.1) * Math.min(1, Math.abs(v.spd) / 6) / (1 + Math.abs(v.spd) / 30) * Math.sign(v.spd || 1); v.hdg = (v.hdg + turn * RAD * dt + 360) % 360;
     v.lean += ((moto ? -st * Math.min(0.75, Math.abs(v.spd) / 40) : -st * 0.04 * Math.min(1, Math.abs(v.spd) / 20)) - v.lean) * Math.min(1, dt * 4);
     const d = new THREE.Vector3(Math.sin(v.hdg * DEG), 0, -Math.cos(v.hdg * DEG)); v.pos.addScaledVector(d, v.spd * dt); const gy = groundH(v.pos.x, v.pos.z); const wl = Terrain.waterLevelAt(v.pos.x, v.pos.z); if (wl !== null && wl > gy + 0.5) { v.spd *= 0.5; T('Attention : de l\'eau !', 1000); }
-    v.pos.y = gy; v.obj.position.copy(v.pos); const ahead = groundH(v.pos.x + d.x * 2, v.pos.z + d.z * 2) - groundH(v.pos.x - d.x * 2, v.pos.z - d.z * 2);
+    v.pos.y = Math.max(gy, Terrain.surfaceAt ? Terrain.surfaceAt(v.pos.x, v.pos.z) : gy); v.obj.position.copy(v.pos); const ahead = groundH(v.pos.x + d.x * 2, v.pos.z + d.z * 2) - groundH(v.pos.x - d.x * 2, v.pos.z - d.z * 2);
     v.obj.rotation.set(Math.atan2(ahead, 4), -v.hdg * DEG, v.lean, 'YXZ'); v.obj.userData.wheels.forEach(w => w.rotation.x += v.spd * dt / 0.4);
     // armes : tir auto (A) sur l'ennemi le plus proche, missile (Entrée)
     v.cd -= dt; const tg = Ops.target && !Ops.target.dead ? Ops.target : Ops.nearestEnemy(v.pos, 30000);
-    if (c.KeyA && tg && v.cd < 0 && v.kind !== 'motogp') { v.cd = v.kind === 'camion' ? 2.5 : 0.25; Ops.shootAt(v.pos.clone().add(new THREE.Vector3(0, 2.4, 0)), tg, v.kind === 'camion' ? 'msl' : 'gun'); }
+    if (c.KeyA && tg && v.cd < 0 && v.kind !== 'motogp' && v.kind !== 'voiture') { v.cd = v.kind === 'camion' ? 2.5 : 0.25; Ops.shootAt(v.pos.clone().add(new THREE.Vector3(0, 2.4, 0)), tg, v.kind === 'camion' ? 'msl' : 'gun'); }
     if (Math.abs(v.spd) > 3 && Math.random() < 0.3) Particles.emit(v.pos.x - d.x * 2, v.pos.y + 0.3, v.pos.z - d.z * 2, 0, 0.6, 0, 1.2, 2, 0.6, 0.55, 0.45, 0.35, 1.2);
   }
   function vehKey(code) {
@@ -7829,7 +7961,7 @@ const Extra = (function () {
     q('btnMap').onclick = () => { UI.show('panel', false); mapOpen(); }; q('btnMapClose').onclick = () => q('worldMap').classList.add('hidden');
     q('btnQuick').onclick = () => q('quick').classList.toggle('hidden');
   }
-  return { takeVehicle, spawnSquad, init, key, keyUp, update, camTarget, afterRender, chatShow, voicePlay, pad, foot, replay, replayStep };
+  return { hurt(d) { W6.hp -= d; T('Vous êtes touché ! Santé ' + Math.max(0, W6.hp) + ' % — à couvert : C (accroupi) ou P (à plat ventre).', 2000); if (W6.hp <= 0) { W6.hp = 100; foot.pos.add(new THREE.Vector3(0, 0, 0)); T('Vous êtes blessé et soigné par l\'infirmier. Santé 100 %.', 4000); } }, leaveAll() { if (veh.cur) leaveVehicle(); if (foot.active) { clearSquad(); World.remove(foot.obj); foot.active = false; CROWD.list.forEach(c => World.remove(c.obj)); CROWD.list.length = 0; } }, goFoot() { if (!foot.active) footToggle(); }, addVehicle, get veh() { return veh; }, W6, myCC, takeVehicle, spawnSquad, init, key, keyUp, update, camTarget, afterRender, chatShow, voicePlay, pad, foot, replay, replayStep };
 })();
 
 // ---- 15c_code.js ----
@@ -7862,6 +7994,346 @@ const Extra = (function () {
     $('codeModal').addEventListener('keyup', e => e.stopPropagation());
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+
+// ---- 16_war.js ----
+// ===== GUERRE ENTRE PAYS : bases militaires, armées, missiles au sol, ordre de FEU, alliés, front au sol, vainqueur et CLASSEMENT des puissances =====
+const War = (function () {
+  let ctx = null; const T = (m, d) => UI.toast(m, d || 4000);
+  const gH = (x, z) => { const d = Ops.deckAt(x, z); let m = Terrain.meshHeightAt(x, z); if (Airports.surfaceType(x, z)) m = Math.max(m, Terrain.heightAt(x, z)); const w = Terrain.waterLevelAt(x, z); return Math.max(m, d ?? -1e9, w ?? -1e9); };
+  // ---------- classement de départ (inspiré des classements réels de puissance militaire) + effectifs réels approximatifs ----------
+  const ORDER = ['us', 'cn', 'ru', 'gb', 'fr', 'jp', 'br', 'de', 'ca', 'ng', 'ar', 'ae', 'ma', 'be', 'cd', 'cm', 'td', 'ci', 'sn', 'ga'];
+  const TROOPS = { us: 1330000, cn: 2035000, ru: 1320000, gb: 141000, fr: 203000, jp: 247000, br: 366000, de: 181000, ca: 68000, ng: 143000, ar: 72000, ae: 63000, ma: 195000, be: 25000, cd: 134000, cm: 40000, td: 33000, ci: 27000, sn: 18000, ga: 5000 };
+  const NUKES = { us: 60, ru: 60, cn: 30, fr: 20, gb: 15 };
+  const KEY = 'simvol_puissances';
+  let P = null; // { cc: { score, troops, troops0, msl, nukes, wins, losses } }
+  function fresh() { const o = {}; ORDER.forEach((cc, i) => { const sc = Math.round(1000 * Math.pow(0.84, i)); o[cc] = { score: sc, troops: TROOPS[cc], troops0: TROOPS[cc], msl: Math.max(24, Math.round(sc * 0.45)), nukes: NUKES[cc] || 0, wins: 0, losses: 0 }; }); return o; }
+  function load() { try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s && s.us) { P = Object.assign(fresh(), s); return; } } catch (e) { } P = fresh(); }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(P)); } catch (e) { } }
+  function ranking() { return Object.keys(P).filter(cc => COUNTRIES[cc]).sort((a, b) => P[b].score - P[a].score); }
+  const fmt = n => Math.round(n).toLocaleString('fr-FR');
+  const name = cc => COUNTRIES[cc] ? COUNTRIES[cc].n : cc;
+
+  // ---------- état de la guerre ----------
+  const W = { on: false, a: null, b: null, me: 'cm', ally: '', mySide: -1, t: 0, order: 'tenir', fireAuto: false, enemyT: 50, start: {}, baseHp: {}, log: [] };
+  function sideOf(cc) { if (cc === W.a) return 0; if (cc === W.b) return 1; if (cc === W.me && W.ally) return W.ally === W.a ? 0 : W.ally === W.b ? 1 : -1; return -1; }
+  function sideCountries(sd) { const L = [sd === 0 ? W.a : W.b]; if (W.ally && W.me !== W.a && W.me !== W.b && sideOf(W.me) === sd) L.push(W.me); return L; }
+  const powerOf = sd => sideCountries(sd).reduce((s, cc) => s + P[cc].score * (0.25 + 0.75 * P[cc].troops / P[cc].troops0), 0);
+
+  // ---------- emplacement de la base de chaque pays (près de son aéroport principal, sur la terre ferme) ----------
+  const baseLoc = {};
+  function baseOf(cc) {
+    if (baseLoc[cc]) return baseLoc[cc]; const a = AIRPORTS.find(x => x.cc === cc); if (!a) return null; let best = null;
+    for (let k = 0; k < 16 && !best; k++) { const ang = (a.hdg + 90 + k * 45) * DEG, r = 7000 + (k >> 3) * 4000; const x = a.x + Math.sin(ang) * r, z = a.z - Math.cos(ang) * r; const h = Terrain.heightAt(x, z), wl = Terrain.waterLevelAt(x, z); if (wl === null || wl < h - 1) best = { x, z, hdg: a.hdg, cc, ap: a }; }
+    return (baseLoc[cc] = best || { x: a.x + 7000, z: a.z, hdg: a.hdg, cc, ap: a });
+  }
+
+  // ================= MODÈLES 3D : missiles, lanceurs, jeeps, chars, bâtiments =================
+  const MT = {};
+  const M = (k, c, r, m) => MT[k] || (MT[k] = new THREE.MeshStandardMaterial({ color: lin(c), roughness: r ?? 0.8, metalness: m ?? 0.1 }));
+  function camoMat(cc) { const k = 'cam_' + cc; if (MT[k]) return MT[k]; const m = new THREE.MeshStandardMaterial({ map: Rig.camoTex(Rig.natCamo(cc)), roughness: 0.85, metalness: 0.1 }); return (MT[k] = m); }
+  function flagTex(cc) { const k = 'flag_' + cc; if (MT[k]) return MT[k]; const c = makeCanvas(96, 64); try { drawFlag2D(c.getContext('2d'), cc, 0, 0, 96, 64); } catch (e) { } return (MT[k] = new THREE.MeshBasicMaterial({ map: canvasTex(c), side: THREE.DoubleSide })); }
+  const add = (g, geo, mat, x, y, z) => { const o = new THREE.Mesh(geo, mat); o.position.set(x || 0, y || 0, z || 0); o.castShadow = true; g.add(o); return o; };
+  // missile balistique : corps, ogive, bandes, ailerons, drapeau peint
+  function missile(cc, L) {
+    L = L || 12; const g = new THREE.Group(); const R = L * 0.04;
+    const pts = [new THREE.Vector2(0.001, L / 2 + L * 0.16), new THREE.Vector2(R * 0.45, L / 2 + L * 0.1), new THREE.Vector2(R * 0.9, L / 2 + L * 0.02), new THREE.Vector2(R, L / 2 - L * 0.05), new THREE.Vector2(R, -L / 2 + 0.2), new THREE.Vector2(R * 1.1, -L / 2), new THREE.Vector2(R * 0.6, -L / 2 - 0.2), new THREE.Vector2(0.001, -L / 2 - 0.2)];
+    const body = new THREE.LatheGeometry(pts, 24); body.rotateX(-Math.PI / 2); add(g, body, M('mslW', '#e6e8e3', 0.35, 0.3));
+    for (const zz of [-L * 0.28, L * 0.2]) { const b = new THREE.CylinderGeometry(R * 1.02, R * 1.02, L * 0.05, 24); b.rotateX(Math.PI / 2); add(g, b, M('mslR', '#9e1b1b', 0.5), 0, 0, zz); }
+    const tip = new THREE.CylinderGeometry(R * 0.5, R * 0.92, L * 0.08, 24); tip.rotateX(-Math.PI / 2); add(g, tip, M('mslK', '#2b2d2f', 0.4, 0.4), 0, 0, -L / 2 - L * 0.06);
+    for (let k = 0; k < 4; k++) { const f = add(g, new THREE.BoxGeometry(0.05, R * 2.6, L * 0.12), M('mslK', '#2b2d2f', 0.4, 0.4), 0, 0, L / 2 - L * 0.08); f.rotation.z = k * Math.PI / 2; f.position.x = Math.sin(k * Math.PI / 2) * R * 1.4; f.position.y = Math.cos(k * Math.PI / 2) * R * 1.4; }
+    const fl = add(g, new THREE.PlaneGeometry(R * 2.4, R * 1.6), flagTex(cc), R * 1.03, 0, -L * 0.05); fl.rotation.y = Math.PI / 2;
+    return g;
+  }
+  // lanceur mobile (camion à 8 roues) avec son missile sur la rampe
+  function launcher(cc) {
+    const g = new THREE.Group(); const cm = camoMat(cc), dk = M('dk', '#1c1e1a', 0.8), tire = M('tire', '#101010', 0.95);
+    add(g, new THREE.BoxGeometry(3, 2.2, 3), cm, 0, 2.2, -7.5); add(g, new THREE.BoxGeometry(2.8, 0.8, 0.05), M('glass', '#1c3a52', 0.1, 0.6), 0, 2.8, -9.02);
+    add(g, new THREE.BoxGeometry(2.9, 0.7, 14), dk, 0, 1.3, 0); add(g, new THREE.BoxGeometry(2.6, 0.5, 13), cm, 0, 1.9, 0.5);
+    for (const x of [-1.35, 1.35]) for (const z of [-6.5, -3.5, 2.5, 5.5]) { const w = add(g, new THREE.CylinderGeometry(0.75, 0.75, 0.5, 16), tire, x, 0.75, z); w.rotation.z = Math.PI / 2; }
+    const ramp = new THREE.Group(); ramp.position.set(0, 2.3, 6.2); g.add(ramp); const m = missile(cc, 12.5); m.position.set(0, 0.7, -6.4); ramp.add(m); add(ramp, new THREE.BoxGeometry(1.6, 0.3, 12.5), dk, 0, 0.1, -6.2);
+    g.userData.ramp = ramp; g.userData.msl = m; return g;
+  }
+  // râtelier : missiles posés au sol, prêts à être chargés
+  function rack(cc) { const g = new THREE.Group(); const st = M('stand', '#3a3d36', 0.7, 0.4); for (let k = 0; k < 4; k++) { const m = missile(cc, 9); m.position.set((k - 1.5) * 1.6, 0.95, 0); g.add(m); } for (const z of [-3, 3]) add(g, new THREE.BoxGeometry(7, 0.5, 0.4), st, 0, 0.35, z); return g; }
+  function jeep(cc) {
+    const g = new THREE.Group(); const cm = camoMat(cc), dk = M('dk', '#1c1e1a', 0.8), tire = M('tire', '#101010', 0.95); const wheels = [];
+    add(g, new THREE.BoxGeometry(2.1, 0.9, 4.6), cm, 0, 1.05, 0); add(g, new THREE.BoxGeometry(2.0, 0.8, 2.2), cm, 0, 1.85, 0.4); add(g, new THREE.BoxGeometry(1.8, 0.5, 0.05), M('glass', '#1c3a52', 0.1, 0.6), 0, 1.95, -0.72);
+    for (const x of [-1.05, 1.05]) for (const z of [-1.5, 1.5]) { const w = add(g, new THREE.CylinderGeometry(0.48, 0.48, 0.4, 16), tire, x, 0.48, z); w.rotation.z = Math.PI / 2; wheels.push(w); }
+    add(g, new THREE.CylinderGeometry(0.06, 0.06, 1.4, 8), dk, 0, 2.6, 0.6).rotation.x = Math.PI / 2; add(g, new THREE.CylinderGeometry(0.35, 0.35, 0.3, 12), dk, 0, 2.35, 0.9);
+    const fl = add(g, new THREE.PlaneGeometry(0.9, 0.6), flagTex(cc), 1.06, 1.2, 0.6); fl.rotation.y = Math.PI / 2; const fl2 = fl.clone(); fl2.position.x = -1.06; fl2.rotation.y = -Math.PI / 2; g.add(fl2);
+    g.userData.wheels = wheels; return g;
+  }
+  function tank(cc) {
+    const g = new THREE.Group(); const cm = camoMat(cc), dk = M('dk', '#1c1e1a', 0.8); const wheels = [];
+    add(g, new THREE.BoxGeometry(3.6, 1.2, 7.5), cm, 0, 1.1, 0); for (const x of [-1.85, 1.85]) { add(g, new THREE.BoxGeometry(0.8, 1.1, 7.8), dk, x, 0.6, 0); for (let k = 0; k < 6; k++) { const w = add(g, new THREE.CylinderGeometry(0.42, 0.42, 0.85, 14), dk, x, 0.5, -3 + k * 1.2); w.rotation.z = Math.PI / 2; wheels.push(w); } }
+    const tur = new THREE.Group(); tur.position.set(0, 2.0, 0.3); g.add(tur); add(tur, new THREE.SphereGeometry(1.5, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2), cm, 0, -0.3, 0).scale.set(1.15, 0.7, 1.3);
+    const gun = add(tur, new THREE.CylinderGeometry(0.13, 0.16, 5.5, 12), dk, 0, 0.15, -3.6); gun.rotation.x = Math.PI / 2;
+    const fl = add(tur, new THREE.PlaneGeometry(0.8, 0.5), flagTex(cc), 1.55, 0.1, 0.2); fl.rotation.y = Math.PI / 2; g.userData.wheels = wheels; g.userData.tur = tur; return g;
+  }
+  function flagPole(cc, h) { const g = new THREE.Group(); add(g, new THREE.CylinderGeometry(0.1, 0.14, h, 8), M('pole', '#cfd2d6', 0.3, 0.8), 0, h / 2, 0); const f = add(g, new THREE.PlaneGeometry(4.5, 3, 8, 1), flagTex(cc), 2.3, h - 1.6, 0); g.userData.flag = f; return g; }
+  function sandbags(len) { const g = new THREE.Group(); const m = M('sand', '#9c8a62', 0.95); for (let r = 0; r < 3; r++) for (let k = 0; k < len; k++) { const b = add(g, new THREE.SphereGeometry(0.35, 10, 6), m, (k - len / 2) * 0.62 + (r % 2) * 0.3, 0.2 + r * 0.32, 0); b.scale.set(0.95, 0.5, 0.7); } return g; }
+  function weaponTable() { const g = new THREE.Group(); add(g, new THREE.BoxGeometry(2.4, 0.08, 1), M('tbl', '#5a4630', 0.8), 0, 0.8, 0); for (const x of [-1.1, 1.1]) for (const z of [-0.4, 0.4]) add(g, new THREE.BoxGeometry(0.08, 0.8, 0.08), M('tbl', '#5a4630', 0.8), x, 0.4, z); for (let k = 0; k < 3; k++) { const gn = Rig.gun(k === 1 ? 'mitraillette' : 'carabine'); gn.scale.setScalar(1.2); gn.rotation.set(0, Math.PI / 2, Math.PI / 2); gn.position.set(-0.7 + k * 0.7, 0.86, 0); g.add(gn); } return g; }
+
+  // ================= BASE MILITAIRE (construite quand on s'approche, retirée quand on s'éloigne) =================
+  const built = {}; // cc -> { grp, objs:[], soldiers:[], tels:[], vehicles:[] }
+  function place(B, o, lx, lz, rot) { const h = B.hdg * DEG; const x = B.x + Math.cos(h) * lx - Math.sin(h) * lz, z = B.z + Math.sin(h) * lx + Math.cos(h) * lz; o.position.set(x, gH(x, z), z); o.rotation.y = -(B.hdg + (rot || 0)) * DEG; World.add(o); return o; }
+  function buildBase(cc) {
+    const B = baseOf(cc); if (!B) return; try { Terrain.clearZone(B.x, B.z, 300); } catch (e) { } const S = { cc, objs: [], soldiers: [], tels: [], racks: [], vehicles: [], hit: [] };
+    const P_ = (o, x, z, r) => { place(B, o, x, z, r); S.objs.push(o); return o; };
+    const wallM = M('wall', '#b9b39f', 0.9), roofM = M('roof', '#5d6150', 0.8), conc = M('conc', '#9a9890', 0.95);
+    // sol de la base : terre battue + béton qui épousent le relief
+    { const g = new THREE.PlaneGeometry(400, 400, 24, 24); g.rotateX(-Math.PI / 2); const Pp = g.attributes.position; const h = B.hdg * DEG; const y0 = gH(B.x, B.z);
+      for (let i = 0; i < Pp.count; i++) { const lx = Pp.getX(i), lz = Pp.getZ(i); const x = B.x + Math.cos(h) * lx - Math.sin(h) * lz, z = B.z + Math.sin(h) * lx + Math.cos(h) * lz; Pp.setY(i, gH(x, z) - y0 + 0.25); } g.computeVertexNormals();
+      const pad = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: lin('#8a7a5c'), roughness: 1, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })); pad.receiveShadow = true; pad.position.set(B.x, y0, B.z); pad.rotation.y = -B.hdg * DEG; /* sol de base retiré : le relief affiché passe au travers */ pad.geometry.dispose(); }
+    // clôture + miradors
+    for (const [x0, z0, x1, z1] of [[-190, -190, 190, -190], [190, -190, 190, 190], [190, 190, -190, 190], [-190, 190, -190, -190]]) for (let t = 0; t < 1; t += 1 / 12) { const x = x0 + (x1 - x0) * (t + 1 / 24), z = z0 + (z1 - z0) * (t + 1 / 24); if (z0 === -190 && z1 === -190 && Math.abs(x) < 20) continue; /* portail d'entrée */ const seg = new THREE.Group(); const L = 380 / 12; add(seg, new THREE.BoxGeometry(0.15, 3, 0.15), M('post', '#5a5d5f', 0.6, 0.6), -L / 2, 1.5, 0); for (const y of [1, 2, 2.9]) add(seg, new THREE.BoxGeometry(L, 0.04, 0.04), M('wire', '#8a8d90', 0.5, 0.8), 0, y, 0); P_(seg, x, z, Math.atan2(z1 - z0, x1 - x0) * RAD); }
+    for (const [x, z] of [[-185, -185], [185, -185], [185, 185], [-185, 185]]) { const t = new THREE.Group(); for (const sx of [-1, 1]) for (const sz of [-1, 1]) add(t, new THREE.BoxGeometry(0.25, 9, 0.25), M('post', '#5a5d5f', 0.6, 0.6), sx * 1.5, 4.5, sz * 1.5); add(t, new THREE.BoxGeometry(4, 2.4, 4), wallM, 0, 10, 0); add(t, new THREE.ConeGeometry(3.4, 1.6, 4), roofM, 0, 12, 0).rotation.y = Math.PI / 4; P_(t, x, z); }
+    // QG avec drapeau, casernes, hangars, héliport, radar
+    const hq = new THREE.Group(); add(hq, new THREE.BoxGeometry(34, 10, 18), wallM, 0, 5, 0); add(hq, new THREE.BoxGeometry(35, 0.8, 19), roofM, 0, 10.4, 0); for (let k = 0; k < 8; k++) add(hq, new THREE.BoxGeometry(2, 1.6, 0.1), M('win', '#22313d', 0.2, 0.5), -14 + k * 4, 6, -9.05); P_(hq, 0, -120);
+    P_(flagPole(cc, 18), 0, -95); P_(flagPole(cc, 14), -30, -95); P_(flagPole(cc, 14), 30, -95);
+    for (let k = 0; k < 3; k++) { const b = new THREE.Group(); add(b, new THREE.BoxGeometry(40, 6, 12), wallM, 0, 3, 0); add(b, new THREE.BoxGeometry(41, 0.6, 13), roofM, 0, 6.3, 0); P_(b, -120, -100 + k * 30); }
+    for (let k = 0; k < 2; k++) { const h = new THREE.Group(); const hg = new THREE.CylinderGeometry(16, 16, 45, 24, 1, true, 0, Math.PI); hg.rotateZ(Math.PI / 2); hg.rotateY(Math.PI / 2); add(h, hg, M('hang', '#7b806e', 0.7, 0.4), 0, 0, 0).material.side = THREE.DoubleSide; add(h, new THREE.CircleGeometry(16, 20, 0, Math.PI), M('door', '#2a2c28', 0.9), 0, 0, -22.4).rotation.y = Math.PI; P_(h, 120, -110 + k * 55); }
+    const hp = new THREE.Group(); add(hp, new THREE.CylinderGeometry(14, 14, 0.3, 32), conc, 0, 0.15, 0); const hc = makeCanvas(128, 128), hgc = hc.getContext('2d'); hgc.fillStyle = '#9a9890'; hgc.fillRect(0, 0, 128, 128); hgc.strokeStyle = '#fff'; hgc.lineWidth = 6; hgc.beginPath(); hgc.arc(64, 64, 56, 0, 7); hgc.stroke(); hgc.fillStyle = '#fff'; hgc.font = 'bold 80px Arial'; hgc.textAlign = 'center'; hgc.fillText('H', 64, 92);
+    add(hp, new THREE.CircleGeometry(13, 32), new THREE.MeshStandardMaterial({ map: canvasTex(hc), roughness: 0.9 }), 0, 0.32, 0).rotation.x = -Math.PI / 2; P_(hp, -120, 120);
+    const rd = new THREE.Group(); add(rd, new THREE.CylinderGeometry(0.6, 1, 10, 10), M('post', '#5a5d5f', 0.6, 0.6), 0, 5, 0); const dish = new THREE.Group(); dish.position.y = 10.5; rd.add(dish); add(dish, new THREE.SphereGeometry(4, 20, 10, 0, Math.PI * 2, 0, Math.PI * 0.35), M('dish', '#e1e3e5', 0.4, 0.5), 0, 0, 0).rotation.x = -Math.PI / 2 + 0.4; P_(rd, 150, 150); S.dish = dish;
+    // zone des MISSILES : lanceurs + râteliers (tous les missiles que le pays possède, en modèle réduit au-delà de 40)
+    const nT = clamp(Math.round(P[cc].msl / 40), 2, 8), nR = clamp(Math.round(P[cc].msl / 25), 2, 10);
+    for (let k = 0; k < nT; k++) { const L = launcher(cc); P_(L, -80 + k * 22, 40); S.tels.push(L); }
+    for (let k = 0; k < nR; k++) { const R = rack(cc); P_(R, -80 + (k % 5) * 18, 85 + Math.floor(k / 5) * 12); S.racks.push(R); }
+    if (P[cc].nukes) { const n = missile(cc, 22); n.traverse(o => { if (o.material && o.material === MT.mslW) o.material = M('nukeY', '#d8c64a', 0.4, 0.3); }); n.rotation.x = -Math.PI / 2; n.userData.dy = 11; P_(n, 120, 60).position.y += 11; const pad = new THREE.Group(); add(pad, new THREE.CylinderGeometry(4, 4, 0.6, 20), conc, 0, 0.3, 0); P_(pad, 120, 60);
+      const tc = makeCanvas(128, 128), tg = tc.getContext('2d'); tg.fillStyle = '#f2d61a'; tg.fillRect(0, 0, 128, 128); tg.fillStyle = '#111'; tg.beginPath(); tg.arc(64, 64, 10, 0, 7); tg.fill(); for (let k = 0; k < 3; k++) { tg.beginPath(); tg.moveTo(64, 64); tg.arc(64, 64, 52, k * 2.094 - 0.5, k * 2.094 + 0.5); tg.closePath(); tg.fill(); }
+      const sign = new THREE.Mesh(new THREE.PlaneGeometry(4, 4), new THREE.MeshBasicMaterial({ map: canvasTex(tc), side: THREE.DoubleSide })); const sg = new THREE.Group(); sg.add(sign); sign.position.y = 3; add(sg, new THREE.BoxGeometry(0.15, 2, 0.15), M('post', '#5a5d5f', 0.6, 0.6), 0, 1, 0); P_(sg, 112, 52); }
+    // véhicules du pays (on peut monter dedans : 0 à côté)
+    for (let k = 0; k < 6; k++) { const o = jeep(cc); P_(o, 40 + (k % 3) * 8, 120 + Math.floor(k / 3) * 9); S.vehicles.push({ kind: 'jeep', obj: o }); }
+    for (let k = 0; k < 4; k++) { const o = tank(cc); P_(o, 80 + k * 10, 125); S.vehicles.push({ kind: 'char', obj: o }); }
+    for (const v of S.vehicles) { const r = { kind: v.kind, obj: v.obj, pos: new THREE.Vector3(v.obj.position.x, v.obj.position.y, v.obj.position.z), hdg: (-v.obj.rotation.y * RAD + 360) % 360, spd: 0, lean: 0, cd: 0, base: cc }; Extra.addVehicle(r); v.ref = r; }
+    // sacs de sable, tables d'armes
+    for (let k = 0; k < 4; k++) P_(sandbags(9), -20 + k * 14, 160);
+    for (let k = 0; k < 3; k++) P_(weaponTable(), -40 + k * 10, -40);
+    // militaires : en paix ils nettoient leurs armes, montent la garde, patrouillent, chargent les missiles ; le général passe en revue
+    const jobs = ['clean', 'clean', 'clean', 'guard', 'guard', 'patrol', 'patrol', 'load', 'load', 'drill', 'drill', 'drill', 'drill', 'drill', 'drill', 'general', 'special', 'special'];
+    jobs.forEach((job, k) => { const kind = job === 'general' ? 'general' : job === 'special' ? 'special' : 'soldat'; const o = Rig.make(kind, k * 11 + cc.charCodeAt(0), { cc }); if (job !== 'general') Rig.hold(o, Rig.gun(k % 3 ? 'carabine' : 'mitraillette'));
+      let lx = 0, lz = 0, rot = 0; if (job === 'clean') { lx = -40 + (k % 3) * 10; lz = -38.8; rot = 180; } else if (job === 'guard') { lx = k % 2 ? -8 : 8; lz = -186; rot = 180; } else if (job === 'drill') { lx = -10 + ((k - 9) % 3) * 2; lz = -60 + Math.floor((k - 9) / 3) * 2; } else if (job === 'general') { lx = 0; lz = -66; rot = 180; } else { lx = -60 + k * 6; lz = 20; }
+      P_(o, lx, lz, rot); S.soldiers.push({ o, job, lx, lz, base: { lx, lz }, rot, t: k * 1.7, hp: 100, dead: false, B }); });
+    built[cc] = S;
+  }
+  function destroyBase(cc) { const S = built[cc]; if (!S) return; for (const o of S.objs) World.remove(o); for (const v of S.vehicles) { const L = Extra.veh.list; const i = L.indexOf(v.ref); if (i >= 0 && Extra.veh.cur !== v.ref) { L.splice(i, 1); } } delete built[cc]; }
+  function baseTick(dt, camAbs) {
+    const near = cc => { const B = baseOf(cc); return B ? Math.hypot(B.x - camAbs.x, B.z - camAbs.z) : 1e9; };
+    for (const cc of Object.keys(built)) if (near(cc) > 26000) destroyBase(cc);
+    // construit la base du pays le plus proche quand on arrive à moins de 15 km
+    let best = null, bd = 15000; for (const cc of ORDER) { if (built[cc]) continue; const d = near(cc); if (d < bd) { bd = d; best = cc; } } if (best) buildBase(best);
+    for (const cc in built) animBase(built[cc], dt, camAbs);
+  }
+  const _w = new THREE.Vector3();
+  // le relief se dessine plus finement quand on s'approche : on recolle le sol de la base et tous les objets sur le vrai sol
+  function refreshY(S) {
+    if (S.pad) { const g = S.pad.geometry, Pp = g.attributes.position; const B = baseOf(S.cc), h = B.hdg * DEG; const y0 = gH(B.x, B.z); S.pad.position.y = y0;
+      for (let i = 0; i < Pp.count; i++) { const lx = Pp.getX(i), lz = Pp.getZ(i); const x = B.x + Math.cos(h) * lx - Math.sin(h) * lz, z = B.z + Math.sin(h) * lx + Math.cos(h) * lz; Pp.setY(i, gH(x, z) - y0 + 0.2); } Pp.needsUpdate = true; g.computeVertexNormals(); }
+    for (const o of S.objs) if (o !== S.pad) o.position.y = gH(o.position.x, o.position.z) + (o.userData.dy || 0);
+    for (const v of S.vehicles) if (v.ref && Extra.veh.cur !== v.ref) { v.ref.pos.y = gH(v.ref.pos.x, v.ref.pos.z); }
+  }
+  function animBase(S, dt, camAbs) {
+    S.rT = (S.rT ?? 0.5) - dt; if (S.rT < 0) { const Bq = baseOf(S.cc); S.rT = Math.hypot(Bq.x - camAbs.x, Bq.z - camAbs.z) < 4000 ? 2.5 : 8; refreshY(S); }
+    if (S.dish) S.dish.rotation.y += dt * 0.8; const B = S.soldiers[0] && S.soldiers[0].B; if (!B) return; const close = Math.hypot(B.x - camAbs.x, B.z - camAbs.z) < 2500; const war = W.on && sideOf(S.cc) >= 0;
+    for (const s of S.soldiers) {
+      s.o.visible = close; if (!close) continue; s.t += dt; let sp = 0, stance = 0, aim = false;
+      if (s.dead) { s.o.rotation.x = Math.max(-Math.PI / 2, s.o.rotation.x - dt * 3); continue; }
+      if (war && s.job !== 'general') { aim = true; if (s.job === 'drill' || s.job === 'clean') { stance = 1; } }
+      else if (s.job === 'patrol') { const a = s.t * 0.06; s.lx = s.base.lx + Math.sin(a) * 40; s.lz = s.base.lz + Math.cos(a) * 30; s.rot = (Math.atan2(Math.cos(a) * 40, -Math.sin(a) * 30) * RAD + 180); sp = 1.6; }
+      else if (s.job === 'load') { const ph = (s.t * 0.08) % 2; const k = ph < 1 ? ph : 2 - ph; s.lx = s.base.lx + k * 0; s.lz = 20 + k * 60; s.rot = ph < 1 ? 180 : 0; sp = 1.5; }
+      else if (s.job === 'general') { const a = s.t * 0.15; s.lx = Math.sin(a) * 8; s.rot = 180 + Math.cos(a) * 60; sp = Math.abs(Math.cos(a)) > 0.2 ? 1.1 : 0; }
+      else if (s.job === 'drill') { sp = (s.t % 8) < 4 ? 0 : 0; aim = false; }
+      if (sp) place(B, s.o, s.lx, s.lz, s.rot), World.remove(s.o), World.add(s.o);
+      Rig.animate(s.o, { speed: sp, stance, aim, dt });
+      if (s.job === 'clean' && !war) { const J = s.o.userData.rig.J; const k = Math.sin(s.t * 3); J.shR.rotation.set(0.9 + k * 0.15, 0, 0.1); J.elR.rotation.set(1.1, 0, 0); J.shL.rotation.set(0.85 - k * 0.15, 0, -0.1); J.elL.rotation.set(1.2, 0, 0); J.head.rotation.x = 0.35; }
+      if (s.job === 'drill' && !war) { const J = s.o.userData.rig.J; const salute = (s.t % 10) > 7; if (salute) { J.shR.rotation.set(-0.3, 0, 2.3); J.elR.rotation.set(1.9, 0, 0); } }
+    }
+  }
+
+  // ================= MISSILES ENTRE PAYS =================
+  const flights = []; // { from, to, t, T, kind, mesh?, fromPos, toPos, launched }
+  function telLaunch(cc) { const S = built[cc]; if (!S || !S.tels.length) return null; const L = S.tels[(Math.random() * S.tels.length) | 0]; L.userData.raiseT = 4; return L; }
+  function fire(fromCC, toCC, kind) {
+    const st = P[fromCC]; if (kind === 'nuke') { if (st.nukes <= 0) return T('☢ ' + name(fromCC) + ' n\'a plus de bombe atomique.'), false; st.nukes--; } else { if (st.msl <= 0) return T(name(fromCC) + ' n\'a plus de missiles.'), false; st.msl = Math.max(0, st.msl - (kind === 'salve' ? 6 : 1)); }
+    const A = baseOf(fromCC), Bb = baseOf(toCC); const d = Math.hypot(A.x - Bb.x, A.z - Bb.z); const f = { from: fromCC, to: toCC, kind, t: 0, T: clamp(d / 60000, 12, 45), A, B: Bb, phase: 0 }; flights.push(f);
+    const L = telLaunch(fromCC); if (L) { f.tel = L; }
+    if (sideOf(fromCC) === W.mySide || fromCC === W.me) T((kind === 'nuke' ? '☢ BOMBE ATOMIQUE LANCÉE' : kind === 'salve' ? '🚀🚀🚀 SALVE DE 6 MISSILES LANCÉE' : '🚀 MISSILE LANCÉ') + ' de ' + name(fromCC) + ' vers la base de ' + name(toCC) + ' — impact dans ' + Math.round(f.T) + ' s.', 5000);
+    else T('⚠ ALERTE : ' + name(fromCC) + ' a lancé ' + (kind === 'nuke' ? 'une BOMBE ATOMIQUE' : kind === 'salve' ? 'une salve de missiles' : 'un missile') + ' sur ' + name(toCC) + ' ! Impact dans ' + Math.round(f.T) + ' s.', 6000);
+    try { Ops.radio(kind === 'nuke' ? 'lancement nucléaire confirmé.' : 'missiles partis, impact estimé.', kind === 'nuke' ? 'nuclear launch confirmed.' : 'missiles away.', 'Défense'); } catch (e) { } save(); return true;
+  }
+  const trail = (p, big) => Particles.emit(p.x, p.y, p.z, (Math.random() - 0.5) * 2, 1 + Math.random(), (Math.random() - 0.5) * 2, big ? 8 : 4, 6, 0.85, 0.85, 0.85, 0.7, 5);
+  function flightTick(dt, camAbs) {
+    for (let i = flights.length - 1; i >= 0; i--) {
+      const f = flights[i]; f.t += dt; const nearA = Math.hypot(f.A.x - camAbs.x, f.A.z - camAbs.z) < 20000, nearB = Math.hypot(f.B.x - camAbs.x, f.B.z - camAbs.z) < 20000;
+      // départ : le missile monte (visible si on est près de la base de lancement)
+      if (f.t < 6 && nearA) { if (!f.up) { f.up = missile(f.from, f.kind === 'nuke' ? 18 : 12); f.up.rotation.x = Math.PI / 2; f.up.rotation.order = 'YXZ'; const p = f.tel ? f.tel.position.clone() : new THREE.Vector3(f.A.x, gH(f.A.x, f.A.z), f.A.z); f.upPos = p.add(new THREE.Vector3(0, 8, 0)); World.add(f.up); }
+        const v = 20 + f.t * f.t * 25; f.upPos.y += v * dt; f.up.position.copy(f.upPos); f.up.rotation.set(Math.PI / 2, 0, 0); for (let k = 0; k < 3; k++) trail(f.upPos.clone().add(new THREE.Vector3(0, -6, 0)), true); Particles.emit(f.upPos.x, f.upPos.y - 7, f.upPos.z, 0, -6, 0, 1.2, 3.5, 4, 2.8, 1.2, 1, 0.25); }
+      if (f.t >= 6 && f.up) { World.remove(f.up); f.up = null; }
+      // arrivée : le missile tombe du ciel sur la base visée
+      if (f.t > f.T - 4 && nearB && !f.down) { const p = new THREE.Vector3(f.B.x + (Math.random() - 0.5) * 250, 0, f.B.z + (Math.random() - 0.5) * 250); p.y = gH(p.x, p.z); f.hit = p; f.down = missile(f.from, f.kind === 'nuke' ? 18 : 12); f.down.rotation.x = Math.PI / 2; World.add(f.down); }
+      if (f.down) { const k = clamp((f.T - f.t) / 4, 0, 1); const pos = f.hit.clone().add(new THREE.Vector3(600 * k, 3000 * k, 0)); f.down.position.copy(pos); f.down.lookAt(f.hit.x - World.ox, f.hit.y, f.hit.z - World.oz); f.down.rotateX(Math.PI); trail(pos); }
+      if (f.t >= f.T) { impact(f, nearB); if (f.down) World.remove(f.down); if (f.up) World.remove(f.up); flights.splice(i, 1); }
+    }
+    for (const cc in built) for (const L of built[cc].tels) { const r = L.userData.raiseT || 0; L.userData.raiseT = Math.max(0, r - dt); const ang = r > 0 ? Math.min(1.3, (4 - r) * 0.6) : Math.max(0, L.userData.ramp.rotation.x - dt * 0.3); L.userData.ramp.rotation.x = ang; L.userData.msl.visible = !(r > 0 && r < 1.2); }
+  }
+  function impact(f, visible) {
+    const big = f.kind === 'nuke'; const n = f.kind === 'salve' ? 6 : 1; const D = P[f.to];
+    const lossT = D.troops * (big ? 0.22 : 0.012 * n) * (0.6 + Math.random() * 0.8); const lossM = Math.min(D.msl, Math.round(D.msl * (big ? 0.35 : 0.03 * n)));
+    D.troops = Math.max(0, D.troops - lossT); D.msl -= lossM; W.baseHp[f.to] = Math.max(0, (W.baseHp[f.to] ?? 100) - (big ? 45 : 4 * n));
+    if (visible && f.hit) { try { Ops.boom(f.hit, big ? 1 : 2.4, big); } catch (e) { } const S = built[f.to]; if (S) { for (const s of S.soldiers) if (!s.dead && s.o.position.distanceTo(f.hit) < (big ? 400 : 35)) { s.dead = true; } } }
+    T((big ? '☢💥 ' : '💥 ') + 'Impact sur la base de ' + name(f.to) + ' : −' + fmt(lossT) + ' militaires, −' + lossM + ' missiles. Base à ' + Math.round(W.baseHp[f.to]) + ' %.', 5000);
+    save(); checkEnd();
+  }
+
+  // ================= FRONT AU SOL (place de la guerre) =================
+  const F = { built: false, units: [], grp: [], c: null, dir: null, spawnT: 0, shellT: 3 };
+  function frontGeom() { const c = Ops.war && Ops.war.center ? Ops.war.center : null; if (!c) return null; const A = baseOf(W.a), B = baseOf(W.b); const d = new THREE.Vector3(B.x - A.x, 0, B.z - A.z).normalize(); return { c, d, n: new THREE.Vector3(-d.z, 0, d.x) }; }
+  // position sur le front : side 0 = côté A (arrière à -d), side 1 = côté B ; along = le long de la ligne ; back = recul
+  function frontPos(side, along, back) { const g = frontGeom(); const s = side === 0 ? -1 : 1; const x = g.c.x + g.d.x * s * (200 + back) + g.n.x * along, z = g.c.z + g.d.z * s * (200 + back) + g.n.z * along; return new THREE.Vector3(x, gH(x, z), z); }
+  function frontBuild() {
+    const g = frontGeom(); if (!g) return; F.built = true; F.c = g.c; try { Terrain.clearZone(g.c.x, g.c.z, 420); } catch (e) { }
+    for (const side of [0, 1]) { const cc = side === 0 ? W.a : W.b;
+      for (let k = 0; k < 5; k++) { const sb = sandbags(10); const p = frontPos(side, (k - 2) * 40, -8); sb.position.copy(p); sb.rotation.y = Math.atan2(g.n.x, g.n.z); World.add(sb); F.grp.push(sb); }
+      for (let k = 0; k < 3; k++) { const tk = tank(cc); const p = frontPos(side, (k - 1) * 60, 40); tk.position.copy(p); tk.rotation.y = Math.atan2(g.d.x * (side ? 1 : -1), g.d.z * (side ? 1 : -1)); World.add(tk); F.grp.push(tk); }
+      const fp = flagPole(cc, 10); fp.position.copy(frontPos(side, 0, 70)); World.add(fp); F.grp.push(fp);
+      for (let k = 0; k < 14; k++) spawnUnit(side, k); }
+    // les alliés : mes soldats (à mon drapeau) se battent du côté que j'ai choisi
+    if (W.mySide >= 0 && W.me !== W.a && W.me !== W.b) for (let k = 0; k < 6; k++) spawnUnit(W.mySide, 20 + k, W.me);
+  }
+  function spawnUnit(side, k, ccOverride) {
+    const cc = ccOverride || (side === 0 ? W.a : W.b); if (P[cc].troops <= 0) return; const kind = k % 7 === 6 ? 'special' : 'soldat'; const o = Rig.make(kind, k * 13 + side * 7 + cc.charCodeAt(1), { cc }); Rig.hold(o, Rig.gun(k % 4 === 3 ? 'mitraillette' : 'carabine'));
+    const p = frontPos(side, ((k % 14) - 6.5) * 13 + (Math.random() - 0.5) * 6, 60 + Math.random() * 40); const u = { o, side, cc, pos: p, hdg: 0, hp: 60, dead: false, deadT: 0, cd: 1 + Math.random() * 2, name: 'Soldat ' + name(cc), ground: true, kind: 'soldier', post: ((k % 14) - 6.5) * 13, stance: 0 };
+    World.add(o); F.units.push(u); if (side !== W.mySide) Ops.addGround(u); return u;
+  }
+  function frontClear() { F.units.forEach(u => { World.remove(u.o); u.dead = true; }); F.units.length = 0; F.grp.forEach(o => World.remove(o)); F.grp.length = 0; F.built = false; }
+  function frontTick(dt, camAbs) {
+    if (!W.on) { if (F.built) frontClear(); return; } const g = frontGeom(); if (!g) return; const d = Math.hypot(g.c.x - camAbs.x, g.c.z - camAbs.z);
+    if (!F.built && d < 9000) frontBuild(); if (F.built && d > 14000) frontClear(); if (!F.built) return;
+    const foot = Extra.foot;
+    for (const u of F.units) {
+      if (u.dead) { u.deadT += dt; u.o.rotation.x = Math.max(-Math.PI / 2, u.o.rotation.x - dt * 3); if (u.deadT > 3 && !u.counted) { u.counted = true; const D = P[u.cc]; D.troops = Math.max(0, D.troops - 120); } if (u.deadT > 10) { u.remove = true; } continue; }
+      const mine = u.side === W.mySide; const ord = mine ? W.order : (W.t % 90 < 45 ? 'assaut' : 'tenir');
+      // cible : soldat ennemi le plus proche (ou moi si je suis dans le camp adverse)
+      let tg = null, td = 380; for (const e of F.units) { if (e.dead || e.side === u.side) continue; const dd = e.pos.distanceTo(u.pos); if (dd < td) { td = dd; tg = e; } }
+      if (!mine && foot.active && foot.pos.distanceTo(u.pos) < td) { tg = { pos: foot.pos, player: true }; td = foot.pos.distanceTo(u.pos); }
+      // déplacement selon l'ordre
+      const want = ord === 'assaut' ? frontPos(1 - u.side, u.post, -20) : ord === 'repli' ? frontPos(u.side, u.post, 150) : frontPos(u.side, u.post, -4);
+      const dv = want.clone().sub(u.pos); dv.y = 0; const dist = dv.length(); let sp = 0;
+      if (dist > 2 && !(tg && td < 140 && ord !== 'repli')) { sp = ord === 'assaut' || ord === 'repli' ? 4.5 : 2.4; dv.normalize(); u.pos.addScaledVector(dv, sp * dt); u.hdg = Math.atan2(dv.x, -dv.z) * RAD; }
+      u.pos.y = gH(u.pos.x, u.pos.z); u.stance = !sp && tg && ord === 'tenir' ? 1 : 0;
+      if (tg) u.hdg = Math.atan2(tg.pos.x - u.pos.x, -(tg.pos.z - u.pos.z)) * RAD;
+      const vis = Math.hypot(u.pos.x - camAbs.x, u.pos.z - camAbs.z) < 1500; u.o.visible = vis;
+      u.o.position.copy(u.pos); u.o.rotation.set(0, -u.hdg * DEG, 0); if (vis) Rig.animate(u.o, { speed: sp, stance: u.stance, aim: !!tg && !sp, dt });
+      // tir
+      const fireOK = mine ? W.fire : true; u.cd -= dt;
+      if (tg && fireOK && u.cd < 0 && td < 380) { u.cd = 0.8 + Math.random() * 1.4; Ops.shootAt(u.pos.clone().add(new THREE.Vector3(0, 1.4, 0)), tg, 'gun');
+        if (tg.player) { if (Math.random() < (Extra.W6.stance ? 0.04 : 0.1)) Extra.hurt(8); }
+        else if (Math.random() < 0.28 * (tg.stance ? 0.6 : 1)) { tg.hp -= 30; if (tg.hp <= 0 && !tg.dead) { tg.dead = true; } } }
+    }
+    for (let i = F.units.length - 1; i >= 0; i--) if (F.units[i].remove) { World.remove(F.units[i].o); F.units.splice(i, 1); }
+    // renforts depuis la base (tant que l'armée a des hommes)
+    F.spawnT -= dt; if (F.spawnT < 0) { F.spawnT = 4; for (const side of [0, 1]) { const n = F.units.filter(u => u.side === side && !u.dead).length; if (n < 14) spawnUnit(side, (Math.random() * 14) | 0); } }
+    // obus d'artillerie qui tombent sur le no man's land
+    F.shellT -= dt; if (F.shellT < 0 && d < 5000) { F.shellT = 2 + Math.random() * 5; const p = frontPos(Math.random() < 0.5 ? 0 : 1, (Math.random() - 0.5) * 300, -150 + Math.random() * 140); try { Ops.boom(p, 3.5); } catch (e) { } for (const u of F.units) if (!u.dead && u.pos.distanceTo(p) < 9) u.dead = true; }
+  }
+
+  // ================= DÉROULEMENT, VICTOIRE, CLASSEMENT =================
+  function declare(a, b, me, ally) {
+    if (!a || !b || a === b) return T('Choisissez deux pays différents.'); if (W.on) peace(true);
+    W.on = true; W.a = a; W.b = b; W.me = me || W.me; W.ally = ally || ''; W.t = 0; W.enemyT = 40; W.fire = true; W.order = 'tenir'; W.baseHp = { [a]: 100, [b]: 100 }; W.start = { [a]: P[a].troops, [b]: P[b].troops };
+    W.mySide = sideOf(W.me); if (W.me !== a && W.me !== b && W.ally) { W.baseHp[W.me] = 100; W.start[W.me] = P[W.me].troops; }
+    Ops.declareWar(a, b);
+    const rôle = W.mySide < 0 ? 'Vous êtes observateur (choisissez « allié de » pour aider un camp).' : W.me === a || W.me === b ? 'VOUS COMMANDEZ ' + name(W.me).toUpperCase() + '.' : 'Vous êtes ALLIÉ de ' + name(W.ally) + ' avec ' + name(W.me) + '.';
+    T('⚔ GUERRE : ' + name(a) + ' (' + fmt(P[a].troops) + ' militaires, ' + P[a].msl + ' missiles) contre ' + name(b) + ' (' + fmt(P[b].troops) + ' militaires, ' + P[b].msl + ' missiles). ' + rôle + ' Touche ² = poste de commandement.', 10000);
+    hud(); save();
+  }
+  function peace(silent) { if (!W.on) return; W.on = false; try { Ops.peace(true); } catch (e) { } frontClear(); if (!silent) T('🕊 PAIX signée entre ' + name(W.a) + ' et ' + name(W.b) + '.', 5000); hud(); save(); }
+  function strengthLeft(sd) { return sideCountries(sd).reduce((s, cc) => s + P[cc].troops, 0) / Math.max(1, sideCountries(sd).reduce((s, cc) => s + (W.start[cc] || P[cc].troops0), 0)); }
+  function checkEnd() {
+    if (!W.on) return; for (const sd of [0, 1]) { const cc = sd === 0 ? W.a : W.b; if (strengthLeft(sd) < 0.12 || (W.baseHp[cc] ?? 100) <= 0) return victory(1 - sd); }
+  }
+  function victory(sd) {
+    const win = sd === 0 ? W.a : W.b, lose = sd === 0 ? W.b : W.a; const r0 = ranking(); const gain = Math.round(P[lose].score * 0.25 + 40);
+    sideCountries(sd).forEach((cc, i) => { P[cc].score += i ? Math.round(gain * 0.4) : gain; P[cc].wins++; }); P[lose].score = Math.max(20, P[lose].score - gain); P[lose].losses++;
+    const r1 = ranking(); const up = r0.indexOf(win) - r1.indexOf(win);
+    W.on = false; try { Ops.peace(true); } catch (e) { } frontClear(); save(); hud();
+    const banner = document.getElementById('warBanner'); if (banner) { banner.innerHTML = '🏆 VICTOIRE DE ' + name(win).toUpperCase() + ' !<small>' + name(lose) + ' capitule. ' + name(win) + (up > 0 ? ' MONTE de ' + up + ' place' + (up > 1 ? 's' : '') + ' : ' : ' reste ') + (r1.indexOf(win) + 1) + 'ᵉ au classement des puissances.</small>'; banner.classList.remove('hidden'); setTimeout(() => banner.classList.add('hidden'), 9000); }
+    try { Ops.radio('victoire, cessez-le-feu général.', 'victory, general ceasefire.', 'Défense'); } catch (e) { } setTimeout(() => showRanking(win), 4000);
+  }
+  function tick(dt) {
+    if (!W.on) return; W.t += dt; const pa = powerOf(0), pb = powerOf(1);
+    // usure des armées (plus l'adversaire est puissant, plus on perd d'hommes ; ASSAUT = plus de pertes des deux côtés)
+    for (const sd of [0, 1]) { const mine = sd === W.mySide; const k = 0.0011 * Math.sqrt((sd ? pa : pb) / Math.max(1, sd ? pb : pa)) * (W.order === 'assaut' && mine ? 1.3 : 1) * (W.order === 'assaut' && !mine && W.mySide >= 0 ? 1.5 : 1);
+      for (const cc of sideCountries(sd)) P[cc].troops = Math.max(0, P[cc].troops - (W.start[cc] || P[cc].troops0) * k * dt * (cc === W.me && W.mySide >= 0 && W.me !== W.a && W.me !== W.b ? 0.4 : 1)); }
+    // l'ennemi (ordinateur) tire ses missiles régulièrement
+    W.enemyT -= dt; if (W.enemyT < 0) { W.enemyT = 35 + Math.random() * 30; for (const sd of [0, 1]) { if (sd === W.mySide) continue; const cc = sd === 0 ? W.a : W.b; const tgt = W.mySide >= 0 ? sideCountries(W.mySide)[(Math.random() * sideCountries(W.mySide).length) | 0] : (sd === 0 ? W.b : W.a); const nuke = P[cc].nukes > 0 && strengthLeft(sd) < 0.35 && Math.random() < 0.3; fire(cc, tgt, nuke ? 'nuke' : Math.random() < 0.4 ? 'salve' : 'msl'); } }
+    if (W.mySide < 0) { W.autoT = (W.autoT || 20) - dt; if (W.autoT < 0) { W.autoT = 40; fire(W.a, W.b, 'msl'); } }
+    // FEU automatique de mes bases si activé
+    if (W.mySide >= 0 && W.fireAuto) { W.myT = (W.myT || 8) - dt; if (W.myT < 0) { W.myT = 20; cmd('feu'); } }
+    W.hudT = (W.hudT || 0) - dt; if (W.hudT < 0) { W.hudT = 1; hud(); checkEnd(); save(); }
+  }
+  // ---------- ordres du commandant ----------
+  function enemyCC() { return W.mySide === 0 ? W.b : W.a; }
+  function cmd(c) {
+    if (c === 'classement') return showRanking();
+    if (c === 'base') return gotoBase(W.me);
+    if (!W.on) return T('Il n\'y a pas de guerre en cours. Panneau H → « Guerre entre pays » → Déclarer la guerre.');
+    if (c === 'basee') return gotoBase(enemyCC() || W.b);
+    if (W.mySide < 0 && ['feu', 'salve', 'nuke', 'assaut', 'tenir', 'repli', 'cessez'].includes(c)) return T('Vous êtes observateur : choisissez « allié de » un des deux pays pour donner des ordres.');
+    const me = W.mySide >= 0 ? (W.me === W.a || W.me === W.b || !W.ally ? W.me : W.me) : null; const tgt = enemyCC();
+    if (c === 'feu') return fire(me, tgt, 'msl'); if (c === 'salve') return fire(me, tgt, 'salve'); if (c === 'nuke') return fire(me, tgt, 'nuke');
+    if (c === 'assaut' || c === 'tenir' || c === 'repli') { W.order = c; return T('📣 ORDRE À L\'ARMÉE : ' + { assaut: 'À L\'ASSAUT ! On avance sur les lignes ennemies.', tenir: 'TENEZ LA LIGNE, à couvert derrière les sacs de sable.', repli: 'REPLI vers l\'arrière !' }[c], 3500); }
+    if (c === 'cessez') { W.fire = !W.fire; return T(W.fire ? '🔥 FEU À VOLONTÉ : mes soldats tirent.' : '✋ CESSEZ-LE-FEU : mes soldats ne tirent plus.', 3000); }
+    if (c === 'auto') { W.fireAuto = !W.fireAuto; return T(W.fireAuto ? '🔁 Tir de missiles AUTOMATIQUE toutes les 20 s.' : 'Tir automatique arrêté.', 3000); }
+    if (c === 'front') return gotoFront('pied'); if (c === 'jeep') return gotoFront('jeep'); if (c === 'air') return Ops.gotoBattle(ctx.fm());
+    if (c === 'paix') return peace();
+  }
+  // ---------- se rendre à une base / au front ----------
+  function landAt(x, z, hdg) { const fm = ctx.fm(); Extra.leaveAll(); World.update(x, z); Terrain.update(x, z, 4000, 3000); fm.reset(x, gH(x, z), z, hdg); fm.vel.set(0, 0, 0); fm.throttle = 0; fm.parking = true; fm.onGround = true; ctx.S.lever = 0; }
+  function gotoBase(cc) { const B = baseOf(cc); if (!B) return T('Ce pays n\'a pas d\'aéroport : pas de base.'); const h = B.hdg * DEG; const lx = 30, lz = -230; const x = B.x + Math.cos(h) * lx - Math.sin(h) * lz, z = B.z + Math.sin(h) * lx + Math.cos(h) * lz; landAt(x, z, B.hdg); setTimeout(() => { Extra.goFoot(); T('🪖 Base militaire de ' + name(cc) + ' : ' + fmt(P[cc].troops) + ' militaires, ' + P[cc].msl + ' missiles' + (P[cc].nukes ? ', ' + P[cc].nukes + ' bombes atomiques' : '') + '. Entrez par le portail (Z), allez voir les missiles et les soldats. 0 près d\'une jeep ou d\'un char = monter dedans.', 9000); }, 600); }
+  function gotoFront(mode) {
+    if (!W.on) return T('Déclarez d\'abord la guerre.'); if (W.mySide < 0) return T('Choisissez votre camp (« allié de ») pour aller au front.');
+    const p = frontPos(W.mySide, 0, 110); const g = frontGeom(); const hdg = (Math.atan2(g.d.x * (W.mySide ? -1 : 1), -g.d.z * (W.mySide ? -1 : 1)) * RAD + 360) % 360; landAt(p.x - g.n.x * 60, p.z - g.n.z * 60, hdg);
+    const sv = Settings.data.squadKind, sn = Settings.data.squadN; Settings.data.squadKind = 'soldat'; Settings.data.squadN = +(Settings.data.frontN ?? 12); Extra.noPatrol = true;
+    setTimeout(() => { Extra.goFoot(); setTimeout(() => { Settings.data.squadKind = sv; Settings.data.squadN = sn; Extra.noPatrol = false; }, 500); if (mode === 'jeep') setTimeout(() => Extra.takeVehicle('jeep'), 900);
+      T('🪖 AU FRONT avec ' + (Settings.data.frontN ?? 12) + ' soldats de ' + name(W.me) + '. F = ordres à ton escouade · T = devenir un autre soldat · ² = poste de commandement (assaut, tenir, repli, feu…). L\'ennemi est devant toi !', 9000); }, 600);
+  }
+  // ---------- HUD de guerre + classement ----------
+  function hud() {
+    const el = document.getElementById('warHud'); if (!el) return; if (!W.on) { el.classList.add('hidden'); return; } el.classList.remove('hidden');
+    const bar = sd => { const cc = sd === 0 ? W.a : W.b; const k = strengthLeft(sd); return `<div class="wside${sd === W.mySide ? ' me' : ''}"><b>${name(cc)}${sideCountries(sd).length > 1 ? ' + ' + name(sideCountries(sd)[1]) : ''}</b><div class="wbar"><i style="width:${Math.round(k * 100)}%"></i></div><span>🪖 ${fmt(sideCountries(sd).reduce((s, c) => s + P[c].troops, 0))} · 🚀 ${P[cc].msl} · ☢ ${P[cc].nukes} · base ${Math.round(W.baseHp[cc] ?? 100)} %</span></div>`; };
+    el.innerHTML = bar(0) + '<div class="wvs">⚔</div>' + bar(1) + `<div class="worder">${W.mySide >= 0 ? 'Ordre : <b>' + W.order.toUpperCase() + '</b> · ' + (W.fire ? '🔥 feu à volonté' : '✋ cessez-le-feu') + (W.fireAuto ? ' · 🔁 missiles auto' : '') : 'Observateur'} · <b>²</b> commandement · <b>F10</b> FEU</div>`;
+  }
+  function showRanking(hl) {
+    const box = document.getElementById('rankBox'), body = document.getElementById('rankBody'); if (!box || !body) return; const R = ranking();
+    body.innerHTML = '<table><tr><th>#</th><th>Pays</th><th>Puissance</th><th>Militaires</th><th>Missiles</th><th>☢</th><th>Victoires</th></tr>' + R.map((cc, i) => `<tr class="${cc === hl ? 'hl' : ''}${cc === W.me ? ' me' : ''}"><td>${i + 1}</td><td>${name(cc)}</td><td>${fmt(P[cc].score)}</td><td>${fmt(P[cc].troops)}</td><td>${P[cc].msl}</td><td>${P[cc].nukes}</td><td>${P[cc].wins} / ${P[cc].losses}</td></tr>`).join('') + '</table>';
+    box.classList.remove('hidden');
+  }
+  // ---------- poste de commandement (touche ²) ----------
+  const CMDS = [['1', 'feu', '🚀 FEU : 1 missile sur la base ennemie'], ['2', 'salve', '🚀🚀 Salve de 6 missiles'], ['3', 'nuke', '☢ Bombe atomique à distance'], ['4', 'assaut', '⚔ Armée : À L\'ASSAUT'], ['5', 'tenir', '🛡 Armée : TENIR la ligne'], ['6', 'repli', '↩ Armée : REPLI'], ['7', 'cessez', '✋ Cessez-le-feu / 🔥 feu à volonté'], ['8', 'front', '🪖 Aller AU FRONT à pied avec mes soldats'], ['9', 'jeep', '🚙 Aller au front en JEEP'], ['0', 'air', '✈ Bataille aérienne'], ['B', 'base', '🏠 Visiter MA base militaire'], ['E', 'basee', '🎯 Aller voir la base ENNEMIE'], ['A', 'auto', '🔁 Missiles automatiques marche/arrêt'], ['C', 'classement', '🏆 Classement des puissances'], ['P', 'paix', '🕊 Signer la paix']];
+  let cmdOpen = false;
+  function toggleCmd(v) { cmdOpen = v ?? !cmdOpen; const el = document.getElementById('cmdBox'); if (el) el.classList.toggle('hidden', !cmdOpen); }
+  function key(code, sh) {
+    if (code === 'Backquote' || code === 'IntlBackslash' && false) { toggleCmd(); return true; }
+    if (code === 'F10') { cmd(sh ? 'nuke' : 'feu'); return true; }
+    if (cmdOpen) { if (code === 'Escape') { toggleCmd(false); return true; } const ch = code.startsWith('Digit') ? code.slice(5) : code.startsWith('Key') ? code.slice(3) : ''; const c = CMDS.find(x => x[0] === ch); if (c) { toggleCmd(false); cmd(c[1]); return true; } }
+    return false;
+  }
+  function update(dt, camAbs) { try { baseTick(dt, camAbs); } catch (e) { if (!W.e1) { W.e1 = 1; console.error('WAR base', e.message, e.stack); } } try { flightTick(dt, camAbs); } catch (e) { if (!W.e2) { W.e2 = 1; console.error('WAR flight', e.message, e.stack); } } try { frontTick(dt, camAbs); } catch (e) { if (!W.e3) { W.e3 = 1; console.error('WAR front', e.message, e.stack); } } tick(dt); }
+  function init(c) {
+    ctx = c; load(); const $ = id => document.getElementById(id);
+    const box = $('cmdBox'); if (box) box.innerHTML = '<h3>🎖 Poste de commandement</h3>' + CMDS.map(x => `<button data-c="${x[1]}"><kbd>${x[0]}</kbd>${x[2]}</button>`).join('') + '<p>Échap ou ² = fermer</p>'; if (box) box.onclick = e => { const b = e.target.closest('button'); if (b) { toggleCmd(false); cmd(b.dataset.c); } };
+    const me = $('warMe'), al = $('warAlly'); if (me) { for (const cc of ranking()) { const o = document.createElement('option'); o.value = cc; o.textContent = name(cc); me.appendChild(o); } me.value = 'cm'; }
+    if ($('btnWar')) $('btnWar').onclick = () => { declare($('warA').value, $('warB').value, me ? me.value : 'cm', al ? (al.value === 'A' ? $('warA').value : al.value === 'B' ? $('warB').value : '') : ''); UI.show('panel', false); };
+    if ($('btnPeace')) $('btnPeace').onclick = () => peace();
+    for (const [id, c] of [['btnFront', 'front'], ['btnFrontJeep', 'jeep'], ['btnMyBase', 'base'], ['btnRank', 'classement'], ['btnCmd', null]]) if ($(id)) $(id).onclick = () => { UI.show('panel', false); if (c) cmd(c); else toggleCmd(true); };
+    if ($('rankClose')) $('rankClose').onclick = () => $('rankBox').classList.add('hidden'); if ($('rankReset')) $('rankReset').onclick = () => { P = fresh(); save(); showRanking(); };
+    const fn = $('frontN'), fl = $('frontNLbl'); if (fn) { fn.value = Settings.data.frontN ?? 12; if (fl) fl.textContent = fn.value; fn.oninput = () => { Settings.data.frontN = +fn.value; Settings.save(); if (fl) fl.textContent = fn.value; }; }
+    if (me) me.onchange = () => { W.me = me.value; }; W.me = me ? me.value : 'cm';
+  }
+  return { init, update, key, cmd, declare, peace, showRanking, baseOf, get me() { return W.me; }, get on() { return W.on; }, get W() { return W; }, get P() { return P; }, get built() { return built; } };
 })();
 
 </script>
